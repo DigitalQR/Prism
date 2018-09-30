@@ -13,5 +13,62 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Prism">
+      <UniqueIdentifier>{f46a2365-b67e-41cb-ba08-31991c4f89b6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\Prism\Definitions.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\PrismMinimal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\Assembly.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\Holder.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\Method.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\Variable.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\Type.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\Class.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Assembly.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Holder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Method.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Variable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Type.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Class.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Include\Prism\Holder.inl">
+      <Filter>Header Files\Prism</Filter>
+    </None>
   </ItemGroup>
 </Project>
