@@ -39,19 +39,31 @@ typedef std::string String;
 /// Export/Import interface
 ///
 #if defined(_WIN32) || defined(_WIN64)
-#define DLL_EXPORT __declspec(dllexport)
-#define DLL_IMPORT __declspec(dllimport)
+#define PRISM_DLL_EXPORT __declspec(dllexport)
+#define PRISM_DLL_IMPORT __declspec(dllimport)
 #else
-#define DLL_EXPORT 
-#define DLL_IMPORT 
+#define PRISM_DLL_EXPORT 
+#define PRISM_DLL_IMPORT 
 #endif
 
 #ifndef PRISM_STATIC
 #ifdef _PRISMCORE
-#define PRISMCORE_API DLL_EXPORT
+#define PRISMCORE_API PRISM_DLL_EXPORT
 #else
-#define PRISMCORE_API DLL_IMPORT
+#define PRISMCORE_API PRISM_DLL_IMPORT
 #endif
 #else
 #define PRISMCORE_API
 #endif
+
+/// Should any generated assembly be exported for DLL
+#ifdef PRISM_EXPORT_ASSEMBLY
+#define PRISMGEN_ASSEMBLY_API PRISM_DLL_EXPORT
+#else
+#define PRISMGEN_ASSEMBLY_API 
+#endif
+
+///
+/// Prism code gen utils
+///
+#define PRISM_GEN_NAMESPACE PrismArtefact

@@ -65,9 +65,15 @@
     <ClCompile Include="Class.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CommonTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\Prism\Holder.inl">
+      <Filter>Header Files\Prism</Filter>
+    </None>
+    <None Include="Include\Prism\Assembly.inl">
       <Filter>Header Files\Prism</Filter>
     </None>
   </ItemGroup>

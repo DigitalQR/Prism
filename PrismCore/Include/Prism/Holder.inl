@@ -5,33 +5,32 @@
 /// Copyright (c) 2018 Sam Potter
 ///
 #pragma once
-#include "Type.h"
 #include <memory>
 
 namespace Prism 
 {
 	template<typename T>
 	Holder::Holder(T& obj)
-		: m_Data(new InternalInstance(&obj, sizeof(T), Type::GetTypeOf<T>()))
+		: m_Data(new InternalInstance(&obj, sizeof(T), Assembly::Get().FindTypeOf<T>()))
 		, m_IsPointer(false)
 	{
 	}
 	template<typename T>
 	Holder::Holder(const T& obj)
-		: m_Data(new InternalInstance(&obj, sizeof(T), Type::GetTypeOf<T>()))
+		: m_Data(new InternalInstance(&obj, sizeof(T), Assembly::Get().FindTypeOf<T>()))
 		, m_IsPointer(false)
 	{
 	}
 
 	template<typename T>
 	Holder::Holder(T* obj)
-		: m_Data(new InternalInstance(&obj, sizeof(T*), Type::GetTypeOf<T>()))
+		: m_Data(new InternalInstance(&obj, sizeof(T*), Assembly::Get().FindTypeOf<T>()))
 		, m_IsPointer(true)
 	{
 	}
 	template<typename T>
 	Holder::Holder(const T* obj)
-		: m_Data(new InternalInstance(&obj, sizeof(T*), Type::GetTypeOf<T>()))
+		: m_Data(new InternalInstance(&obj, sizeof(T*), Assembly::Get().FindTypeOf<T>()))
 		, m_IsPointer(true)
 	{
 	}

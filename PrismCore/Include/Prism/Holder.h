@@ -6,7 +6,7 @@
 ///
 #pragma once
 #include "Definitions.h"
-#include "Type.h"
+#include "Assembly.h"
 
 #include <memory>
 
@@ -36,7 +36,7 @@ namespace Prism
 		/// Retrieve the Prism::Type of the object that is currently being held
 		/// @returns Will return valid type if it exists, otherwise will return nullptr
 		///
-		virtual const Type* GetType() const = 0;
+		virtual const TypeInfo* GetTypeInfo() const = 0;
 	};
 
 	///
@@ -47,17 +47,17 @@ namespace Prism
 	private:
 		void* m_Data;
 		const size_t m_Size;
-		const Type* m_Type;
+		const TypeInfo* m_Type;
 
 	public:
-		InternalInstance(const void* source, size_t size, const Type* type);
+		InternalInstance(const void* source, size_t size, const TypeInfo* type);
 		~InternalInstance();
 
 		virtual void* GetData() { return m_Data; }
 		virtual const void* GetData() const { return m_Data; }
 
 		size_t GetSize() const { return m_Size; }
-		const Type* GetType() const { return m_Type; }
+		const TypeInfo* GetTypeInfo() const { return m_Type; }
 	};
 
 	///
@@ -137,7 +137,7 @@ namespace Prism
 		/// Retrieve the Prism::Type of the object that is currently being held
 		/// @returns Will return valid type if it exists, otherwise will return nullptr
 		///
-		const Type* GetType() const;
+		const TypeInfo* GetTypeInfo() const;
 	};
 }
 

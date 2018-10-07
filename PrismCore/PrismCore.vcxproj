@@ -32,12 +32,14 @@
   <ItemGroup>
     <ClCompile Include="Assembly.cpp" />
     <ClCompile Include="Class.cpp" />
+    <ClCompile Include="CommonTypes.cpp" />
     <ClCompile Include="Holder.cpp" />
     <ClCompile Include="Method.cpp" />
     <ClCompile Include="Type.cpp" />
     <ClCompile Include="Variable.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Include\Prism\Assembly.inl" />
     <None Include="Include\Prism\Holder.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

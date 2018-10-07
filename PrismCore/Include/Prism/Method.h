@@ -12,12 +12,12 @@
 
 namespace Prism
 {
-	class Type;
+	class TypeInfo;
 
 	struct PRISMCORE_API ParamInfo
 	{
 		const String Name;
-		const Type* Type;
+		const TypeInfo* TypeInfo;
 		const bool IsPointer;
 	};
 
@@ -35,7 +35,6 @@ namespace Prism
 
 	public:
 		inline const String& GetName() const { return m_Name; }
-		inline const Type* GetOwningType() const { return m_OwningType; }
 
 		inline const ParamInfo& GetReturnInfo() const { return m_ReturnType; }
 		inline const ParamInfo& GetParamInfo(int index) const { return m_ParamTypes[index]; }
