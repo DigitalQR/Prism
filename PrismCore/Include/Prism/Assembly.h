@@ -6,6 +6,7 @@
 ///
 #pragma once
 #include "Definitions.h"
+#include "TypeId.h"
 #include <map>
 
 namespace Prism 
@@ -82,15 +83,6 @@ namespace Prism
 
 		friend Type;
 	};
-
-	namespace Utils 
-	{
-		///
-		/// Get a unique id for a C++ type
-		///
-		template<typename T>
-		long GetTypeId();
-	}
 }
 
 #include "Assembly.inl"

@@ -10,4 +10,4 @@
 #include "Prism\Type.h"
 #include "Prism\Class.h"
 #include "Prism\Method.h"
-#include "Prism\Variable.h"
+#include "Prism\Property.h"

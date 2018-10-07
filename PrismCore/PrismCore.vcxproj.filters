@@ -36,13 +36,19 @@
     <ClInclude Include="Include\Prism\Method.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Prism\Variable.h">
-      <Filter>Header Files\Prism</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Prism\Type.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
     <ClInclude Include="Include\Prism\Class.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\Property.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\TypeId.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\CommonTypes.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,9 +62,6 @@
     <ClCompile Include="Method.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Variable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Type.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -66,6 +69,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CommonTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Property.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TypeId.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -76,5 +85,10 @@
     <None Include="Include\Prism\Assembly.inl">
       <Filter>Header Files\Prism</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Include\Prism\TypeId.inl">
+      <Filter>Header Files\Prism</Filter>
+    </Text>
   </ItemGroup>
 </Project>

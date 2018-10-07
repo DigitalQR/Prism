@@ -6,4 +6,5 @@
 ///
 #pragma once
 #include "Prism\Definitions.h"
+#include "Prism\CommonTypes.h"
 #include "Prism\Assembly.h"

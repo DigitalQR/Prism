@@ -23,11 +23,13 @@
     <ClInclude Include="Include\PrismMinimal.h" />
     <ClInclude Include="Include\Prism\Assembly.h" />
     <ClInclude Include="Include\Prism\Class.h" />
+    <ClInclude Include="Include\Prism\CommonTypes.h" />
     <ClInclude Include="Include\Prism\Definitions.h" />
     <ClInclude Include="Include\Prism\Holder.h" />
     <ClInclude Include="Include\Prism\Method.h" />
     <ClInclude Include="Include\Prism\Type.h" />
-    <ClInclude Include="Include\Prism\Variable.h" />
+    <ClInclude Include="Include\Prism\Property.h" />
+    <ClInclude Include="Include\Prism\TypeId.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembly.cpp" />
@@ -36,11 +38,15 @@
     <ClCompile Include="Holder.cpp" />
     <ClCompile Include="Method.cpp" />
     <ClCompile Include="Type.cpp" />
-    <ClCompile Include="Variable.cpp" />
+    <ClCompile Include="Property.cpp" />
+    <ClCompile Include="TypeId.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\Prism\Assembly.inl" />
     <None Include="Include\Prism\Holder.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Include\Prism\TypeId.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E8FDADE2-D6C0-459F-8854-742E392BAEB6}</ProjectGuid>

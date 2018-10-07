@@ -3,14 +3,6 @@
 
 namespace Prism 
 {
-	namespace Utils
-	{
-		namespace Private
-		{
-			long g_IdCounter = 0;
-		}
-	}
-
 	TypeInfo::TypeInfo(Type* type) 
 		: m_Type(type)
 	{
