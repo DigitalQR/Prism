@@ -79,7 +79,7 @@ namespace Prism
 		/// (Should only be called internally by other prism classes)
 		/// @param type			Will be internally stored based on its internal name, so if dupe will overwrite previous instance
 		///
-		void RegisterType(Type* type);
+		const TypeInfo* RegisterType(Type* type);
 
 		friend Type;
 	};

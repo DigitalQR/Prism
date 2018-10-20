@@ -10,7 +10,7 @@ namespace Prism
 		, m_Size(size)
 		, m_IsClass(isClass)
 	{
-		Assembly::Get().RegisterType(this);
+		m_AssociatedInfo = Assembly::Get().RegisterType(this);
 	}
 
 	String Type::GetInternalName() const 

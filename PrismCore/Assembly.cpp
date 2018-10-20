@@ -39,15 +39,22 @@ namespace Prism
 		return nullptr;
 	}
 
-	void Assembly::RegisterType(Type* type) 
+	const TypeInfo* Assembly::RegisterType(Type* type)
 	{
 		String name = type->GetInternalName();
 		auto it = m_TypeMap.find(name);
 
 		if (it == m_TypeMap.end())
-			m_TypeMap[name] = new TypeInfo(type);
+		{
+			TypeInfo* info = new TypeInfo(type);
+			m_TypeMap[name] = info;
+			return info;
+		}
 		else
+		{
 			// TODO - Make this thread safe
 			it->second->m_Type = type;
+			return it->second;
+		}
 	}
 }

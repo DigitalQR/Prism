@@ -10,6 +10,7 @@
 namespace Prism 
 {
 	class Class;
+	class TypeInfo;
 
 	///
 	/// Prism reflected type info
@@ -20,7 +21,9 @@ namespace Prism
 		const long m_UniqueId;
 		const String m_Namespace;
 		const String m_Name;
-		const size_t m_Size;
+		const size_t m_Size; 
+		
+		const TypeInfo* m_AssociatedInfo;
 
 		const bool m_IsClass : 1;
 
@@ -45,5 +48,7 @@ namespace Prism
 	private:
 		Type(const Type&) = delete;
 		void operator=(const Type&) = delete;
+
+		friend class Assembly;
 	};
 }
