@@ -43,7 +43,7 @@ namespace Prism
 #define PRISM_DLL_IMPORT 
 #endif
 
-#ifndef PRISM_STATIC
+#ifndef _PRISM_STATIC
 #ifdef _PRISMCORE
 #define PRISMCORE_API PRISM_DLL_EXPORT
 #else
