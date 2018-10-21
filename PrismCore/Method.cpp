@@ -19,7 +19,7 @@ namespace Prism
 		if (params.size() != GetParamCount())
 			return false;
 				
-		for (int i = 0; i < GetParamCount(); ++i)
+		for (int i = 0; i < (int)GetParamCount(); ++i)
 		{
 			const Prism::ParamInfo& param = GetParamInfo(i);
 
