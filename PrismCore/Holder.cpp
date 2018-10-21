@@ -10,7 +10,7 @@ namespace Prism
 	{
 	}
 
-	InternalInstance::InternalInstance(const void* source, size_t size, const TypeInfo* type)
+	UnmanagedInstance::UnmanagedInstance(const void* source, size_t size, const TypeInfo* type)
 		: m_Size(size)
 		, m_Type(type)
 	{
@@ -18,7 +18,7 @@ namespace Prism
 		memcpy_s(m_Data, m_Size, source, m_Size);
 	}
 
-	InternalInstance::~InternalInstance() 
+	UnmanagedInstance::~UnmanagedInstance()
 	{
 		free(m_Data);
 	}

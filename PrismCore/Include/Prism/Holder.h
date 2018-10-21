@@ -42,7 +42,7 @@ namespace Prism
 	///
 	/// Wrapper for holding internal types i.e. non-prism types 
 	///
-	class PRISMCORE_API InternalInstance : public ObjectInstance
+	class PRISMCORE_API UnmanagedInstance : public ObjectInstance
 	{
 	private:
 		void* m_Data;
@@ -50,13 +50,34 @@ namespace Prism
 		const TypeInfo* m_Type;
 
 	public:
-		InternalInstance(const void* source, size_t size, const TypeInfo* type);
-		~InternalInstance();
+		UnmanagedInstance(const void* source, size_t size, const TypeInfo* type);
+		virtual ~UnmanagedInstance();
 
 		virtual void* GetData() { return m_Data; }
 		virtual const void* GetData() const { return m_Data; }
 
 		size_t GetSize() const { return m_Size; }
+		const TypeInfo* GetTypeInfo() const { return m_Type; }
+	};
+
+	///
+	/// Wrapper for correctly managed internal data
+	///
+	template<typename T>
+	class ManagedInstance : public ObjectInstance
+	{
+	private:
+		T* m_Data;
+		const TypeInfo* m_Type;
+
+	public:
+		ManagedInstance(const T* source, const TypeInfo* type);
+		virtual ~ManagedInstance();
+
+		virtual void* GetData() { return m_Data; }
+		virtual const void* GetData() const { return m_Data; }
+
+		size_t GetSize() const { return sizeof(T); }
 		const TypeInfo* GetTypeInfo() const { return m_Type; }
 	};
 
