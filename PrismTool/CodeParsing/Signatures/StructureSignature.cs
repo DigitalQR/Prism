@@ -144,16 +144,25 @@ namespace Prism.CodeParsing.Signatures
 						{
 							ImplementationBeginData.ParentStructure parentData = new ImplementationBeginData.ParentStructure();
 
-							string[] parts = parentInfo.Trim().Split(' ');
-							if (parts.Length == 0) // Private inheritance
+							// Don't look for access specifiers for enums
+							if (structureName == "enum")
 							{
-								parentData.Access = "private";
-								parentData.DeclareName = parts[0];
+								parentData.Access = "";
+								parentData.DeclareName = parentInfo.Trim();
 							}
 							else
 							{
-								parentData.Access = parts[0];
-								parentData.DeclareName = parts[parts.Length - 1];
+								string[] parts = parentInfo.Trim().Split(' ');
+								if (parts.Length == 0) // Private inheritance
+								{
+									parentData.Access = "private";
+									parentData.DeclareName = parts[0];
+								}
+								else
+								{
+									parentData.Access = parts[0];
+									parentData.DeclareName = parts[parts.Length - 1];
+								}
 							}
 
 							parents.Add(parentData);
