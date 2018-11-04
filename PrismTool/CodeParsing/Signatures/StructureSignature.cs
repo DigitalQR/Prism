@@ -38,6 +38,12 @@ namespace Prism.CodeParsing.Signatures
 			public string DeclareName;
 		}
 
+		public class EnumValueData
+		{
+			public string Name;
+			public string HardcodedValue;
+		}
+
 		public static bool TryParse(string structureName, Stack<ImplementationBeginData> structureStack, long firstLine, string content, SafeLineReader reader, out SignatureInfo sigInfo)
 		{
 			// Is definately a def
@@ -184,7 +190,7 @@ namespace Prism.CodeParsing.Signatures
 			}
 
 			// Check if it is the end of a structure
-			else if(structureStack.Count != 0 && content.StartsWith("}"))
+			else if (structureStack.Count != 0 && content.StartsWith("}"))
 			{
 				bool foundSemiColon = true;
 
@@ -221,6 +227,39 @@ namespace Prism.CodeParsing.Signatures
 						return true;
 					}
 				}
+			}
+
+			// Assume are enum values, if nothing else could parse them
+			else if (structureName == "enum" && (structureStack.Count != 0 && structureStack.Peek().StructureType == "enum"))
+			{
+				int index = content.IndexOf(',');
+				string entry;
+				if (index == -1)
+				{
+					entry = content;
+				}
+				else
+				{
+					entry = content.Substring(0, index).Trim();
+					reader.LeftOverContent = content.Substring(index + 1);
+				}
+
+				EnumValueData data = new EnumValueData();
+
+				int assignIndex = entry.IndexOf('=');
+				if (assignIndex == -1)
+				{
+					data.Name = entry;
+					data.HardcodedValue = null;
+				}
+				else
+				{
+					data.Name = entry.Substring(0, assignIndex).Trim();
+					data.HardcodedValue = entry.Substring(assignIndex + 1).Trim();
+				}
+
+				sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.EnumValueEntry, data);
+				return true;
 			}
 
 			sigInfo = null;

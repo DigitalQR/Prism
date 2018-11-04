@@ -71,10 +71,10 @@ namespace Prism.CodeParsing
 					// Try to figure out what is currently being read
 					parseResult = CommentBlockSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| PreProcessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("class", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("struct", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("enum", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
-						|| MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| NamespaceSignature.TryParse(m_NamespaceStack, currentLine, content, m_SafeReader, out sigInfo);
 				}
 
