@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Prism.CodeParsing;
 using Prism.Utils;
 
 namespace Prism
@@ -21,7 +22,21 @@ namespace Prism
 
 		static void Main(string[] args)
 		{
-			args = new string[10]{
+			string path = @"G:\Side Projects\PrismTesting\PrismTesting\PrismTesting\MyTestClass.h";
+
+			using (FileStream stream = new FileStream(path, FileMode.Open))
+			using (HeaderReader reader = new HeaderReader(stream))
+			{
+				SignatureInfo sigInfo;
+				while (reader.TryReadNext(out sigInfo))
+				{
+					int i = 0;
+				}
+			}
+
+
+
+				args = new string[10]{
 				"--my-int=1234",
 				"--my-int=1234",
 				"--my-int-array=12342",
@@ -33,7 +48,7 @@ namespace Prism
 				"--my-int-array=12342",
 				"-unrelatedThing"
 			};
-
+			
 			MyTestArgs myThing = new MyTestArgs();
 			try
 			{
