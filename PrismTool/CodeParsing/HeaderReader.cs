@@ -24,6 +24,11 @@ namespace Prism.CodeParsing
 		private List<string> m_NamespaceStack;
 
 		/// <summary>
+		/// The active namespace stack
+		/// </summary>
+		private Stack<StructureSignature.ImplementationBeginData> m_StructureStack;
+
+		/// <summary>
 		/// The current depth into {} blocks
 		/// </summary>
 		private int m_BraceBlockDepth = 0;
@@ -32,6 +37,7 @@ namespace Prism.CodeParsing
 		{
 			m_SafeReader = new SafeLineReader(inputStream);
 			m_NamespaceStack = new List<string>();
+			m_StructureStack = new Stack<StructureSignature.ImplementationBeginData>();
 		}
 
 		public SafeLineReader Reader { get => m_SafeReader; }
@@ -48,7 +54,6 @@ namespace Prism.CodeParsing
 			// Keep trying to parse until something valid is found to parse on
 			while (!parseResult)
 			{
-				long firstLine = m_SafeReader.LineNumber;
 				string content;
 				sigInfo = null;
 
@@ -58,19 +63,21 @@ namespace Prism.CodeParsing
 					return false;
 				}
 
+				long currentLine = m_SafeReader.LineNumber;
+
 				// Don't try to parse, if we're in an uncaptured {} block
 				if (m_BraceBlockDepth == 0)
 				{
 					// Try to figure out what is currently being read
-					parseResult = CommentBlockSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo)
-						|| PreProcessorSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo)
-						|| StructureSignature.TryParse("class", firstLine, content, m_SafeReader, out sigInfo)
-						|| StructureSignature.TryParse("struct", firstLine, content, m_SafeReader, out sigInfo)
-						|| MacroCallSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo)
-						|| NamespaceSignature.TryParse(m_NamespaceStack, firstLine, content, m_SafeReader, out sigInfo);
+					parseResult = CommentBlockSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| PreProcessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| StructureSignature.TryParse("class", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
+						|| StructureSignature.TryParse("struct", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
+						|| MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| NamespaceSignature.TryParse(m_NamespaceStack, currentLine, content, m_SafeReader, out sigInfo);
 				}
 
-				// Look for uncaptured {} block
+				// Look for uncaptured {} block or look for ; so we can process the rest of the line
 				if (!parseResult)
 				{
 					for (int i = 0; i < content.Length; ++i)
@@ -84,6 +91,11 @@ namespace Prism.CodeParsing
 						else if (content[i] == '}')
 						{
 							--m_BraceBlockDepth;
+							m_SafeReader.LeftOverContent = content.Substring(i + 1);
+							break;
+						}
+						else if (content[i] == ';')
+						{
 							m_SafeReader.LeftOverContent = content.Substring(i + 1);
 							break;
 						}

@@ -36,7 +36,7 @@ namespace Prism.CodeParsing.Signatures
 					string newContent;
 					if (!reader.SafeReadUntil("{", out newContent)) // Invalid def (Let it get caught c++ side, so just send unknown sig)
 					{
-						sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat);
+						sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Failed to find namespace block start");
 						return true;
 					}
 					content += '\n' + newContent;
@@ -55,7 +55,7 @@ namespace Prism.CodeParsing.Signatures
 				data.CurrentNamespace = namespaceStack.ToArray();
 				data.NamespaceCount = namespaceStack.Count;
 
-				sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.NamespaceBlock, data);
+				sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.NamespaceBegin, data);
 				return true;
 			}
 
@@ -75,7 +75,7 @@ namespace Prism.CodeParsing.Signatures
 					data.NamespaceCount = namespaceStack.Count;
 					data.CurrentNamespace = (data.NamespaceCount == 0 ? null : namespaceStack.ToArray());
 
-					sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.NamespaceBlock, data);
+					sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.NamespaceEnd, data);
 					return true;
 				}
 			}
@@ -103,7 +103,7 @@ namespace Prism.CodeParsing.Signatures
 				UsingData data = new UsingData();
 				data.NamespaceName = content.Substring("using namespace ".Length).Trim();
 
-				sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.UsingNamespace, data);
+				sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.UsingNamespace, "Failed to find using namespace statement end");
 				return true;
 			}
 

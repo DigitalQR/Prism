@@ -20,7 +20,7 @@ namespace Prism.CodeParsing
 		/// <summary>
 		/// The current line in the file we are at
 		/// </summary>
-		private long m_CurrentLine = 1;
+		private long m_CurrentLine = 0;
 
 		/// <summary>
 		/// The current leftovers which are going to be read during next SafeReadNext
@@ -57,8 +57,18 @@ namespace Prism.CodeParsing
 			// Re-use anything that was leftover from last read
 			if (m_LeftOverContent.Length != 0)
 			{
-				line = m_LeftOverContent;
-				m_LeftOverContent = "";
+				int index = m_LeftOverContent.IndexOf('\n');
+
+				if (index == -1)
+				{
+					line = m_LeftOverContent;
+					m_LeftOverContent = "";
+				}
+				else
+				{
+					line = m_LeftOverContent.Substring(0, index);
+					m_LeftOverContent = m_LeftOverContent.Substring(index + 1);
+				}
 				return true;
 			}
 			// Attempt to read a new fresh line
@@ -103,6 +113,40 @@ namespace Prism.CodeParsing
 					line += content + '\n';
 				}
 			} while (!content.Contains(containStr));
+
+			line = line.Trim();
+			return true;
+		}
+
+		/// <summary>
+		/// Safely read until line contains on of a given string
+		/// </summary>
+		public bool SafeReadUntil(string[] containStrs, out string line)
+		{
+			// Initial line check
+			string content;
+			bool foundString = false;
+			line = "";
+
+			do
+			{
+				if (!SafeReadNext(out content))
+				{
+					return false;
+				}
+				else
+				{
+					line += content + '\n';
+				}
+				
+				foreach (string containStr in containStrs)
+				{
+					foundString = content.Contains(containStr);
+					if (foundString)
+						break;
+				}
+
+			} while (!foundString);
 
 			line = line.Trim();
 			return true;

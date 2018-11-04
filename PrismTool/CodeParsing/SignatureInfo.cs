@@ -14,17 +14,16 @@ namespace Prism.CodeParsing
 			InvalidParseFormat,
 
 			CommentBlock,
-			NamespaceBlock,
+			NamespaceBegin,
+			NamespaceEnd,
 			UsingNamespace,
 
 			PreProcessorDirective,
 			MacroCall,
 
-			ClassForwardDeclare,
-			StructForwardDeclare,
-
-			ClassImplementation,
-			StructImplementation,
+			StructureForwardDeclare,
+			StructureImplementationBegin,
+			StructureImplementationEnd,
 		}
 
 		private SigType m_SigType;
