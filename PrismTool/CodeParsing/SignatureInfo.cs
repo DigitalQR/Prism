@@ -24,6 +24,7 @@ namespace Prism.CodeParsing
 			StructureForwardDeclare,
 			StructureImplementationBegin,
 			StructureImplementationEnd,
+			AccessorSet,
 
 			EnumValueEntry,
 		}

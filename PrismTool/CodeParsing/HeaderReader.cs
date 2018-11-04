@@ -76,6 +76,21 @@ namespace Prism.CodeParsing
 						|| StructureSignature.TryParse("struct", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("enum", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| NamespaceSignature.TryParse(m_NamespaceStack, currentLine, content, m_SafeReader, out sigInfo);
+
+					// Try structure only parsing, if all else fails
+					if (!parseResult && m_StructureStack.Count != 0)
+					{
+						string currentStructureType = m_StructureStack.Peek().StructureType;
+
+						if (currentStructureType == "enum")
+						{
+							parseResult = EnumEntrySignature.TryParse(currentLine, content, m_SafeReader, out sigInfo);
+						}
+						else
+						{
+							parseResult = AccessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo);
+						}
+					}
 				}
 
 				// Look for uncaptured {} block or look for ; so we can process the rest of the line
