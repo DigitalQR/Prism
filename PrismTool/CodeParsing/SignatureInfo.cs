@@ -10,9 +10,14 @@ namespace Prism.CodeParsing
 	{
 		public enum SigType
 		{
-			Unknown,
+			Unknown, 
+			InvalidParseFormat,
+
 			CommentBlock,
-			PreProcessorDefinition,
+			NamespaceBlock,
+			UsingNamespace,
+
+			PreProcessorDirective,
 			MacroCall,
 
 			ClassForwardDeclare,

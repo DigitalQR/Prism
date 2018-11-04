@@ -19,6 +19,11 @@ namespace Prism.CodeParsing
 		private SafeLineReader m_SafeReader;
 
 		/// <summary>
+		/// The active namespace stack
+		/// </summary>
+		private List<string> m_NamespaceStack;
+
+		/// <summary>
 		/// The current depth into {} blocks
 		/// </summary>
 		private int m_BraceBlockDepth = 0;
@@ -26,6 +31,7 @@ namespace Prism.CodeParsing
 		public HeaderReader(Stream inputStream)
 		{
 			m_SafeReader = new SafeLineReader(inputStream);
+			m_NamespaceStack = new List<string>();
 		}
 
 		public SafeLineReader Reader { get => m_SafeReader; }
@@ -52,29 +58,36 @@ namespace Prism.CodeParsing
 					return false;
 				}
 
-				// Deal with {} blocks
-				/*
-				if (content.StartsWith("{"))
-				{
-					++m_BraceBlockDepth;
-					m_SafeReader.LeftOverContent = content.Substring(1);
-					continue;
-				}
-				else if (content.StartsWith("}"))
-				{
-					--m_BraceBlockDepth;
-					m_SafeReader.LeftOverContent = content.Substring(1);
-					continue;
-				}*/
-
+				// Don't try to parse, if we're in an uncaptured {} block
 				if (m_BraceBlockDepth == 0)
 				{
-					// If in unhandle
-
 					// Try to figure out what is currently being read
 					parseResult = CommentBlockSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo)
-						|| PreProcessorDefinitionSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo)
-						|| MacroCallSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo);
+						|| PreProcessorSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo)
+						|| StructureSignature.TryParse("class", firstLine, content, m_SafeReader, out sigInfo)
+						|| StructureSignature.TryParse("struct", firstLine, content, m_SafeReader, out sigInfo)
+						|| MacroCallSignature.TryParse(firstLine, content, m_SafeReader, out sigInfo)
+						|| NamespaceSignature.TryParse(m_NamespaceStack, firstLine, content, m_SafeReader, out sigInfo);
+				}
+
+				// Look for uncaptured {} block
+				if (!parseResult)
+				{
+					for (int i = 0; i < content.Length; ++i)
+					{
+						if (content[i] == '{')
+						{
+							++m_BraceBlockDepth;
+							m_SafeReader.LeftOverContent = content.Substring(i + 1);
+							break;
+						}
+						else if (content[i] == '}')
+						{
+							--m_BraceBlockDepth;
+							m_SafeReader.LeftOverContent = content.Substring(i + 1);
+							break;
+						}
+					}
 				}
 			}
 			

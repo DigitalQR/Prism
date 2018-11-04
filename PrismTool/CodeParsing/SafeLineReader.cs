@@ -84,6 +84,30 @@ namespace Prism.CodeParsing
 			}
 		}
 
+		/// <summary>
+		/// Safely read until line contains a given string
+		/// </summary>
+		public bool SafeReadUntil(string containStr, out string line)
+		{
+			// Initial line check
+			string content;
+			line = "";
+			do
+			{
+				if (!SafeReadNext(out content))
+				{
+					return false;
+				}
+				else
+				{
+					line += content + '\n';
+				}
+			} while (!content.Contains(containStr));
+
+			line = line.Trim();
+			return true;
+		}
+
 		public void Dispose()
 		{
 			m_Reader.Dispose();

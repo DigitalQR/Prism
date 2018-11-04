@@ -63,7 +63,6 @@ namespace Prism.CodeParsing.Signatures
 
 				++index;
 			}
-
 			
 
 			sigInfo = null;
