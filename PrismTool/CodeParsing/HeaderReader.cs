@@ -80,6 +80,7 @@ namespace Prism.CodeParsing
 						|| NamespaceSignature.TryParse(m_NamespaceStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| FriendSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| VariableSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| FunctionSignature.TryParse(ref m_BraceBlockDepth, currentLine, content, m_SafeReader, out sigInfo)
 						;
 
 					// Try structure only parsing, if all else fails

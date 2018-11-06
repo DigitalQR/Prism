@@ -85,6 +85,7 @@
     <Compile Include="CodeParsing\Signatures\CommentBlockSignature.cs" />
     <Compile Include="CodeParsing\Signatures\EnumEntrySignature.cs" />
     <Compile Include="CodeParsing\Signatures\FriendSignature.cs" />
+    <Compile Include="CodeParsing\Signatures\FunctionSignature.cs" />
     <Compile Include="CodeParsing\Signatures\MacroCallSignature.cs" />
     <Compile Include="CodeParsing\Signatures\NamespaceSignature.cs" />
     <Compile Include="CodeParsing\Signatures\PreProcessorSignature.cs" />

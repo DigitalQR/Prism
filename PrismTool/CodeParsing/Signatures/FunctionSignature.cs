@@ -1,0 +1,209 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Prism.CodeParsing.Signatures
+{
+	public class FunctionSignature
+	{
+		public class ParseData
+		{
+			public string FunctionName;
+
+			public TypeSignature.FullTypeInfo ReturnType;
+			public VariableSignature.ParseData[] ParamTypes;
+			public int ParamCount;
+
+			public bool IsConst;
+			public bool IsVirtual;
+			public bool IsStatic;
+			public bool IsInlined;
+			public bool IsAbstract;
+		}
+
+		public static bool TryParse(ref int braceBlockDepth, long firstLine, string content, SafeLineReader reader, out SignatureInfo sigInfo)
+		{
+			// Try to check if we are currently looking at a variable
+			bool hasPresetBody = content.EndsWith("{");
+
+			if (content.EndsWith(";") || hasPresetBody)
+			{
+				string searchString = content.Substring(0, content.Length - 1);
+				if (searchString != "")
+				{
+					searchString = searchString.Replace("override", "").Trim(); // Ignore override completely
+
+					bool isConst = false;
+					bool isAbstract = false;
+
+					// Check if abstract
+					if (searchString.EndsWith("0"))
+					{
+						string subString = searchString.Substring(0, searchString.Length - 1).Trim();
+						if (subString.EndsWith("="))
+						{
+							isAbstract = true;
+							searchString = subString.Substring(0, subString.Length - 1).Trim();
+						}
+						// Is not a valid function
+						else
+						{
+							sigInfo = null;
+							return false;
+						}
+					}
+
+					// Check if const
+					if (searchString.EndsWith("const"))
+					{
+						isConst = true;
+						searchString = searchString.Substring(0, searchString.Length - "const".Length).Trim();
+					}
+
+					// Try to detemine function details
+					if (searchString.EndsWith(")"))
+					{
+						ParseData data = new ParseData();
+						data.IsConst = isConst;
+						data.IsAbstract = isAbstract;
+
+						if (searchString.Contains("static"))
+						{
+							data.IsStatic = true;
+							searchString = searchString.Replace("static", "").Trim();
+						}
+						if (searchString.Contains("inline"))
+						{
+							data.IsInlined = true;
+							searchString = searchString.Replace("inline", "").Trim();
+						}
+						if (searchString.Contains("virtual"))
+						{
+							data.IsVirtual = true;
+							searchString = searchString.Replace("virtual", "").Trim();
+						}
+
+						// Split into function params and function def
+						int splitIndex = searchString.IndexOf('(');
+
+						string functionalInfo = searchString.Substring(0, splitIndex).Trim();
+						string paramInfo = searchString.Substring(splitIndex).Trim();
+						paramInfo = paramInfo.Substring(1, paramInfo.Length - 2).Trim();
+
+						// Parse function name and return type
+						{
+							// Cheat by treating it as a variable
+							SignatureInfo tempSig;
+							if (!VariableSignature.TryParse(firstLine, functionalInfo + ";", reader, out tempSig))
+							{
+								sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Initial function data was not in expected format.");
+								return true;
+							}
+
+							VariableSignature.ParseData varData = (VariableSignature.ParseData)tempSig.AdditionalParam;
+							data.ReturnType = varData.TypeInfo;
+							data.FunctionName = varData.VariableName;
+
+							// Is void, so no return type
+							if (data.ReturnType.InnerType.TypeName == "void" && data.ReturnType.PointerCount == 0)
+							{
+								data.ReturnType = null;
+							}
+						}
+
+						// Parse param info
+						if (paramInfo != "" && paramInfo != "void")
+						{
+							List<VariableSignature.ParseData> funcParams = new List<VariableSignature.ParseData>();
+
+							// Context aware split i.e. don't split, if comma is in () or <> etc.
+							string current = "";
+							int blockDepth = 0;
+
+							foreach (char c in paramInfo)
+							{
+								if (c == ',' && blockDepth == 0)
+								{
+									current = current.Trim();
+									SignatureInfo tempSig;
+
+									// Invalid format
+									if (current == "")
+									{
+										sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Found empty param when attempting to parse a function.");
+										return true;
+									}
+
+									// Parse the type info
+									if (!VariableSignature.TryParse(firstLine, current + ";", reader, out tempSig))
+									{
+										sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Failed to parse function param info.");
+										return true;
+									}
+
+									VariableSignature.ParseData varData = (VariableSignature.ParseData)tempSig.AdditionalParam;
+									funcParams.Add(varData);
+
+									current = "";
+									continue;
+								}
+								else if (c == '<' || c == '(' || c == '[' || c == '{')
+								{
+									++blockDepth;
+								}
+								else if (c == '>' || c == ')' || c == ']' || c == '}')
+								{
+									--blockDepth;
+								}
+
+								current += c;
+							}
+
+							// Parse last param
+							{
+
+								current = current.Trim();
+								SignatureInfo tempSig;
+
+								// Invalid format
+								if (current == "")
+								{
+									sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Found empty param when attempting to parse a function.");
+									return true;
+								}
+
+								// Parse the type info
+								if (!VariableSignature.TryParse(firstLine, current + ";", reader, out tempSig))
+								{
+									sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Failed to parse function param info.");
+									return true;
+								}
+
+								VariableSignature.ParseData varData = (VariableSignature.ParseData)tempSig.AdditionalParam;
+								funcParams.Add(varData);
+							}
+
+
+							data.ParamTypes = funcParams.ToArray();
+							data.ParamCount = funcParams.Count;
+						}
+												
+						// Make sure the function body is ignored
+						if (hasPresetBody)
+						{
+							++braceBlockDepth;
+						}
+
+						sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.FunctionDeclare, data);
+						return true;
+					}
+				}
+			}
+			
+			sigInfo = null;
+			return false;
+		}
+	}
+}

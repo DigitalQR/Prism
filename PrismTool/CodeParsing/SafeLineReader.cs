@@ -67,7 +67,7 @@ namespace Prism.CodeParsing
 				else
 				{
 					line = m_LeftOverContent.Substring(0, index);
-					m_LeftOverContent = m_LeftOverContent.Substring(index + 1);
+					m_LeftOverContent = m_LeftOverContent.Substring(index + 1).Trim();
 				}
 				return true;
 			}
@@ -87,6 +87,26 @@ namespace Prism.CodeParsing
 					{
 						line = m_Reader.ReadLine().Trim();
 						++m_CurrentLine;
+
+						// Split at ; and {
+						int endLineIndex = line.IndexOf(';');
+						int startBlockIndex = line.IndexOf('{');
+
+						int index = -1;
+						if (endLineIndex != -1 && startBlockIndex != -1)
+						{
+							index = Math.Min(endLineIndex, startBlockIndex);
+						}
+						else if (endLineIndex == -1)
+						{
+							index = startBlockIndex;
+						}
+
+						if (index != -1)
+						{
+							m_LeftOverContent = line.Substring(index + 1).Trim();
+							line = line.Substring(0, index + 1).Trim();
+						}								
 					}
 				} while (line == "");
 

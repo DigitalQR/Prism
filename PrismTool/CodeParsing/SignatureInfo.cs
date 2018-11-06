@@ -31,7 +31,8 @@ namespace Prism.CodeParsing
 			TypeDefDeclare,
 			TemplateDeclare,
 
-			VariableDeclare
+			VariableDeclare,
+			FunctionDeclare,
 		}
 
 		private SigType m_SigType;

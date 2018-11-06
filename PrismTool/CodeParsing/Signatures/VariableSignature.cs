@@ -6,19 +6,18 @@ using System.Threading.Tasks;
 
 namespace Prism.CodeParsing.Signatures
 {
-
-	/// <summary>
-	/// The full type information about any given varable
-	/// </summary>
-	public class VariableData
-	{
-		public TypeSignature.FullTypeInfo TypeInfo;
-		public string VariableName;
-		public string DefaultValue;
-	}
-
 	public class VariableSignature
 	{
+		/// <summary>
+		/// The full type information about any given varable
+		/// </summary>
+		public class ParseData
+		{
+			public TypeSignature.FullTypeInfo TypeInfo;
+			public string VariableName;
+			public string DefaultValue;
+		}
+
 		public static bool TryParse(long firstLine, string content, SafeLineReader reader, out SignatureInfo sigInfo)
 		{
 			// Try to check if we are currently looking at a variable
@@ -33,7 +32,7 @@ namespace Prism.CodeParsing.Signatures
 					if (searchString.Contains(' '))
 					{
 						// Work backwards to find out variable info
-						VariableData data = new VariableData();
+						ParseData data = new ParseData();
 						
 						// Find any default value
 						int equalsIndex = searchString.LastIndexOf('=');
@@ -63,9 +62,6 @@ namespace Prism.CodeParsing.Signatures
 						}						
 					}
 				}
-
-				//sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.EnumValueEntry, data);
-				//return true;
 			}
 			
 			sigInfo = null;
