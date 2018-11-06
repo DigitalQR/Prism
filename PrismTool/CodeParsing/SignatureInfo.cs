@@ -24,9 +24,13 @@ namespace Prism.CodeParsing
 			StructureForwardDeclare,
 			StructureImplementationBegin,
 			StructureImplementationEnd,
-			AccessorSet,
 
+			AccessorSet,
 			EnumValueEntry,
+			FriendDeclare,
+			TypeDefDeclare,
+
+			VariableDeclare
 		}
 
 		private SigType m_SigType;
