@@ -29,6 +29,7 @@ namespace Prism.CodeParsing
 			EnumValueEntry,
 			FriendDeclare,
 			TypeDefDeclare,
+			TemplateDeclare,
 
 			VariableDeclare
 		}

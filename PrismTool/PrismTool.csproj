@@ -89,6 +89,7 @@
     <Compile Include="CodeParsing\Signatures\NamespaceSignature.cs" />
     <Compile Include="CodeParsing\Signatures\PreProcessorSignature.cs" />
     <Compile Include="CodeParsing\Signatures\StructureSignature.cs" />
+    <Compile Include="CodeParsing\Signatures\TemplateSignature.cs" />
     <Compile Include="CodeParsing\Signatures\TypeDefSignature.cs" />
     <Compile Include="CodeParsing\Signatures\TypeSignature.cs" />
     <Compile Include="CodeParsing\Signatures\VariableSignature.cs" />
