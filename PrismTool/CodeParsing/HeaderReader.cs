@@ -72,10 +72,14 @@ namespace Prism.CodeParsing
 					parseResult = CommentBlockSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| PreProcessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| TypeDefSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("class", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("struct", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("enum", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
-						|| NamespaceSignature.TryParse(m_NamespaceStack, currentLine, content, m_SafeReader, out sigInfo);
+						|| NamespaceSignature.TryParse(m_NamespaceStack, currentLine, content, m_SafeReader, out sigInfo)
+						|| FriendSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| VariableSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						;
 
 					// Try structure only parsing, if all else fails
 					if (!parseResult && m_StructureStack.Count != 0)
