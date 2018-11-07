@@ -24,7 +24,6 @@ namespace Prism.CodeParsing.Signatures
 			if (content.EndsWith(";"))
 			{
 				// Check it's not a function 
-				// TODO - Check if typename could technically have () *Template or something?
 				string searchString = content.Substring(0, content.Length - 1).Trim();
 				if (!string.IsNullOrEmpty(searchString) && !searchString.Contains(')'))
 				{
@@ -44,6 +43,15 @@ namespace Prism.CodeParsing.Signatures
 						else
 						{
 							data.DefaultValue = null;
+						}
+
+						// Remove bit packing if present (e.g. bool myBool : 1;)
+						// Find : but make sure it's not following ::
+						string tempString = searchString.Replace("::", "%ns%");
+						int descIndex = tempString.LastIndexOf(':');
+						if (descIndex != -1)
+						{
+							searchString = tempString.Substring(0, descIndex).Replace("%ns%", "::").Trim();
 						}
 
 						// Find variable name (Will appear after last ' ','>','*' or '&'
