@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Prism.CodeParsing;
+using Prism.Reflection;
 using Prism.Utils;
 
 namespace Prism
@@ -24,14 +25,14 @@ namespace Prism
 		{
 			string path = @"G:\Side Projects\PrismTesting\PrismTesting\PrismTesting\MyTestClass.h";
 
+
+			ReflectionSettings settings = new ReflectionSettings();
+
 			using (FileStream stream = new FileStream(path, FileMode.Open))
-			using (HeaderReader reader = new HeaderReader(stream))
 			{
-				SignatureInfo sigInfo;
-				while (reader.TryReadNext(out sigInfo))
-				{
-					int i = 0;
-				}
+				HeaderReflection file = HeaderReflection.Generate(settings, stream);
+
+				Console.WriteLine("Yeeeeet");
 			}
 
 

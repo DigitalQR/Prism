@@ -85,7 +85,7 @@ namespace Prism.CodeParsing
 					}
 					else
 					{
-						line = m_Reader.ReadLine().Trim();
+						line = m_Reader.ReadLine().Replace('\t', ' ').Trim();
 						++m_CurrentLine;
 
 						// Split at ; and {

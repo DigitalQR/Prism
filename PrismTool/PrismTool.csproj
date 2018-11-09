@@ -96,6 +96,14 @@
     <Compile Include="CodeParsing\Signatures\VariableSignature.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reflection\ConditionState.cs" />
+    <Compile Include="Reflection\EnumStructureReflection.cs" />
+    <Compile Include="Reflection\HeaderReflection.cs" />
+    <Compile Include="Reflection\StructureReflection.cs" />
+    <Compile Include="Reflection\ReflectionException.cs" />
+    <Compile Include="Reflection\ReflectionSettings.cs" />
+    <Compile Include="Reflection\StructureReflectionBase.cs" />
+    <Compile Include="Reflection\TokenReflection.cs" />
     <Compile Include="Utils\CommandLine.cs" />
   </ItemGroup>
   <ItemGroup>

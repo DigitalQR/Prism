@@ -6,40 +6,40 @@ using System.Threading.Tasks;
 
 namespace Prism.CodeParsing.Signatures
 {
+	/// <summary>
+	/// Basic information about a given typename
+	/// </summary>
+	public struct TypeNameInfo
+	{
+		public string TypeName;
+		public bool IsConst;
+	}
+
+	/// <summary>
+	/// Contains basic information about a given pointer/reference
+	/// </summary>
+	public struct PointerInfo
+	{
+		public bool IsConst;
+	}
+
+	/// <summary>
+	/// The full type information about any given varable
+	/// </summary>
+	public class FullTypeInfo
+	{
+		public TypeNameInfo InnerType;
+		public PointerInfo[] PointerData;
+		public int PointerCount;
+		public bool IsReference;
+
+		public bool IsStatic;
+		public bool IsVolatile;
+		public bool IsInlined;
+	}
+
 	public class TypeSignature
 	{
-		/// <summary>
-		/// Basic information about a given typename
-		/// </summary>
-		public struct TypeNameInfo
-		{
-			public string TypeName;
-			public bool IsConst;
-		}
-		
-		/// <summary>
-		/// Contains basic information about a given pointer/reference
-		/// </summary>
-		public struct PointerInfo
-		{
-			public bool IsConst;
-		}
-
-		/// <summary>
-		/// The full type information about any given varable
-		/// </summary>
-		public class FullTypeInfo
-		{
-			public TypeNameInfo InnerType;
-			public PointerInfo[] PointerData;
-			public int PointerCount;
-			public bool IsReference;
-
-			public bool IsStatic;
-			public bool IsVolatile;
-			public bool IsInlined;
-		}
-
 		/// <summary>
 		/// Get basic typename info out
 		/// Expects input in form:

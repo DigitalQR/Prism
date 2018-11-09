@@ -6,23 +6,23 @@ using System.Threading.Tasks;
 
 namespace Prism.CodeParsing.Signatures
 {
+	public class FunctionInfo
+	{
+		public string FunctionName;
+
+		public FullTypeInfo ReturnType;
+		public VariableInfo[] ParamTypes;
+		public int ParamCount;
+
+		public bool IsConst;
+		public bool IsVirtual;
+		public bool IsStatic;
+		public bool IsInlined;
+		public bool IsAbstract;
+	}
+
 	public class FunctionSignature
 	{
-		public class ParseData
-		{
-			public string FunctionName;
-
-			public TypeSignature.FullTypeInfo ReturnType;
-			public VariableSignature.ParseData[] ParamTypes;
-			public int ParamCount;
-
-			public bool IsConst;
-			public bool IsVirtual;
-			public bool IsStatic;
-			public bool IsInlined;
-			public bool IsAbstract;
-		}
-
 		public static bool TryParse(ref int braceBlockDepth, long firstLine, string content, SafeLineReader reader, out SignatureInfo sigInfo)
 		{
 			// Try to check if we are currently looking at a variable
@@ -65,7 +65,7 @@ namespace Prism.CodeParsing.Signatures
 					// Try to detemine function details
 					if (searchString.EndsWith(")"))
 					{
-						ParseData data = new ParseData();
+						var data = new FunctionInfo();
 						data.IsConst = isConst;
 						data.IsAbstract = isAbstract;
 
@@ -102,7 +102,7 @@ namespace Prism.CodeParsing.Signatures
 								return true;
 							}
 
-							VariableSignature.ParseData varData = (VariableSignature.ParseData)tempSig.AdditionalParam;
+							var varData = (VariableInfo)tempSig.AdditionalParam;
 							data.ReturnType = varData.TypeInfo;
 							data.FunctionName = varData.VariableName;
 
@@ -116,7 +116,7 @@ namespace Prism.CodeParsing.Signatures
 						// Parse param info
 						if (paramInfo != "" && paramInfo != "void")
 						{
-							List<VariableSignature.ParseData> funcParams = new List<VariableSignature.ParseData>();
+							List<VariableInfo> funcParams = new List<VariableInfo>();
 
 							// Context aware split i.e. don't split, if comma is in () or <> etc.
 							string current = "";
@@ -143,7 +143,7 @@ namespace Prism.CodeParsing.Signatures
 										return true;
 									}
 
-									VariableSignature.ParseData varData = (VariableSignature.ParseData)tempSig.AdditionalParam;
+									var varData = (VariableInfo)tempSig.AdditionalParam;
 									funcParams.Add(varData);
 
 									current = "";
@@ -181,7 +181,7 @@ namespace Prism.CodeParsing.Signatures
 									return true;
 								}
 
-								VariableSignature.ParseData varData = (VariableSignature.ParseData)tempSig.AdditionalParam;
+								var varData = (VariableInfo)tempSig.AdditionalParam;
 								funcParams.Add(varData);
 							}
 
