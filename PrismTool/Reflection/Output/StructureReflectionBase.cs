@@ -15,16 +15,22 @@ namespace Prism.Reflection
 		/// </summary>
 		private string m_DeclerationName;
 
-		protected StructureReflectionBase(string name, ConditionState conditionState, string tokenParams, string docString)
-			: base(conditionState, tokenParams, docString)
+		/// <summary>
+		/// The namespace this token was declared in
+		/// </summary>
+		private string[] m_TokenNamespace;
+		
+		protected StructureReflectionBase(string name, string[] tokenNamespace, ConditionState conditionState, int bodyLine, string tokenParams, string docString)
+			: base(conditionState, bodyLine, tokenParams, docString)
 		{
 			m_DeclerationName = name;
+			m_TokenNamespace = tokenNamespace == null ? new string[0] : tokenNamespace;
 		}
 				
 		/// <summary>
 		/// Get the appropriate StructureReflection based on the signature
 		/// </summary>
-		public static StructureReflectionBase RetrieveFromSignature(SignatureInfo sigInfo, ConditionState conditionState, string tokenParams, string docString)
+		public static StructureReflectionBase RetrieveFromSignature(SignatureInfo sigInfo, string[] tokenNamespace, ConditionState conditionState, int tokenBodyLine, string tokenParams, string docString)
 		{
 			if (sigInfo.SignatureType != SignatureInfo.SigType.StructureImplementationBegin)
 			{
@@ -35,11 +41,11 @@ namespace Prism.Reflection
 
 			if (data.StructureType == "class" || data.StructureType == "struct")
 			{
-				return new StructureReflection(data, conditionState, tokenParams, docString);
+				return new StructureReflection(data, tokenNamespace, conditionState, tokenBodyLine, tokenParams, docString);
 			}
 			else if (data.StructureType == "enum")
 			{
-				return new EnumStructureReflection(data, conditionState, tokenParams, docString);
+				return new EnumStructureReflection(data, tokenNamespace, conditionState, tokenBodyLine, tokenParams, docString);
 			}
 
 			throw new ReflectionException(sigInfo, "No reflection structure for this current signature");
@@ -59,9 +65,25 @@ namespace Prism.Reflection
 		}
 
 		/// <summary>
+		/// The namespace this token was declared in
+		/// </summary>
+		public string[] TokenNamespace
+		{
+			get { return m_TokenNamespace; }
+		}
+
+		/// <summary>
+		/// The namespace this token was declared in
+		/// </summary>
+		public string TokenNamespaceFormatted
+		{
+			get { return m_TokenNamespace.Length != 0 ? string.Join("::", m_TokenNamespace) : ""; }
+		}
+
+		/// <summary>
 		/// Add a specific signature to the reflection of this structure
 		/// </summary>
-		public abstract void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, string tokenParams, string docString);
+		public abstract void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, int tokenLine, string tokenParams, string docString);
 
 	}
 }

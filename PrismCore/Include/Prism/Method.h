@@ -16,31 +16,48 @@ namespace Prism
 
 	struct PRISMCORE_API ParamInfo
 	{
-		const String Name;
+		String Name;
 		const TypeInfo* TypeInfo;
-		const bool IsPointer;
+		bool IsPointer : 1;
+		bool IsConst : 1;
 	};
 
 	class PRISMCORE_API Method
 	{
 	private:
 		const String m_Name;
-		const Type* m_OwningType;
-		const ParamInfo m_ReturnType;
-		const std::vector<ParamInfo> m_ParamTypes;
-	protected:
-		const bool m_IsStatic;
 
-		Method(const String& name, const Type* owningType, const ParamInfo& returnType, const std::vector<ParamInfo>& paramTypes);
+	protected:
+		const bool m_IsStatic : 1;
+		const bool m_IsConst : 1;
+		const bool m_IsVirtual : 1;
+
+		Method(const String& name, bool isStatic, bool isConst, bool isVirtual);
 
 	public:
 		inline const String& GetName() const { return m_Name; }
 
-		inline const ParamInfo& GetReturnInfo() const { return m_ReturnType; }
-		inline const ParamInfo& GetParamInfo(int index) const { return m_ParamTypes[index]; }
-		inline size_t GetParamCount() const { return m_ParamTypes.size(); }
-		
 		inline bool IsStatic() const { return m_IsStatic; }
+		inline bool IsConst() const { return m_IsConst; }
+		inline bool IsVirtual() const { return m_IsVirtual; }
+
+
+		///
+		/// Get the return type info for this method
+		/// @returns The param info for the return type
+		///
+		virtual const ParamInfo* GetReturnInfo() const = 0;
+
+		///
+		/// Get the type info for a specific param
+		/// @returns The param info for the param
+		///
+		virtual const ParamInfo* GetParamInfo(size_t index) const = 0;
+
+		///
+		/// Get the number of params that this method has
+		///
+		virtual size_t GetParamCount() const = 0;
 
 		///
 		/// Attempt to call this method with these params

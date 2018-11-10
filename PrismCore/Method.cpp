@@ -2,12 +2,11 @@
 
 namespace Prism
 {
-	Method::Method(const String& name, const Type* owningType, const ParamInfo& returnType, const std::vector<ParamInfo>& paramTypes)
+	Method::Method(const String& name, bool isStatic, bool isConst, bool isVirtual)
 		: m_Name(name)
-		, m_OwningType(owningType)
-		, m_ReturnType(returnType)
-		, m_ParamTypes(paramTypes)
-		, m_IsStatic(false)
+		, m_IsStatic(isStatic)
+		, m_IsConst(isConst)
+		, m_IsVirtual(isVirtual)
 	{
 	}
 	
@@ -21,10 +20,10 @@ namespace Prism
 				
 		for (int i = 0; i < (int)GetParamCount(); ++i)
 		{
-			const Prism::ParamInfo& param = GetParamInfo(i);
+			const Prism::ParamInfo* param = GetParamInfo(i);
 
-			const bool diffType = param.TypeInfo != params[i].GetTypeInfo();
-			const bool diffPtr = param.IsPointer != params[i].IsPointer();
+			const bool diffType = param->TypeInfo != params[i].GetTypeInfo();
+			const bool diffPtr = param->IsPointer != params[i].IsPointer();
 
 			if (diffType || diffPtr)
 				return false;

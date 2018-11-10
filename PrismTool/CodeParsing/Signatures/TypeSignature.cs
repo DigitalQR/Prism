@@ -36,6 +36,17 @@ namespace Prism.CodeParsing.Signatures
 		public bool IsStatic;
 		public bool IsVolatile;
 		public bool IsInlined;
+
+		public bool IsConst
+		{
+			get
+			{
+				if (PointerCount != 0)
+					return PointerData[PointerCount - 1].IsConst;
+				else
+					return InnerType.IsConst;
+			}
+		}
 	}
 
 	public class TypeSignature
@@ -90,7 +101,7 @@ namespace Prism.CodeParsing.Signatures
 				typeString = typeString.Replace("volatile", "").Trim();
 				typeInfo.IsVolatile = true;
 			}
-
+			
 			// Is reference
 			if (typeString.EndsWith("&"))
 			{
@@ -140,7 +151,7 @@ namespace Prism.CodeParsing.Signatures
 					typeInfo.PointerData[i] = reversePointerData[typeInfo.PointerCount - i - 1];
 				}
 			}
-
+			
 			return TryGetTypeName(typeString, out typeInfo.InnerType);
 		}
 	}

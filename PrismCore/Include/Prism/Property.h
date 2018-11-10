@@ -16,20 +16,29 @@ namespace Prism
 	{
 	private:
 		const String m_Name;
-		const TypeInfo* m_TypeInfo;
 	protected:
-		const Type* m_OwningType;
 		const bool m_IsPointer : 1;
 		const bool m_IsStatic : 1;
 		const bool m_IsConst : 1;
 
-		Property(const String& name, const Type* owningType, const TypeInfo* type, bool isPointer, bool isStatic, bool isConst);
+		Property(const String& name, bool isPointer, bool isStatic, bool isConst);
 	public:
 		inline const String& GetName() const { return m_Name; }
-		inline const TypeInfo* GetTypeInfo() const { return m_TypeInfo; }
 		inline bool IsPointer() const { return m_IsPointer; }
 		inline bool IsStatic() const { return m_IsStatic; }
 		inline bool IsConst() const { return m_IsConst; }
+
+		///
+		/// Get the prism type info for the parent of this property
+		/// @returns The Prism::TypeInfo, if found or nullptr
+		///
+		virtual const TypeInfo* GetParentInfo() const = 0;
+
+		///
+		/// Get the prism type info for this property
+		/// @returns The Prism::TypeInfo, if found or nullptr
+		///
+		virtual const TypeInfo* GetTypeInfo() const = 0;
 
 		///
 		/// Attempt to set this property's value for the target

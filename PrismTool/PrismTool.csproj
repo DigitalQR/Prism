@@ -97,13 +97,16 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\ConditionState.cs" />
-    <Compile Include="Reflection\EnumStructureReflection.cs" />
+    <Compile Include="Reflection\Output\EnumStructureReflection.cs" />
     <Compile Include="Reflection\HeaderReflection.cs" />
-    <Compile Include="Reflection\StructureReflection.cs" />
+    <Compile Include="Reflection\Output\FunctionReflection.cs" />
+    <Compile Include="Reflection\Output\StructureReflection.cs" />
+    <Compile Include="Reflection\Output\VariableReflection.cs" />
     <Compile Include="Reflection\ReflectionException.cs" />
     <Compile Include="Reflection\ReflectionSettings.cs" />
-    <Compile Include="Reflection\StructureReflectionBase.cs" />
+    <Compile Include="Reflection\Output\StructureReflectionBase.cs" />
     <Compile Include="Reflection\TokenReflection.cs" />
+    <Compile Include="Reflection\Output\IReflectionOutput.cs" />
     <Compile Include="Utils\CommandLine.cs" />
   </ItemGroup>
   <ItemGroup>

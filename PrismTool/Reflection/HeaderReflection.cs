@@ -52,6 +52,16 @@ namespace Prism.Reflection
 			};
 		}
 
+		public TokenReflection[] ReflectedTokens
+		{
+			get { return m_ReflectedTokens.ToArray(); }
+		}
+
+		public int ReflectedTokenCount
+		{
+			get { return m_ReflectedTokens.Count; }
+		}
+
 		/// <summary>
 		/// Fetched the desired header reflection from an input stream
 		/// </summary>
@@ -176,7 +186,7 @@ namespace Prism.Reflection
 										else
 										{
 											// Create new structure for this signature
-											currentStructure = StructureReflectionBase.RetrieveFromSignature(previousSignature, macroCondition, data.MacroParams, recentDocString);
+											currentStructure = StructureReflectionBase.RetrieveFromSignature(previousSignature, activeNamespace, macroCondition, (int)currentSignature.LineNumber, data.MacroParams, recentDocString);
 											currentAccessScope = supportedStructure.DefaultAccess;
 											reflection.m_ReflectedTokens.Add(currentStructure);
 
@@ -221,7 +231,7 @@ namespace Prism.Reflection
 									if (data.MacroName == settings.VariableToken)
 									{
 										if (currentStructure != null)
-											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, data.MacroParams, recentDocString);
+											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
 										else
 										{
 											throw new ReflectionException(currentSignature, "Found unexpected '" + settings.VariableToken + "' (Prism does not currently support reflecting outside of a type structure)");
@@ -233,7 +243,7 @@ namespace Prism.Reflection
 								if (settings.UseImplicitVariables)
 								{
 									if (currentStructure != null)
-										currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, "", recentDocString);
+										currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)currentSignature.LineNumber, "", recentDocString);
 								}
 
 								break;
@@ -249,7 +259,7 @@ namespace Prism.Reflection
 									if (data.MacroName == settings.FunctionToken)
 									{
 										if (currentStructure != null)
-											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, data.MacroParams, recentDocString);
+											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
 										else
 										{
 											throw new ReflectionException(currentSignature, "Found unexpected '" + settings.FunctionToken + "' (Prism does not currently support reflecting outside of a type structure)");
@@ -261,7 +271,7 @@ namespace Prism.Reflection
 								if (settings.UseImplicitFunctions)
 								{
 									if (currentStructure != null)
-										currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, "", recentDocString);
+										currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)currentSignature.LineNumber, "", recentDocString);
 								}
 
 								break;
@@ -271,7 +281,7 @@ namespace Prism.Reflection
 						case SignatureInfo.SigType.EnumValueEntry:
 							{
 								if (currentStructure != null)
-									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, "", recentDocString);
+									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)currentSignature.LineNumber, "", recentDocString);
 
 								break;
 							}
