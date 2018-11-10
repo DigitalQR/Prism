@@ -94,16 +94,11 @@ namespace Prism
 	public:
 		Holder(const Holder& other);
 
-		template<typename T>
-		Holder(T& obj);
-		template<typename T>
+		template<typename T, typename = std::enable_if_t<!std::is_pointer<T>::value>>
 		Holder(const T& obj);
 
-		template<typename T>
-		Holder(T* obj);
-		template<typename T>
-		Holder(const T* obj);
-
+		template<typename T, typename = std::enable_if_t<std::is_pointer<T>::value>>
+		Holder(T obj);
 
 		///
 		/// Copy internal data from other holder

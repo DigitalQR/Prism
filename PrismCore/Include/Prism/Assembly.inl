@@ -42,12 +42,12 @@ namespace Prism
 	template<typename T>
 	const TypeInfo* Assembly::FindTypeOf() const
 	{
-		const TypeInfo* info = FindTypeById(TypeId::Get<T>());
+		const TypeInfo* info = FindTypeById(TypeId::Get<std::remove_pointer_t<T>>());
 
 		// Attempt to retieve info by calling RetrievePrismInfo (Required for template types)
 		if (info == nullptr)
 		{
-			const Type* type = try_call_RetrievePrismInfo<T>::run();
+			const Type* type = try_call_RetrievePrismInfo<std::remove_pointer_t<T>>::run();
 			if (type != nullptr)
 				return type->m_AssociatedInfo;
 			else

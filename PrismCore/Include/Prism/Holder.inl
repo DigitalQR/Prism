@@ -29,6 +29,9 @@ namespace Prism
 
 	namespace Utils
 	{
+		///
+		/// Use the ManagedInstance, if the type has a valid copy-constructor, otherwise use unsafe UnmanagedInstance which just used malloc and free
+		///
 		template<typename T>
 		struct InstanceFactory
 		{
@@ -53,30 +56,36 @@ namespace Prism
 				return Create(source, copy_type());
 			}
 		};
+
+		///
+		/// For values passed by reference, make a copy of the type
+		///
+		template<typename T, typename = std::enable_if_t<!std::is_pointer<T>::value>>
+		std::shared_ptr<ObjectInstance> CreateInstance(const T* source)
+		{
+			return InstanceFactory<T>::CreateInstance(source);
+		}
+
+		///
+		/// For values passed by pointer, just point towards the value
+		///
+		template<typename T, typename = std::enable_if_t<std::is_pointer<T>::value>>
+		std::shared_ptr<ObjectInstance> CreateInstance(T source)
+		{
+			return std::make_shared<ManagedInstance<T>>(&source, Assembly::Get().FindTypeOf<T>());
+		}
 	}
-	
-	template<typename T>
-	Holder::Holder(T& obj)
-		: m_Data(Utils::InstanceFactory<T>::CreateInstance(&obj))
-		, m_IsPointer(false)
-	{
-	}
-	template<typename T>
+		
+	template<typename T, typename>
 	Holder::Holder(const T& obj)
-		: m_Data(Utils::InstanceFactory<T>::CreateInstance(&obj))
+		: m_Data(Utils::CreateInstance<T>(&obj))
 		, m_IsPointer(false)
 	{
 	}
 
-	template<typename T>
-	Holder::Holder(T* obj)
-		: m_Data(Utils::InstanceFactory<T>::CreateInstance(obj))
-		, m_IsPointer(true)
-	{
-	}
-	template<typename T>
-	Holder::Holder(const T* obj)
-		: m_Data(Utils::InstanceFactory<T>::CreateInstance(obj))
+	template<typename T, typename>
+	Holder::Holder(T obj)
+		: m_Data(Utils::CreateInstance<T>(obj))
 		, m_IsPointer(true)
 	{
 	}
