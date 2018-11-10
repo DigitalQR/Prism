@@ -125,13 +125,21 @@ private:
 
 		public override string GenerateIncludeReflectionContent()
 		{
+			string content = "";
+
 			// Add method header reflection
-			// TODO
+			foreach (var method in m_Functions)
+			{
+				content += method.GenerateIncludeReflectionContent();
+			}
 
 			// Add proprety header reflection
-			// TODO
+			foreach (var property in m_Variables)
+			{
+				content += property.GenerateIncludeReflectionContent();
+			}
 
-			return "";
+			return content;
 		}
 
 		public override string GenerateSourceReflectionContent()
@@ -149,7 +157,8 @@ private:
 %CLASS_NAME%::ClassInfo::ClassInfo()
 	: Prism::Class(
 		Prism::TypeId::Get<%CLASS_NAME%>(), 
-		PRISM_STR(""%NAMESPACE_STR%""), PRISM_STR(""%CLASS_NAME%""), sizeof(%CLASS_NAME%),
+		PRISM_STR(""%NAMESPACE_STR%""), PRISM_STR(""%CLASS_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
+		sizeof(%CLASS_NAME%),
 		{ %METHOD_INSTANCES% },
 		{ %PROPERTY_INSTANCES% }
 )
@@ -167,7 +176,7 @@ private:
 				content += "\n#endif\n";
 
 				methodInstances += "\n#if " + method.PreProcessorCondition + "\n";
-				methodInstances += "new MethodInfo_" + method.ReflectionInfo.FunctionName + "(), ";
+				methodInstances += "new MethodInfo_" + method.ReflectionInfo.SafeFunctionName + "(), ";
 				methodInstances += "\n#endif\n";
 			}
 
@@ -193,7 +202,8 @@ private:
 				.Replace("%CLASS_NAME%", DeclerationName)
 				.Replace("%NAMESPACE_STR%", TokenNamespaceFormatted)
 				.Replace("%METHOD_INSTANCES%", methodInstances)
-				.Replace("%PROPERTY_INSTANCES%", propertyInstances);
+				.Replace("%PROPERTY_INSTANCES%", propertyInstances)
+				.Replace("%DOC_STRING%", SafeDocString);
 		}
 	}
 }

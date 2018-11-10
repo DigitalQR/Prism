@@ -42,6 +42,7 @@ class MethodInfo_%FUNCTION_NAME% : public Prism::Method
 public:
 	MethodInfo_%FUNCTION_NAME%();
 
+	virtual const Prism::TypeInfo* GetParentInfo() const override;
 	virtual const Prism::ParamInfo* GetReturnInfo() const override;
 	virtual const Prism::ParamInfo* GetParamInfo(size_t index) const override;
 	virtual size_t GetParamCount() const override;
@@ -49,9 +50,9 @@ public:
 	virtual Prism::Holder Call(Prism::Holder target, const std::vector<Prism::Holder>& params) const override;
 };
 ";
-
 			return content
-				.Replace("%FUNCTION_NAME%", m_ReflectionInfo.FunctionName);
+				.Replace("%FUNCTION_NAME%", m_ReflectionInfo.SafeFunctionName)
+				.Replace("%FUNCTION_INTERNAL_NAME%", m_ReflectionInfo.FunctionName);
 		}
 
 		public override string GenerateIncludeReflectionContent()
@@ -67,7 +68,7 @@ public:
 			content += @"
 
 %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::MethodInfo_%FUNCTION_NAME%()
-	: Prism::Method(PRISM_STR(""%FUNCTION_NAME%""), %IS_STATIC%, %IS_CONST%, %IS_VIRTUAL%)
+	: Prism::Method(PRISM_STR(""%FUNCTION_INTERNAL_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""), %IS_STATIC%, %IS_CONST%, %IS_VIRTUAL%)
 {}
 
 const Prism::ParamInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetReturnInfo() const
@@ -83,6 +84,11 @@ const Prism::ParamInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetRetur
 #else
 	return nullptr;
 #endif
+}
+
+const Prism::TypeInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetParentInfo() const
+{
+	return Prism::Assembly::Get().FindTypeOf<%PARENT_STRUCTURE%>();
 }
 
 const Prism::ParamInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetParamInfo(size_t index) const
@@ -105,17 +111,17 @@ Prism::Holder %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::Call(Prism::Holder
 	std::vector<Prism::Holder>& safeParams = *const_cast<std::vector<Prism::Holder>*>(&params);
 #if %IS_STATIC%
 #if %HAS_RETURN%
-	return %PARENT_STRUCTURE%::%FUNCTION_NAME%(%CALL_PARAMS%);
+	return %PARENT_STRUCTURE%::%FUNCTION_INTERNAL_NAME%(%CALL_PARAMS%);
 #else
-	%PARENT_STRUCTURE%::%FUNCTION_NAME%(%CALL_PARAMS%);
+	%PARENT_STRUCTURE%::%FUNCTION_INTERNAL_NAME%(%CALL_PARAMS%);
 	return nullptr;
 #endif
 #else
 	%PARENT_STRUCTURE%* obj = target.GetPtrAs<%PARENT_STRUCTURE%>();
 #if %HAS_RETURN%
-	return obj->%FUNCTION_NAME%(%CALL_PARAMS%);
+	return obj->%FUNCTION_INTERNAL_NAME%(%CALL_PARAMS%);
 #else
-	obj->%FUNCTION_NAME%(%CALL_PARAMS%);
+	obj->%FUNCTION_INTERNAL_NAME%(%CALL_PARAMS%);
 	return nullptr;
 #endif
 #endif
@@ -188,16 +194,18 @@ case %PARAM_INDEX%:
 				   .Replace("%RETURN_TYPE_PTR%", "0")
 				   .Replace("%RETURN_TYPE_CONST%", "0");
 			}
-
+			
 			return content
-				.Replace("%FUNCTION_NAME%", m_ReflectionInfo.FunctionName)
+				.Replace("%FUNCTION_NAME%", m_ReflectionInfo.SafeFunctionName)
+				.Replace("%FUNCTION_INTERNAL_NAME%", m_ReflectionInfo.FunctionName)
 				.Replace("%PARENT_STRUCTURE%", m_ParentStructure.DeclerationName)
 				.Replace("%IS_VIRTUAL%", m_ReflectionInfo.IsVirtual ? "1" : "0")
 				.Replace("%IS_STATIC%", m_ReflectionInfo.IsStatic ? "1" : "0")
 				.Replace("%IS_CONST%", m_ReflectionInfo.IsConst ? "1" : "0")
 				.Replace("%PARAM_COUNT%", "" + m_ReflectionInfo.ParamCount)
 				.Replace("%SELECT_PARAM%", paramSelect)
-				.Replace("%CALL_PARAMS%", callParams);
+				.Replace("%CALL_PARAMS%", callParams)
+				.Replace("%DOC_STRING%", SafeDocString);
 		}
 	}
 }

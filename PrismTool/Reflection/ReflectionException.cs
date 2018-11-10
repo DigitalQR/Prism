@@ -17,6 +17,7 @@ namespace Prism.Reflection
 		ParseError					= 300,
 		ParseFormatError			= 301,
 		ParseUnexpectedSignature	= 302,
+		ParseExpectedInclude		= 303,
 	}
 
 	public class ReflectionException : Exception

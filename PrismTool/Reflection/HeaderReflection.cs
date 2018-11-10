@@ -32,6 +32,15 @@ namespace Prism.Reflection
 		}
 
 		/// <summary>
+		/// When an include is found
+		/// </summary>
+		public class IncludeFile
+		{
+			public string Path;
+			public int LineNumber;
+		}
+
+		/// <summary>
 		/// The supported structure tokens to look for
 		/// </summary>
 		private StructureToken[] m_SupportedStructureTokens;
@@ -40,11 +49,17 @@ namespace Prism.Reflection
 		/// All the reflected tokens found in this file
 		/// </summary>
 		private List<TokenReflection> m_ReflectedTokens;
+
+		/// <summary>
+		/// All the includes found in this file
+		/// </summary>
+		private List<IncludeFile> m_Includes;
 		
 
 		private HeaderReflection(ReflectionSettings settings)
 		{
 			m_ReflectedTokens = new List<TokenReflection>();
+			m_Includes = new List<IncludeFile>();
 			m_SupportedStructureTokens = new StructureToken[] {
 				new StructureToken(settings.ClassToken, "class", "private"),
 				new StructureToken(settings.StructToken, "struct", "public"),
@@ -60,6 +75,16 @@ namespace Prism.Reflection
 		public int ReflectedTokenCount
 		{
 			get { return m_ReflectedTokens.Count; }
+		}
+
+		public IncludeFile[] FileIncludes
+		{
+			get { return m_Includes.ToArray(); }
+		}
+
+		public int FileIncludeCount
+		{
+			get { return m_Includes.Count; }
 		}
 
 		/// <summary>
@@ -131,7 +156,20 @@ namespace Prism.Reflection
 							{
 								string macroString = currentSignature.LineContent;
 
-								if (macroString.StartsWith("#ifdef"))
+								if (macroString.StartsWith("#include"))
+								{
+									string includeFile = macroString.Substring("#include".Length).Trim();
+									// Remove <> or ""
+									includeFile = includeFile.Substring(1, includeFile.Length - 2);
+
+									IncludeFile include = new IncludeFile();
+									include.Path = includeFile;
+									include.LineNumber = (int)currentSignature.LineNumber;
+
+									reflection.m_Includes.Add(include);
+								}
+
+								else if (macroString.StartsWith("#ifdef"))
 								{
 									string condition = macroString.Substring("#ifdef".Length).Trim();
 									macroCondition.AddIF("defined(" + condition + ")");
@@ -201,6 +239,14 @@ namespace Prism.Reflection
 									throw new ReflectionException(ReflectionErrorCode.TokenMissuse, currentSignature, errorMessage);
 
 
+								reuseDocString = true;
+								break;
+							}
+
+						// Keep an eye out for the currentStructure ending
+						case SignatureInfo.SigType.StructureImplementationBegin:
+							{
+								// Wait for macro to appear before reflecting
 								reuseDocString = true;
 								break;
 							}

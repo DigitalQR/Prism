@@ -1,4 +1,5 @@
-﻿using Prism.Reflection;
+﻿using Prism.CodeParsing;
+using Prism.Reflection;
 using Prism.Utils;
 using System;
 using System.Collections.Generic;
@@ -177,6 +178,32 @@ namespace Prism.Export
 					// Export tokens, if any have been found
 					if (file.ReflectedTokenCount != 0)
 					{
+						// This has valid tokens to reflect, so check that the includes are present
+						bool foundReflInclude = false;
+						string requiredPreInclude = includeExportPath.ToLower().Replace('/', '\\');
+						int firstTokenLine = file.ReflectedTokens[0].TokenLineNumber;
+
+						foreach (var fileInclude in file.FileIncludes)
+						{
+							if (fileInclude.LineNumber > firstTokenLine)
+								continue;
+							
+							string path = fileInclude.Path.ToLower().Replace('/', '\\');
+							if(requiredPreInclude.EndsWith(path))
+							{
+								foundReflInclude = true;
+								break;
+							}
+						}
+
+						if (!foundReflInclude)
+						{
+							var token = file.ReflectedTokens[0];
+							SignatureInfo fakeSig = new SignatureInfo(token.TokenLineNumber, "", SignatureInfo.SigType.Unknown);
+							throw new ReflectionException(ReflectionErrorCode.ParseExpectedInclude, fakeSig, "Expected include to '" + Path.GetFileName(includeExportPath) + "' to appear before first token.");
+						}
+
+
 						// Generate the reflection export data for all tokens found
 						for (int i = 0; i < file.ReflectedTokenCount; ++i)
 						{

@@ -19,6 +19,31 @@ namespace Prism.CodeParsing.Signatures
 		public bool IsStatic;
 		public bool IsInlined;
 		public bool IsAbstract;
+
+		public string SafeFunctionName
+		{
+			get
+			{
+				return FunctionName.Replace("+", "Add")
+				.Replace("-", "Sub")
+				.Replace("*", "Mult")
+				.Replace("/", "Div")
+				.Replace("%", "Perc")
+				.Replace("^", "Hat")
+				.Replace("&", "Amp")
+				.Replace("|", "Pipe")
+				.Replace("~", "Inv")
+				.Replace("!", "Not")
+				.Replace(",", "Com")
+				.Replace("=", "Equ")
+				.Replace("<", "Less")
+				.Replace(">", "Great")
+				.Replace("(", "BrSrt")
+				.Replace(")", "BrEnd")
+				.Replace("[", "SqSrt")
+				.Replace("]", "SqEnd");
+			}
+		}
 	}
 
 	public class FunctionSignature
