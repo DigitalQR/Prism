@@ -67,7 +67,7 @@ public:
 			content += @"
 %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::VariableInfo_%VARIABLE_NAME%()
 	: Prism::Property(
-		PRISM_STR(""%VARIABLE_NAME%""),
+		PRISM_STR(""%VARIABLE_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
 		%IS_POINTER%, %IS_STATIC%, %IS_CONST%
 	)
 {
@@ -112,7 +112,8 @@ Prism::Holder %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::Get(Prism::Holde
 				.Replace("%VARIABLE_TYPE%", m_ReflectionInfo.TypeInfo.InnerType.TypeName)
 				.Replace("%IS_POINTER%", m_ReflectionInfo.TypeInfo.PointerCount != 0 ? "1" : "0")
 				.Replace("%IS_STATIC%", m_ReflectionInfo.TypeInfo.IsStatic ? "1" : "0")
-				.Replace("%IS_CONST%", m_ReflectionInfo.TypeInfo.IsConst ? "1" : "0");
+				.Replace("%IS_CONST%", m_ReflectionInfo.TypeInfo.IsConst ? "1" : "0")
+				.Replace("%DOC_STRING%", SafeDocString);
 		}
 	}
 }

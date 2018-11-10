@@ -106,13 +106,17 @@ namespace Prism.Reflection
 		{
 			get { return m_PreProcessorCondition; }
 		}
-		
+
 		/// <summary>
 		/// The doc-string associated with this token
 		/// </summary>
 		public string DocString
 		{
 			get { return m_DocString; }
+		}
+		public string SafeDocString
+		{
+			get { return m_DocString.Replace("\"", "\"\""); }
 		}
 
 		/// <summary>

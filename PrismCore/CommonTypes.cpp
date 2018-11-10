@@ -7,7 +7,7 @@ T g_Temp_ ## T; \
 class PRISMCORE_API T ## _Type : public Prism::Type \
 { \
 public: \
-	T ## _Type() : Prism::Type(Prism::TypeId::Get<T>(), PRISM_STR(""), PRISM_STR(#T), sizeof(T), false) {} \
+	T ## _Type() : Prism::Type(Prism::TypeId::Get<T>(), PRISM_STR(""), PRISM_STR(#T), PRISM_DEVSTR("Internal type"), sizeof(T), false) {} \
 }; \
 static T ## _Type g_ ## T ## _Instance;
 

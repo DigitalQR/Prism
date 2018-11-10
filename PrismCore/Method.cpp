@@ -2,8 +2,9 @@
 
 namespace Prism
 {
-	Method::Method(const String& name, bool isStatic, bool isConst, bool isVirtual)
+	Method::Method(const String& name, const String& documentation, bool isStatic, bool isConst, bool isVirtual)
 		: m_Name(name)
+		, m_Documentation(documentation)
 		, m_IsStatic(isStatic)
 		, m_IsConst(isConst)
 		, m_IsVirtual(isVirtual)
@@ -12,7 +13,7 @@ namespace Prism
 	
 	bool Method::AreValidParams(Prism::Holder target, const std::vector<Prism::Holder>& params) const 
 	{
-		if (!m_IsStatic && !target.GetTypeInfo() || target.GetTypeInfo()->Get() != m_OwningType)
+		if (!m_IsStatic && !target.GetTypeInfo() || target.GetTypeInfo() != GetParentInfo())
 			return false;
 
 		if (params.size() != GetParamCount())

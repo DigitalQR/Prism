@@ -26,21 +26,28 @@ namespace Prism
 	{
 	private:
 		const String m_Name;
+		const String m_Documentation;
 
 	protected:
 		const bool m_IsStatic : 1;
 		const bool m_IsConst : 1;
 		const bool m_IsVirtual : 1;
 
-		Method(const String& name, bool isStatic, bool isConst, bool isVirtual);
+		Method(const String& name, const String& documentation, bool isStatic, bool isConst, bool isVirtual);
 
 	public:
 		inline const String& GetName() const { return m_Name; }
+		inline const String& GetDocumentation() const { return m_Documentation; }
 
 		inline bool IsStatic() const { return m_IsStatic; }
 		inline bool IsConst() const { return m_IsConst; }
 		inline bool IsVirtual() const { return m_IsVirtual; }
 
+		///
+		/// Get the prism type info for the parent of this property
+		/// @returns The Prism::TypeInfo, if found or nullptr
+		///
+		virtual const TypeInfo* GetParentInfo() const = 0;
 
 		///
 		/// Get the return type info for this method

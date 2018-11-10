@@ -57,6 +57,6 @@ namespace Prism
 		inline size_t GetPropertyCount() const { return m_Properties.size(); }
 
 	protected:
-		Class(long uniqueId, const String& space, const String& name, size_t size, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
+		Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
 	};
 }

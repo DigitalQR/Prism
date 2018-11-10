@@ -3,9 +3,10 @@
 
 namespace Prism 
 {
-	Type::Type(long uniqueId, const String& space, const String& name, size_t size, bool isClass)
+	Type::Type(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, bool isClass)
 		: m_UniqueId(uniqueId)
 		, m_Namespace(space)
+		, m_Documentation(documentation)
 		, m_Name(name)
 		, m_Size(size)
 		, m_IsClass(isClass)

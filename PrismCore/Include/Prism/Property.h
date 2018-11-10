@@ -16,14 +16,18 @@ namespace Prism
 	{
 	private:
 		const String m_Name;
+		const String m_Documentation;
+
 	protected:
 		const bool m_IsPointer : 1;
 		const bool m_IsStatic : 1;
 		const bool m_IsConst : 1;
 
-		Property(const String& name, bool isPointer, bool isStatic, bool isConst);
+		Property(const String& name, const String& documentation, bool isPointer, bool isStatic, bool isConst);
 	public:
 		inline const String& GetName() const { return m_Name; }
+		inline const String& GetDocumentation() const { return m_Documentation; }
+
 		inline bool IsPointer() const { return m_IsPointer; }
 		inline bool IsStatic() const { return m_IsStatic; }
 		inline bool IsConst() const { return m_IsConst; }
