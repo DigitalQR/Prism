@@ -57,5 +57,12 @@ namespace Prism.Reflection
 		/// </summary>
 		[CmdArg(Arg = "impl-functions", ShortArg = "i", Usage = "Indicates if you all function inside of a reflected type will be reflected regardless of if the reflection token is used", MustExist = false)]
 		public bool UseImplicitFunctions = false;
+
+		
+		/// <summary>
+		/// Should all files be rebuilt
+		/// </summary>
+		[CmdArg(Arg = "rebuild", ShortArg = "r", Usage = "Force all files to be rescanned and rebuilt", MustExist = false)]
+		public bool RebuildEverything = false;
 	}
 }

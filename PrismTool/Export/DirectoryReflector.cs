@@ -46,6 +46,11 @@ namespace Prism.Export
 			CmdArgs.Parse(m_ReflectionSettings, args);
 		}
 
+		public override string IntermediateFolder
+		{
+			get { return Path.Combine(m_OutputDirectory, ".prism"); }
+		}
+
 		public override List<ExportFile> Run()
 		{
 			List<ExportFile> outputFiles = new List<ExportFile>();
@@ -53,6 +58,7 @@ namespace Prism.Export
 			var sourceFiles = Directory.EnumerateFiles(m_SourceDirectory, "*.*", SearchOption.AllDirectories).Where(f => m_WhitelistedExtensions.Contains(Path.GetExtension(f)));
 			string outputDir = m_OutputDirectory.ToLower();
 
+			Console.WriteLine("Generating Prism Reflection -> " + m_OutputDirectory);
 			foreach (var file in sourceFiles)
 			{
 				try
@@ -69,7 +75,9 @@ namespace Prism.Export
 					throw new HeaderReflectionException(file, e.ErrorCode, e.Signature, e);
 				}
 			}
+			Console.WriteLine("Prism Reflection Generated.");
 
+			LastBuildTime = DateTime.UtcNow;
 			return outputFiles;
 		}
 	}

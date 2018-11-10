@@ -47,7 +47,51 @@ namespace Prism.Export
 			/// </summary>
 			public bool IsNewFile;
 		}
-				
+
+		/// <summary>
+		/// Where any persistant build data can be stored
+		/// </summary>
+		public abstract string IntermediateFolder { get; }
+
+		private DateTime m_LastBuildTime;
+		private bool m_FetchedBuildTime;
+
+		/// <summary>
+		/// The last time these files were built
+		/// </summary>
+		public DateTime LastBuildTime
+		{
+			get
+			{
+				if (!m_FetchedBuildTime)
+				{
+					string buildFile = Path.Combine(IntermediateFolder, "build");
+					if (File.Exists(buildFile))
+						m_LastBuildTime = File.GetLastWriteTimeUtc(buildFile);
+					else
+						m_LastBuildTime = DateTime.FromFileTimeUtc(0);
+
+					m_FetchedBuildTime = true;
+				}
+
+				return m_LastBuildTime;
+			}
+			set
+			{
+				string buildFile = Path.Combine(IntermediateFolder, "build");
+
+				if (!Directory.Exists(IntermediateFolder))
+					Directory.CreateDirectory(IntermediateFolder);
+
+				if (File.Exists(buildFile))
+					File.SetLastWriteTimeUtc(buildFile, value);
+				else
+					File.Create(buildFile);
+
+				m_LastBuildTime = value;
+			}
+		}
+
 		/// <summary>
 		/// Runs through each file, as specified by the reflector
 		/// </summary>
@@ -60,10 +104,21 @@ namespace Prism.Export
 		/// <returns>All the reflection files which have been created from these</returns>
 		protected List<ExportFile> ReflectFile(ReflectionSettings settings, string sourcePath, string exportDirectory)
 		{
-			string includeContent = "";
-			string sourceContent = "";
-			
-			includeContent = @"%FILE_EXPORT_HEADER%
+			List<ExportFile> exports = new List<ExportFile>();
+
+			// Decide whether to reflect the file
+			DateTime fileWriteTime = File.GetLastWriteTimeUtc(sourcePath);
+			if(settings.RebuildEverything || fileWriteTime > LastBuildTime)
+			{
+				string includeExportPath = Path.Combine(exportDirectory, Path.GetFileNameWithoutExtension(sourcePath) + m_ExportExtension + Path.GetExtension(sourcePath));
+				string sourceExportPath = Path.Combine(exportDirectory, Path.GetFileNameWithoutExtension(sourcePath) + m_ExportExtension + ".cpp");
+
+				Console.WriteLine("\tReflecting " + Path.GetFileName(sourcePath) + " -> " + Path.GetFileName(includeExportPath));
+
+				string includeContent = "";
+				string sourceContent = "";
+
+				includeContent = @"%FILE_EXPORT_HEADER%
 #pragma once
 #include <Prism.h>
 
@@ -96,50 +151,49 @@ namespace Prism.Export
 #endif
 #define %VARIABLE_TOKEN%(...)
 ";
-			// Setup defaults
-			sourceContent = @"%FILE_EXPORT_HEADER%
+				// Setup defaults
+				sourceContent = @"%FILE_EXPORT_HEADER%
 #include ""%FILE_PATH%""
 ";
 
-			// Resolve placeholders
-			includeContent = includeContent
-				.Replace("%FILE_EXPORT_HEADER%", s_ExportHeader)
-				.Replace("%CLASS_TOKEN%", settings.ClassToken)
-				.Replace("%STRUCT_TOKEN%", settings.StructToken)
-				.Replace("%ENUM_TOKEN%", settings.EnumToken)
-				.Replace("%FUNCTION_TOKEN%", settings.FunctionToken)
-				.Replace("%VARIABLE_TOKEN%", settings.VariableToken);
+				// Resolve placeholders
+				includeContent = includeContent
+					.Replace("%FILE_EXPORT_HEADER%", s_ExportHeader)
+					.Replace("%CLASS_TOKEN%", settings.ClassToken)
+					.Replace("%STRUCT_TOKEN%", settings.StructToken)
+					.Replace("%ENUM_TOKEN%", settings.EnumToken)
+					.Replace("%FUNCTION_TOKEN%", settings.FunctionToken)
+					.Replace("%VARIABLE_TOKEN%", settings.VariableToken);
 
-			sourceContent = sourceContent
-				.Replace("%FILE_EXPORT_HEADER%", s_ExportHeader)
-				.Replace("%FILE_PATH%", sourcePath);
+				sourceContent = sourceContent
+					.Replace("%FILE_EXPORT_HEADER%", s_ExportHeader)
+					.Replace("%FILE_PATH%", sourcePath);
 
-			// Reflect the file
-			using (FileStream stream = new FileStream(sourcePath, FileMode.Open))
-			{
-				HeaderReflection file = HeaderReflection.Generate(settings, stream);
-				List<ExportFile> exports = new List<ExportFile>();
-
-				// Export tokens, if any have been found
-				if (file.ReflectedTokenCount != 0)
+				// Reflect the file
+				using (FileStream stream = new FileStream(sourcePath, FileMode.Open))
 				{
-					// Generate the reflection export data for all tokens found
-					for (int i = 0; i < file.ReflectedTokenCount; ++i)
+					HeaderReflection file = HeaderReflection.Generate(settings, stream);
+
+					// Export tokens, if any have been found
+					if (file.ReflectedTokenCount != 0)
 					{
-						var token = file.ReflectedTokens[i];
+						// Generate the reflection export data for all tokens found
+						for (int i = 0; i < file.ReflectedTokenCount; ++i)
+						{
+							var token = file.ReflectedTokens[i];
 
-						string tokenHeader = token.GenerateHeaderReflectionContent();
-						string tokenInclude = token.GenerateIncludeReflectionContent();
-						string tokenSource = token.GenerateSourceReflectionContent();
+							string tokenHeader = token.GenerateHeaderReflectionContent();
+							string tokenInclude = token.GenerateIncludeReflectionContent();
+							string tokenSource = token.GenerateSourceReflectionContent();
 
-						// Raw include content
-						string finalInclude = "";
-						string finalSource = tokenSource;
+							// Raw include content
+							string finalInclude = "";
+							string finalSource = tokenSource;
 
-						finalInclude += tokenInclude + "\n";
+							finalInclude += tokenInclude + "\n";
 
-						// Macro replacement 
-						string headerMacro = @"
+							// Macro replacement 
+							string headerMacro = @"
 #if %TOKEN_CONDITION%
 #ifdef PRISM_REFLECTION_BODY_%TOKEN_LINE%
 #undef PRISM_REFLECTION_BODY_%TOKEN_LINE%
@@ -147,60 +201,58 @@ namespace Prism.Export
 #define PRISM_REFLECTION_BODY_%TOKEN_LINE% %MACRO_CONTENT%
 #endif
 ";
-						finalInclude += headerMacro
-							.Replace("%TOKEN_CONDITION%", "" + token.PreProcessorCondition)
-							.Replace("%TOKEN_LINE%", "" + token.TokenLineNumber)
-							.Replace("%MACRO_CONTENT%", tokenHeader.Replace("\r\n", " \\\n"));
+							finalInclude += headerMacro
+								.Replace("%TOKEN_CONDITION%", "" + token.PreProcessorCondition)
+								.Replace("%TOKEN_LINE%", "" + token.TokenLineNumber)
+								.Replace("%MACRO_CONTENT%", tokenHeader.Replace("\r\n", " \\\n"));
 
 
-						// Add line breaks to make debugging easier on the eyes
-						includeContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalInclude + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
-						sourceContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalSource + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
-					}
+							// Add line breaks to make debugging easier on the eyes
+							includeContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalInclude + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
+							sourceContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalSource + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
+						}
 
 
-					// Fix line-endings
-					includeContent = includeContent.Replace("\r\n", "\n").Replace("\n", "\r\n");
-					sourceContent = sourceContent.Replace("\r\n", "\n").Replace("\n", "\r\n");
+						// Fix line-endings
+						includeContent = includeContent.Replace("\r\n", "\n").Replace("\n", "\r\n");
+						sourceContent = sourceContent.Replace("\r\n", "\n").Replace("\n", "\r\n");
 
-					
-					// Export header
-					{
-						ExportFile includeExport = new ExportFile();
-						string includeExportPath = Path.Combine(exportDirectory, Path.GetFileNameWithoutExtension(sourcePath) + m_ExportExtension + Path.GetExtension(sourcePath));
-						string includeExportDir = Path.GetDirectoryName(includeExportPath);
 
-						if (!Directory.Exists(includeExportDir))
-							Directory.CreateDirectory(includeExportDir);
+						// Export header
+						{
+							ExportFile includeExport = new ExportFile();
+							string includeExportDir = Path.GetDirectoryName(includeExportPath);
 
-						includeExport.IsInclude = true;
-						includeExport.IsNewFile = !File.Exists(includeExportPath);
-						includeExport.Path = includeExportPath;
+							if (!Directory.Exists(includeExportDir))
+								Directory.CreateDirectory(includeExportDir);
 
-						File.WriteAllText(includeExportPath, includeContent);
-						exports.Add(includeExport);
-					}
+							includeExport.IsInclude = true;
+							includeExport.IsNewFile = !File.Exists(includeExportPath);
+							includeExport.Path = includeExportPath;
 
-					// Export source
-					{
-						ExportFile sourceExport = new ExportFile();
-						string sourceExportPath = Path.Combine(exportDirectory, Path.GetFileNameWithoutExtension(sourcePath) + m_ExportExtension + ".cpp");
-						string sourceExportDir = Path.GetDirectoryName(sourceExportPath);
+							File.WriteAllText(includeExportPath, includeContent);
+							exports.Add(includeExport);
+						}
 
-						if (!Directory.Exists(sourceExportDir))
-							Directory.CreateDirectory(sourceExportDir);
+						// Export source
+						{
+							ExportFile sourceExport = new ExportFile();
+							string sourceExportDir = Path.GetDirectoryName(sourceExportPath);
 
-						sourceExport.IsInclude = false;
-						sourceExport.IsNewFile = !File.Exists(sourceExportPath);
-						sourceExport.Path = sourceExportPath;
+							if (!Directory.Exists(sourceExportDir))
+								Directory.CreateDirectory(sourceExportDir);
 
-						File.WriteAllText(sourceExportPath, sourceContent);
-						exports.Add(sourceExport);
+							sourceExport.IsInclude = false;
+							sourceExport.IsNewFile = !File.Exists(sourceExportPath);
+							sourceExport.Path = sourceExportPath;
+
+							File.WriteAllText(sourceExportPath, sourceContent);
+							exports.Add(sourceExport);
+						}
 					}
 				}
-
-				return exports;
 			}
+			return exports;
 		}
 	}
 }
