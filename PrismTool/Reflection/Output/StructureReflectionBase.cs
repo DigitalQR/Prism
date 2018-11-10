@@ -34,7 +34,7 @@ namespace Prism.Reflection
 		{
 			if (sigInfo.SignatureType != SignatureInfo.SigType.StructureImplementationBegin)
 			{
-				throw new ReflectionException(sigInfo, "Cannot retrieve structure reflection from this signature");
+				throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, sigInfo, "Cannot retrieve structure reflection from this signature");
 			}
 
 			var data = (StructureSignature.ImplementationBeginData)sigInfo.AdditionalParam;
@@ -48,7 +48,7 @@ namespace Prism.Reflection
 				return new EnumStructureReflection(data, tokenNamespace, conditionState, tokenBodyLine, tokenParams, docString);
 			}
 
-			throw new ReflectionException(sigInfo, "No reflection structure for this current signature");
+			throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, sigInfo, "No reflection structure for this current signature");
 		}
 		
 		/// <summary>

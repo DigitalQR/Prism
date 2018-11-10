@@ -86,14 +86,14 @@ namespace Prism.Reflection
 
 				while (reader.TryReadNext(out currentSignature))
 				{
+					bool macroTokenClaimed = false;
+
 					/*
 						Unknown, 
 						InvalidParseFormat,
 						
 						UsingNamespace,
 						
-						MacroCall,
-
 						StructureForwardDeclare,
 						
 						FriendDeclare,
@@ -113,7 +113,7 @@ namespace Prism.Reflection
 						// Handle errors in parsing
 						case SignatureInfo.SigType.InvalidParseFormat:
 							{
-								throw new ReflectionException(currentSignature, "Prism parser found something unexpected");
+								throw new ReflectionException(ReflectionErrorCode.ParseError, currentSignature, "Prism parser found something unexpected");
 							}
 
 						// Keep track of current namespace
@@ -198,7 +198,7 @@ namespace Prism.Reflection
 								}
 
 								if(errorMessage != null)
-									throw new ReflectionException(currentSignature, errorMessage);
+									throw new ReflectionException(ReflectionErrorCode.TokenMissuse, currentSignature, errorMessage);
 
 
 								reuseDocString = true;
@@ -230,11 +230,13 @@ namespace Prism.Reflection
 
 									if (data.MacroName == settings.VariableToken)
 									{
+										macroTokenClaimed = true;
+
 										if (currentStructure != null)
 											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
 										else
 										{
-											throw new ReflectionException(currentSignature, "Found unexpected '" + settings.VariableToken + "' (Prism does not currently support reflecting outside of a type structure)");
+											throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.VariableToken + "' (Prism does not currently support reflecting outside of a type structure)");
 										}
 										break;
 									}
@@ -258,11 +260,13 @@ namespace Prism.Reflection
 
 									if (data.MacroName == settings.FunctionToken)
 									{
+										macroTokenClaimed = true;
+
 										if (currentStructure != null)
 											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
 										else
 										{
-											throw new ReflectionException(currentSignature, "Found unexpected '" + settings.FunctionToken + "' (Prism does not currently support reflecting outside of a type structure)");
+											throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.FunctionToken + "' (Prism does not currently support reflecting outside of a type structure)");
 										}
 										break;
 									}
@@ -286,6 +290,24 @@ namespace Prism.Reflection
 								break;
 							}
 
+					}
+					
+					// Check for miss-use of macro tokens
+					if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
+					{
+						if (!macroTokenClaimed)
+						{
+							var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
+
+							if (data.MacroName == settings.FunctionToken)
+							{
+								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting function definition to follow)");
+							}
+							else if (data.MacroName == settings.VariableToken)
+							{
+								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting variable definition to follow)");
+							}
+						}
 					}
 
 					// Should keep same doc-string between statements
@@ -318,7 +340,7 @@ namespace Prism.Reflection
 				}
 				else
 				{
-					throw new ReflectionException(currentSignature, "Found unexpected '" + token + "' (Must be first line of " + structure + " body)");
+					throw new ReflectionException(ReflectionErrorCode.TokenMissuse, currentSignature, "Found unexpected '" + token + "' (Must be first line of " + structure + " body)");
 				}
 			}
 
