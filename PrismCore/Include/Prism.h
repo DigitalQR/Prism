@@ -9,5 +9,6 @@
 
 #include "Prism\Type.h"
 #include "Prism\Class.h"
+#include "Prism\Enum.h"
 #include "Prism\Method.h"
 #include "Prism\Property.h"

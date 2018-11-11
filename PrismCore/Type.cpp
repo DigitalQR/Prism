@@ -19,12 +19,4 @@ namespace Prism
 	{ 
 		return m_Namespace.empty() ? m_Name : m_Namespace + String(PRISM_STR(".")) + m_Name; 
 	}
-
-	const Class* Type::AsClass() const 
-	{
-		if (m_IsClass)
-			return (const Class*)this;
-		else
-			return nullptr;
-	}
 }

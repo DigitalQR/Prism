@@ -41,6 +41,7 @@
     <ClInclude Include="Include\Prism\Class.h" />
     <ClInclude Include="Include\Prism\CommonTypes.h" />
     <ClInclude Include="Include\Prism\Definitions.h" />
+    <ClInclude Include="Include\Prism\Enum.h" />
     <ClInclude Include="Include\Prism\Holder.h" />
     <ClInclude Include="Include\Prism\Method.h" />
     <ClInclude Include="Include\Prism\Type.h" />
@@ -52,6 +53,7 @@
     <ClCompile Include="Assembly.cpp" />
     <ClCompile Include="Class.cpp" />
     <ClCompile Include="CommonTypes.cpp" />
+    <ClCompile Include="Enum.cpp" />
     <ClCompile Include="Holder.cpp" />
     <ClCompile Include="Method.cpp" />
     <ClCompile Include="Type.cpp" />
