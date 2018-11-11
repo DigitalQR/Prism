@@ -36,13 +36,13 @@ namespace Prism
 		/// Get the prism type info for the parent of this property
 		/// @returns The Prism::TypeInfo, if found or nullptr
 		///
-		virtual const TypeInfo* GetParentInfo() const = 0;
+		virtual TypeInfo GetParentInfo() const = 0;
 
 		///
 		/// Get the prism type info for this property
 		/// @returns The Prism::TypeInfo, if found or nullptr
 		///
-		virtual const TypeInfo* GetTypeInfo() const = 0;
+		virtual TypeInfo GetTypeInfo() const = 0;
 
 		///
 		/// Attempt to set this property's value for the target

@@ -3,12 +3,6 @@
 
 namespace Prism 
 {
-	TypeInfo::TypeInfo(Type* type) 
-		: m_Type(type)
-	{
-		
-	}
-
 	Assembly::Assembly() 
 	{
 	}
@@ -19,34 +13,45 @@ namespace Prism
 		return assembly;
 	}
 
-	const TypeInfo* Assembly::FindType(const String& internalName) const 
-	{
-		auto it = m_TypeMap.find(internalName);
-		if (it == m_TypeMap.end())
-			return nullptr;
-		else
-			return it->second;
-	}
-	
-	const TypeInfo* Assembly::FindTypeById(long id) const 
+	TypeInfo Assembly::FindTypeFromTypeName(const String& name) const
 	{
 		for (const auto& it : m_TypeMap)
 		{
-			if (it.second->Get()->GetUniqueId() == id)
+			if (it.second->m_Type->GetTypeName() == name)
 				return it.second;
 		}
 
 		return nullptr;
 	}
 
-	const TypeInfo* Assembly::RegisterType(Type* type)
+	TypeInfo Assembly::FindTypeFromAssemblyTypeName(const String& name) const
 	{
-		String name = type->GetInternalName();
+		auto it = m_TypeMap.find(name);
+		if (it == m_TypeMap.end())
+			return nullptr;
+		else
+			return it->second;
+	}
+	
+	TypeInfo Assembly::FindTypeById(long id) const
+	{
+		for (const auto& it : m_TypeMap)
+		{
+			if (it.second->m_Type->GetUniqueId() == id)
+				return it.second;
+		}
+
+		return nullptr;
+	}
+
+	TypeInfo Assembly::RegisterType(Type* type)
+	{
+		String name = type->GetAssemblyTypeName();
 		auto it = m_TypeMap.find(name);
 
 		if (it == m_TypeMap.end())
 		{
-			TypeInfo* info = new TypeInfo(type);
+			TypePointer* info = new TypePointer(type);
 			m_TypeMap[name] = info;
 			return info;
 		}

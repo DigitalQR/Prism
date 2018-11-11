@@ -10,7 +10,7 @@
 namespace Prism 
 {
 	template<typename T>
-	ManagedInstance<T>::ManagedInstance(const T* source, const TypeInfo* type)
+	ManagedInstance<T>::ManagedInstance(const T* source, const TypeInfo& type)
 		: m_Data(new T(*source))
 		, m_Type(type)
 	{

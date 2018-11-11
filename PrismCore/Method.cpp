@@ -13,7 +13,7 @@ namespace Prism
 	
 	bool Method::AreValidParams(Prism::Holder target, const std::vector<Prism::Holder>& params) const 
 	{
-		if (!m_IsStatic && !target.GetTypeInfo() || target.GetTypeInfo() != GetParentInfo())
+		if ((!m_IsStatic && !target.GetTypeInfo().IsValid()) || target.GetTypeInfo() != GetParentInfo())
 			return false;
 
 		if (params.size() != GetParamCount())
@@ -23,7 +23,7 @@ namespace Prism
 		{
 			const Prism::ParamInfo* param = GetParamInfo(i);
 
-			const bool diffType = param->TypeInfo != params[i].GetTypeInfo();
+			const bool diffType = param->Type != params[i].GetTypeInfo();
 			const bool diffPtr = param->IsPointer != params[i].IsPointer();
 
 			if (diffType || diffPtr)

@@ -6,18 +6,17 @@
 ///
 #pragma once
 #include "Definitions.h"
+#include "TypeInfo.h"
 #include "Holder.h"
 
 #include <vector>
 
 namespace Prism
 {
-	class TypeInfo;
-
 	struct PRISMCORE_API ParamInfo
 	{
 		String Name;
-		const TypeInfo* TypeInfo;
+		TypeInfo Type;
 		bool IsPointer : 1;
 		bool IsConst : 1;
 	};
@@ -47,7 +46,7 @@ namespace Prism
 		/// Get the prism type info for the parent of this property
 		/// @returns The Prism::TypeInfo, if found or nullptr
 		///
-		virtual const TypeInfo* GetParentInfo() const = 0;
+		virtual TypeInfo GetParentInfo() const = 0;
 
 		///
 		/// Get the return type info for this method

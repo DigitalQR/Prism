@@ -10,7 +10,7 @@ namespace Prism
 	{
 	}
 
-	UnmanagedInstance::UnmanagedInstance(const void* source, size_t size, const TypeInfo* type)
+	UnmanagedInstance::UnmanagedInstance(const void* source, size_t size, const TypeInfo& type)
 		: m_Size(size)
 		, m_Type(type)
 	{
@@ -40,6 +40,11 @@ namespace Prism
 		return m_Data->GetData() == other.m_Data->GetData();
 	}
 
+	bool Holder::operator!=(const Holder& other) const
+	{
+		return m_Data->GetData() == other.m_Data->GetData();
+	}
+
 	void* Holder::GetData()
 	{
 		return m_Data->GetData();
@@ -50,7 +55,7 @@ namespace Prism
 		return m_Data->GetData();
 	}
 
-	const TypeInfo* Holder::GetTypeInfo() const 
+	TypeInfo Holder::GetTypeInfo() const 
 	{
 		return m_Data->GetTypeInfo();
 	}

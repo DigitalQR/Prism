@@ -36,7 +36,7 @@ namespace Prism
 		/// Retrieve the Prism::Type of the object that is currently being held
 		/// @returns Will return valid type if it exists, otherwise will return nullptr
 		///
-		virtual const TypeInfo* GetTypeInfo() const = 0;
+		virtual TypeInfo GetTypeInfo() const = 0;
 	};
 
 	///
@@ -47,17 +47,17 @@ namespace Prism
 	private:
 		void* m_Data;
 		const size_t m_Size;
-		const TypeInfo* m_Type;
+		TypeInfo m_Type;
 
 	public:
-		UnmanagedInstance(const void* source, size_t size, const TypeInfo* type);
+		UnmanagedInstance(const void* source, size_t size, const TypeInfo& type);
 		virtual ~UnmanagedInstance();
 
 		virtual void* GetData() { return m_Data; }
 		virtual const void* GetData() const { return m_Data; }
 
 		size_t GetSize() const { return m_Size; }
-		const TypeInfo* GetTypeInfo() const { return m_Type; }
+		TypeInfo GetTypeInfo() const { return m_Type; }
 	};
 
 	///
@@ -68,17 +68,17 @@ namespace Prism
 	{
 	private:
 		T* m_Data;
-		const TypeInfo* m_Type;
+		TypeInfo m_Type;
 
 	public:
-		ManagedInstance(const T* source, const TypeInfo* type);
+		ManagedInstance(const T* source, const TypeInfo& type);
 		virtual ~ManagedInstance();
 
 		virtual void* GetData() { return m_Data; }
 		virtual const void* GetData() const { return m_Data; }
 
 		size_t GetSize() const { return sizeof(T); }
-		const TypeInfo* GetTypeInfo() const { return m_Type; }
+		TypeInfo GetTypeInfo() const { return m_Type; }
 	};
 
 	///
@@ -109,6 +109,23 @@ namespace Prism
 		/// Is internal data the same
 		///
 		bool operator==(const Holder& other) const;
+
+		///
+		/// Is internal data the same
+		///
+		bool operator!=(const Holder& other) const;
+
+
+		///
+		/// Is this holder currently the only one refering to this data
+		///
+		inline bool IsUnique() const { return m_Data.unique(); }
+
+		///
+		/// How many objects are currently refering to the date this holder holds
+		///
+		inline long GetRefCount() const { return m_Data.use_count(); }
+
 
 		///
 		/// Is the data internal held being treated as a pointer
@@ -153,7 +170,7 @@ namespace Prism
 		/// Retrieve the Prism::Type of the object that is currently being held
 		/// @returns Will return valid type if it exists, otherwise will return nullptr
 		///
-		const TypeInfo* GetTypeInfo() const;
+		TypeInfo GetTypeInfo() const;
 	};
 }
 

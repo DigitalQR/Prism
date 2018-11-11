@@ -46,6 +46,7 @@
     <ClInclude Include="Include\Prism\Type.h" />
     <ClInclude Include="Include\Prism\Property.h" />
     <ClInclude Include="Include\Prism\TypeId.h" />
+    <ClInclude Include="Include\Prism\TypeInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembly.cpp" />
@@ -56,6 +57,7 @@
     <ClCompile Include="Type.cpp" />
     <ClCompile Include="Property.cpp" />
     <ClCompile Include="TypeId.cpp" />
+    <ClCompile Include="TypeInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\Prism\Assembly.inl" />
