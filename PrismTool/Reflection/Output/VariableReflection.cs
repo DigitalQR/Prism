@@ -42,8 +42,8 @@ class VariableInfo_%VARIABLE_NAME% : public Prism::Property
 public:
 	VariableInfo_%VARIABLE_NAME%();
 
-	virtual const Prism::TypeInfo* GetParentInfo() const override;
-	virtual const Prism::TypeInfo* GetTypeInfo() const override;
+	virtual Prism::TypeInfo GetParentInfo() const override;
+	virtual Prism::TypeInfo GetTypeInfo() const override;
 
 	virtual void Set(Prism::Holder, Prism::Holder) const override;
 	virtual Prism::Holder Get(Prism::Holder) const override;
@@ -73,12 +73,12 @@ public:
 {
 }
 
-const Prism::TypeInfo* %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::GetParentInfo() const
+Prism::TypeInfo %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::GetParentInfo() const
 {
 	return Prism::Assembly::Get().FindTypeOf<%PARENT_STRUCTURE%>();
 }
 
-const Prism::TypeInfo* %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::GetTypeInfo() const
+Prism::TypeInfo %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::GetTypeInfo() const
 {
 	return Prism::Assembly::Get().FindTypeOf<%VARIABLE_TYPE%>();
 }

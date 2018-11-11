@@ -26,7 +26,11 @@ namespace Prism.Reflection
 		{
 			get
 			{
-				return string.Join(" && ", m_StateTree);
+				string condition = string.Join(" && ", m_StateTree);
+				if (condition == "")
+					return "1";
+				else
+					return condition;
 			}
 		}
 

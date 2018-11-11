@@ -96,11 +96,15 @@ namespace Prism.Reflection
 			string content = "";
 
 			// Setup Prism Class (Stored in body, so dupe name doesn't matter)
-			content += @"private:
+			content += @"
+public:
+	virtual Prism::TypeInfo GetTypeInfo() const;
+
+private:
 class ClassInfo : public Prism::Class
 {
 private:
-	static ClassInfo g_AssemblyInstance;
+	static ClassInfo s_AssemblyInstance;
 	ClassInfo();
 };
 ";
@@ -164,7 +168,9 @@ private:
 )
 {}
 
-%CLASS_NAME%::ClassInfo %CLASS_NAME%::ClassInfo::g_AssemblyInstance;
+Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get().FindTypeOf<%CLASS_NAME%>(); }
+
+%CLASS_NAME%::ClassInfo %CLASS_NAME%::ClassInfo::s_AssemblyInstance;
 ";
 
 			// Add method header reflection
@@ -200,7 +206,7 @@ private:
 			
 			return content
 				.Replace("%CLASS_NAME%", DeclerationName)
-				.Replace("%NAMESPACE_STR%", TokenNamespaceFormatted)
+				.Replace("%NAMESPACE_STR%", TokenNamespaceFormatted.Replace("::", "."))
 				.Replace("%METHOD_INSTANCES%", methodInstances)
 				.Replace("%PROPERTY_INSTANCES%", propertyInstances)
 				.Replace("%DOC_STRING%", SafeDocString);

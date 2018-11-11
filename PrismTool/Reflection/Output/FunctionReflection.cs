@@ -42,8 +42,8 @@ class MethodInfo_%FUNCTION_NAME% : public Prism::Method
 public:
 	MethodInfo_%FUNCTION_NAME%();
 
-	virtual const Prism::TypeInfo* GetParentInfo() const override;
-	virtual const Prism::ParamInfo* GetReturnInfo() const override;
+	virtual Prism::TypeInfo GetParentInfo() const override;
+	virtual Prism::TypeInfo GetReturnInfo() const override;
 	virtual const Prism::ParamInfo* GetParamInfo(size_t index) const override;
 	virtual size_t GetParamCount() const override;
 
@@ -71,22 +71,16 @@ public:
 	: Prism::Method(PRISM_STR(""%FUNCTION_INTERNAL_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""), %IS_STATIC%, %IS_CONST%, %IS_VIRTUAL%)
 {}
 
-const Prism::ParamInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetReturnInfo() const
+Prism::TypeInfo %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetReturnInfo() const
 {
 #if %HAS_RETURN%
-	static Prism::ParamInfo info = {
-		PRISM_STR(""ReturnValue""),
-		Prism::Assembly::Get().FindTypeOf<%RETURN_TYPE%>(),
-		%RETURN_TYPE_PTR%,
-		%RETURN_TYPE_CONST%
-	};
-	return &info;
+	return Prism::Assembly::Get().FindTypeOf<%RETURN_TYPE%>();
 #else
 	return nullptr;
 #endif
 }
 
-const Prism::TypeInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetParentInfo() const
+Prism::TypeInfo %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetParentInfo() const
 {
 	return Prism::Assembly::Get().FindTypeOf<%PARENT_STRUCTURE%>();
 }

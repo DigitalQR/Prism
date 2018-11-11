@@ -22,6 +22,16 @@ namespace Prism.Reflection
 		}
 
 		/// <summary>
+		/// The name that this enum was setup with
+		/// </summary>
+		private string m_EnumName;
+
+		/// <summary>
+		/// The internal type used to store this enum (If declared)
+		/// </summary>
+		private string m_EnumType;
+
+		/// <summary>
 		/// The values belonging to this enum
 		/// </summary>
 		private List<Value> m_Values;
@@ -29,6 +39,8 @@ namespace Prism.Reflection
 		public EnumStructureReflection(StructureSignature.ImplementationBeginData data, string[] tokenNamespace, ConditionState conditionState, int bodyLine, string tokenParams, string docString)
 			: base(data.DeclareName, tokenNamespace, conditionState, bodyLine, tokenParams, docString)
 		{
+			m_EnumName = data.DeclareName;
+			m_EnumType = string.Join(" ", data.ParentStructures.Select(v => v.DeclareName));
 			m_Values = new List<Value>();
 		}
 
@@ -60,17 +72,81 @@ namespace Prism.Reflection
 
 		public override string GenerateHeaderReflectionContent()
 		{
-			throw new NotImplementedException();
+			return "";
 		}
 
 		public override string GenerateIncludeReflectionContent()
 		{
-			throw new NotImplementedException();
+			string content = "";
+
+			// Enter into the existing namespace
+			foreach (string space in TokenNamespace)
+				content += "namespace " + space + " {\n";
+
+			content += @"
+enum class %ENUM_FORWARD_DECLARE%;
+
+namespace Private { namespace Generated {
+class EnumInfo_%ENUM_NAME% : public Prism::Enum
+{
+private:
+	static EnumInfo_%ENUM_NAME% s_AssemblyInstance;
+	EnumInfo_%ENUM_NAME%();
+};
+}}
+";
+			// Exit into the existing namespace
+			foreach (string space in TokenNamespace)
+				content += "}\n";
+
+			string forwardDeclare = m_EnumName;
+			if (m_EnumType != "")
+				forwardDeclare += " : " + m_EnumType;
+
+			return content
+				.Replace("%ENUM_NAME%", m_EnumName)
+				.Replace("%ENUM_FORWARD_DECLARE%", forwardDeclare);
 		}
 
 		public override string GenerateSourceReflectionContent()
 		{
-			throw new NotImplementedException();
+			string content = "";
+
+			// Enter into the existing namespace
+			foreach (string space in TokenNamespace)
+				content += "namespace " + space + " {\n";
+
+			content += @"
+namespace Private { namespace Generated {
+EnumInfo_%ENUM_NAME%::EnumInfo_%ENUM_NAME%()
+	: Prism::Enum(
+		Prism::TypeId::Get<%ENUM_NAME%>(), 
+		PRISM_STR(""%NAMESPACE_STR%""), PRISM_STR(""%ENUM_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
+		sizeof(%ENUM_NAME%),
+		{ %ENUM_VALUES% }
+	)
+{}
+
+EnumInfo_%ENUM_NAME% EnumInfo_%ENUM_NAME%::s_AssemblyInstance;
+}}
+";
+			string enumValues = "";
+			foreach (var value in m_Values)
+			{
+				enumValues += "\n#if " + value.PreProcessorCondition + "\n";
+				enumValues += "Prism::Enum::Value(PRISM_STR(\"" + value.Name + "\"), (size_t)" + m_EnumName + "::" + value.Name + "),\n";
+				enumValues += "#endif\n";
+			}
+
+			// Exit into the existing namespace
+			foreach (string space in TokenNamespace)
+				content += "}\n";
+
+			return content
+				.Replace("%ENUM_NAME%", m_EnumName)
+				.Replace("%ENUM_VALUES%", enumValues)
+				.Replace("%NAMESPACE_STR%", TokenNamespaceFormatted.Replace("::", "."))
+				.Replace("%DOC_STRING%", SafeDocString);
 		}
 	}
 }
