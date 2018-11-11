@@ -14,10 +14,14 @@
 namespace Prism
 {
 #ifdef _PRISM_SSTRING
+	typedef char Char;
 	typedef std::string String;
+	#define PRISM_STR_WIDE 0
 	#define PRISM_STR(s) s
 #else
+	typedef wchar_t Char;
 	typedef std::wstring String;
+	#define PRISM_STR_WIDE 1
 	#define PRISM_STR(s) L##s
 #endif
 }

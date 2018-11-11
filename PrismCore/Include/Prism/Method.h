@@ -52,7 +52,7 @@ namespace Prism
 		/// Get the return type info for this method
 		/// @returns The param info for the return type
 		///
-		virtual const ParamInfo* GetReturnInfo() const = 0;
+		virtual TypeInfo GetReturnInfo() const = 0;
 
 		///
 		/// Get the type info for a specific param

@@ -32,4 +32,40 @@ namespace Prism
 
 		return nullptr;
 	}
+
+	Prism::String Class::ToString(Prism::Holder inStorage) const 
+	{
+		const Method* toStringMethod = GetMethodByName(PRISM_STR("ToString"));
+		if (toStringMethod && !toStringMethod->IsStatic() && toStringMethod->GetParamCount() == 0)
+		{
+			// Check that the FromString is in format Prism::String ToString();
+			if (toStringMethod->GetReturnInfo() == Assembly::Get().FindTypeOf<Prism::String>())
+			{
+				return toStringMethod->Call(inStorage).GetAs<Prism::String>();
+			}
+		}
+
+		return PRISM_STR("");
+	}
+
+	bool Class::ParseFromString(const String& str, Prism::Holder outStorage) const 
+	{
+		const Method* fromStringMethod = GetMethodByName(PRISM_STR("FromString"));
+		if (fromStringMethod && fromStringMethod->IsStatic() && fromStringMethod->GetParamCount() == 2)
+		{
+			const auto& param1 = fromStringMethod->GetParamInfo(0);
+			const auto& param2 = fromStringMethod->GetParamInfo(1);
+
+			// Check that the FromString is in format bool FromString(Prism::String inString, <Type> outValue);
+			if (fromStringMethod->GetReturnInfo() == Assembly::Get().FindTypeOf<bool>()
+				&& (param1->Type == Assembly::Get().FindTypeOf<Prism::String>())
+				&& (param2->Type == m_AssociatedInfo)
+			   ) 
+			{
+				return fromStringMethod->Call(nullptr, { str, outStorage }).GetAs<bool>();
+			}
+		}
+
+		return false;
+	}
 }

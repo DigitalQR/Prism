@@ -58,5 +58,17 @@ namespace Prism
 
 	protected:
 		Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
+
+		///
+		/// Convert this given value into a string
+		/// (Holder will already be pre-checked to make sure it is valid, when this is called)
+		///
+		virtual Prism::String ToString(Prism::Holder inStorage) const override;
+
+		///
+		/// Attempt to parse a string into an instance of this type 
+		/// (Holder will already be pre-checked to make sure it is valid, when this is called)
+		///
+		virtual bool ParseFromString(const String& str, Prism::Holder outStorage) const override;
 	};
 }
