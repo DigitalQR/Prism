@@ -58,7 +58,6 @@
     <ClCompile Include="Method.cpp" />
     <ClCompile Include="Type.cpp" />
     <ClCompile Include="Property.cpp" />
-    <ClCompile Include="TypeId.cpp" />
     <ClCompile Include="TypeInfo.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,13 @@
 #include "Include\Prism\Assembly.h"
 #include "Include\Prism\Type.h"
+#include "Include\Prism\CommonTypes.h"
 
 namespace Prism 
 {
 	Assembly::Assembly() 
 	{
+		// Forcefully re-register the null type info (Store lib being built with missing symbols)
+		this->RegisterType(&Common::TypeInfo_nullptr::s_AssemblyInstance);
 	}
 
 	Assembly& Assembly::Get() 
