@@ -1,4 +1,5 @@
-﻿using Prism.CodeParsing.Signatures;
+﻿using Prism.CodeParsing;
+using Prism.CodeParsing.Signatures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,12 @@ namespace Prism.Reflection
 		{
 			m_ParentStructure = parentStructure;
 			m_ReflectionInfo = variable;
+
+			if (variable.TypeInfo.PointerCount > 1)
+			{
+				SignatureInfo dudInfo = new SignatureInfo(tokenLine, "", SignatureInfo.SigType.VariableDeclare);
+				throw new ReflectionException(ReflectionErrorCode.TokenUnsupportedUsage, dudInfo, "Prism currently only supported single pointer types");
+			}
 		}
 
 		public VariableInfo ReflectionInfo
@@ -87,10 +94,19 @@ void %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::Set(Prism::Holder target,
 {
 #if !(%IS_CONST%)
 #if %IS_STATIC%
+#if %IS_POINTER%
+	%PARENT_STRUCTURE%::%VARIABLE_NAME% = value.GetPtrAs<%VARIABLE_TYPE%>();
+#else
 	%PARENT_STRUCTURE%::%VARIABLE_NAME% = value.GetAs<%VARIABLE_TYPE%>();
+#endif
+#else
+#if %IS_POINTER%
+	%PARENT_STRUCTURE%* obj = target.GetPtrAs<%PARENT_STRUCTURE%>();
+	obj->%VARIABLE_NAME% = value.GetPtrAs<%VARIABLE_TYPE%>();
 #else
 	%PARENT_STRUCTURE%* obj = target.GetPtrAs<%PARENT_STRUCTURE%>();
 	obj->%VARIABLE_NAME% = value.GetAs<%VARIABLE_TYPE%>();
+#endif
 #endif
 #endif
 }

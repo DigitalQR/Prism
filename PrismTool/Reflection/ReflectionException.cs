@@ -13,6 +13,7 @@ namespace Prism.Reflection
 
 		TokenError					= 200,
 		TokenMissuse				= 201,
+		TokenUnsupportedUsage		= 202,
 
 		ParseError					= 300,
 		ParseFormatError			= 301,

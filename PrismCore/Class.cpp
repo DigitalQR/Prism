@@ -39,7 +39,7 @@ namespace Prism
 		if (toStringMethod && !toStringMethod->IsStatic() && toStringMethod->GetParamCount() == 0)
 		{
 			// Check that the FromString is in format Prism::String ToString();
-			if (toStringMethod->GetReturnInfo() == Assembly::Get().FindTypeOf<Prism::String>())
+			if (toStringMethod->GetReturnInfo()->Type == Assembly::Get().FindTypeOf<Prism::String>())
 			{
 				return toStringMethod->Call(inStorage).GetAs<Prism::String>();
 			}
@@ -57,7 +57,7 @@ namespace Prism
 			const auto& param2 = fromStringMethod->GetParamInfo(1);
 
 			// Check that the FromString is in format bool FromString(Prism::String inString, <Type> outValue);
-			if (fromStringMethod->GetReturnInfo() == Assembly::Get().FindTypeOf<bool>()
+			if (fromStringMethod->GetReturnInfo()->Type == Assembly::Get().FindTypeOf<bool>()
 				&& (param1->Type == Assembly::Get().FindTypeOf<Prism::String>())
 				&& (param2->Type == m_AssociatedInfo)
 			   ) 

@@ -1,4 +1,5 @@
-﻿using Prism.CodeParsing.Signatures;
+﻿using Prism.CodeParsing;
+using Prism.CodeParsing.Signatures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,25 @@ namespace Prism.Reflection
 		{
 			m_ParentStructure = parentStructure;
 			m_ReflectionInfo = function;
+
+			if (function.ReturnType != null && function.ReturnType.PointerCount > 1)
+			{
+				SignatureInfo dudInfo = new SignatureInfo(tokenLine, "", SignatureInfo.SigType.FunctionDeclare);
+				throw new ReflectionException(ReflectionErrorCode.TokenUnsupportedUsage, dudInfo, "Prism currently only supported single pointer types (Check return type)");
+			}
+			if (function.ParamCount != 0)
+			{
+				int i = 0;
+				foreach (var paramType in function.ParamTypes)
+				{
+					if (paramType.TypeInfo.PointerCount > 1)
+					{
+						SignatureInfo dudInfo = new SignatureInfo(tokenLine, "", SignatureInfo.SigType.FunctionDeclare);
+						throw new ReflectionException(ReflectionErrorCode.TokenUnsupportedUsage, dudInfo, "Prism currently only supported single pointer types (Check argument " + (i + 1) + ")");
+					}
+					++i;
+				}
+			}
 		}
 
 		public FunctionInfo ReflectionInfo
@@ -43,7 +63,7 @@ public:
 	MethodInfo_%FUNCTION_NAME%();
 
 	virtual Prism::TypeInfo GetParentInfo() const override;
-	virtual Prism::TypeInfo GetReturnInfo() const override;
+	virtual const Prism::ParamInfo* GetReturnInfo() const override;
 	virtual const Prism::ParamInfo* GetParamInfo(size_t index) const override;
 	virtual size_t GetParamCount() const override;
 
@@ -71,10 +91,16 @@ public:
 	: Prism::Method(PRISM_STR(""%FUNCTION_INTERNAL_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""), %IS_STATIC%, %IS_CONST%, %IS_VIRTUAL%)
 {}
 
-Prism::TypeInfo %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetReturnInfo() const
+const Prism::ParamInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetReturnInfo() const
 {
 #if %HAS_RETURN%
-	return Prism::Assembly::Get().FindTypeOf<%RETURN_TYPE%>();
+	static Prism::ParamInfo info = {
+		PRISM_STR(""ReturnValue""),
+		Prism::Assembly::Get().FindTypeOf<%RETURN_TYPE%>(),
+		%RETURN_TYPE_PTR%,
+		%RETURN_TYPE_CONST%
+	};
+	return &info;
 #else
 	return nullptr;
 #endif
