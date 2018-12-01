@@ -71,6 +71,7 @@ namespace Prism.CodeParsing
 					// Try to figure out what is currently being read
 					parseResult = CommentBlockSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| PreProcessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| ConstructorSignature.TryParse(ref m_BraceBlockDepth, m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| TypeDefSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| TemplateSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)

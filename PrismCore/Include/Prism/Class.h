@@ -18,10 +18,27 @@ namespace Prism
 	class PRISMCORE_API Class : public Type
 	{
 	private:
+		const std::vector<const Method*> m_Constructors;
 		const std::vector<const Method*> m_Methods;
 		const std::vector<const Property*> m_Properties;
 
+		const bool m_IsAbstract : 1;
+
 	public:
+		///
+		/// Construct a new object of this type
+		/// @param params		The params that should be used in the constructor for this type
+		/// @returns The newly constructed object or an empty holder if a valid constructor couldn't be found
+		///
+		virtual Prism::Holder CreateNew(const std::vector<Prism::Holder>& params = {}) const override;
+
+		///
+		/// Check if these params are valid for calling this particular class
+		/// @param params		The params which the constructor should be called using
+		///
+		bool HasValidConstructor(const std::vector<Prism::Holder>& params = {});
+
+
 		///
 		/// Attempt to retrieve a function by it's name
 		/// @param name			The name of the function to look for
@@ -57,7 +74,7 @@ namespace Prism
 		inline size_t GetPropertyCount() const { return m_Properties.size(); }
 
 	protected:
-		Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
+		Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
 
 		///
 		/// Convert this given value into a string

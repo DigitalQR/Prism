@@ -4,11 +4,41 @@
 
 namespace Prism 
 {
-	Class::Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties)
+	Class::Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties)
 		: Type(uniqueId, space, name, documentation, size, true, false)
+		, m_IsAbstract(isAbstract)
+		, m_Constructors(constructors)
 		, m_Methods(methods)
 		, m_Properties(properties)
 	{
+	}
+
+	Prism::Holder Class::CreateNew(const std::vector<Prism::Holder>& params) const 
+	{
+		if (m_IsAbstract)
+			return nullptr;
+
+		for (const Method* constructor : m_Constructors)
+		{
+			if (constructor->AreValidParams(nullptr, params))
+				return constructor->Call(nullptr, params);
+		}
+
+		return nullptr;
+	}
+
+	bool Class::HasValidConstructor(const std::vector<Prism::Holder>& params) 
+	{
+		if (m_IsAbstract)
+			return false;
+
+		for (const Method* constructor : m_Constructors)
+		{
+			if (constructor->AreValidParams(nullptr, params))
+				return true;
+		}
+
+		return false;
 	}
 
 	const Method* Class::GetMethodByName(const String& name) const 

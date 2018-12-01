@@ -138,7 +138,7 @@ namespace Prism.Reflection
 						// Handle errors in parsing
 						case SignatureInfo.SigType.InvalidParseFormat:
 							{
-								throw new ReflectionException(ReflectionErrorCode.ParseError, currentSignature, "Prism parser found something unexpected");
+								throw new ReflectionException(ReflectionErrorCode.ParseError, currentSignature, "Prism parser found something unexpected (InvalidParseFormat)");
 							}
 
 						// Keep track of current namespace
@@ -333,6 +333,22 @@ namespace Prism.Reflection
 								if (currentStructure != null)
 									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)currentSignature.LineNumber, "", recentDocString);
 
+								break;
+							}
+
+						// Add any constructor to current structure
+						case SignatureInfo.SigType.StructureConstructor:
+							{
+								if (currentStructure != null)
+									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)currentSignature.LineNumber, "", recentDocString);
+								break;
+							}
+
+						// Add any destructor to current structure
+						case SignatureInfo.SigType.StructureDestructor:
+							{
+								if (currentStructure != null)
+									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, (int)currentSignature.LineNumber, "", recentDocString);
 								break;
 							}
 

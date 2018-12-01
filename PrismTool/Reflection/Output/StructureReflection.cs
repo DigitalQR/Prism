@@ -89,6 +89,12 @@ namespace Prism.Reflection
 				VariableReflection refl = new VariableReflection(this, data, conditionState, tokenLine, tokenParams, docString);
 				m_Variables.Add(refl);
 			}
+			else if (sigInfo.SignatureType == SignatureInfo.SigType.StructureConstructor)
+			{
+				var data = (ConstructorInfo)sigInfo.AdditionalParam;
+				FunctionReflection refl = new FunctionReflection(this, data, conditionState, tokenLine, tokenParams, docString);
+				m_Functions.Add(refl);
+			}
 		}
 
 		public override string GenerateHeaderReflectionContent()
@@ -163,6 +169,8 @@ private:
 		Prism::TypeId::Get<%CLASS_NAME%>(), 
 		PRISM_STR(""%NAMESPACE_STR%""), PRISM_STR(""%CLASS_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
 		sizeof(%CLASS_NAME%),
+		std::is_abstract<%CLASS_NAME%>::value,
+		{ %CONSTRUCTOR_INSTANCES% },
 		{ %METHOD_INSTANCES% },
 		{ %PROPERTY_INSTANCES% }
 )
@@ -174,6 +182,7 @@ Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get(
 ";
 
 			// Add method header reflection
+			string constructorInstances = "";
 			string methodInstances = "";
 			foreach (var method in m_Functions)
 			{
@@ -181,9 +190,18 @@ Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get(
 				content += method.GenerateSourceReflectionContent();
 				content += "\n#endif\n";
 
-				methodInstances += "\n#if " + method.PreProcessorCondition + "\n";
-				methodInstances += "new MethodInfo_" + method.ReflectionInfo.SafeFunctionName + "(), ";
-				methodInstances += "\n#endif\n";
+				if (method.IsConstructor)
+				{
+					constructorInstances += "\n#if " + method.PreProcessorCondition + "\n";
+					constructorInstances += "new MethodInfo_" + method.ReflectionInfo.SafeFunctionName + "(), ";
+					constructorInstances += "\n#endif\n";
+				}
+				else
+				{
+					methodInstances += "\n#if " + method.PreProcessorCondition + "\n";
+					methodInstances += "new MethodInfo_" + method.ReflectionInfo.SafeFunctionName + "(), ";
+					methodInstances += "\n#endif\n";
+				}
 			}
 
 			// Add proprety header reflection
@@ -198,8 +216,7 @@ Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get(
 				propertyInstances += "new VariableInfo_" + property.ReflectionInfo.VariableName + "(), ";
 				propertyInstances += "\n#endif\n";
 			}
-
-
+			
 			// Exit into the existing namespace
 			foreach (string space in TokenNamespace)
 				content += "}\n";
@@ -207,6 +224,7 @@ Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get(
 			return content
 				.Replace("%CLASS_NAME%", DeclerationName)
 				.Replace("%NAMESPACE_STR%", TokenNamespaceFormatted.Replace("::", "."))
+				.Replace("%CONSTRUCTOR_INSTANCES%", constructorInstances)
 				.Replace("%METHOD_INSTANCES%", methodInstances)
 				.Replace("%PROPERTY_INSTANCES%", propertyInstances)
 				.Replace("%DOC_STRING%", SafeDocString);

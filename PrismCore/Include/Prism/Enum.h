@@ -29,6 +29,13 @@ namespace Prism
 
 	public:
 		///
+		/// Construct a new object of this type
+		/// @param params		The params that should be used in the constructor for this type
+		/// @returns The newly constructed object or an empty holder if a valid constructor couldn't be found
+		///
+		virtual Prism::Holder CreateNew(const std::vector<Prism::Holder>& params = {}) const override;
+
+		///
 		/// Get value at a specific index i.e. the order they appear in code, not the actual value itself
 		///
 		inline const Value& GetValueAtIndex(int i) const { return m_Values[i]; }

@@ -4,6 +4,12 @@
 TypeInfo_ ## StructName::TypeInfo_ ## StructName() \
 	: Prism::Type(Prism::TypeId::Get<TypeName>(), PRISM_STR(#Namespace), PRISM_STR(#StructName), PRISM_DEVSTR("Internally reflected type for '" #TypeName "'"), sizeof(TypeName), false, false) \
 {} \
+Prism::Holder TypeInfo_ ## StructName::CreateNew(const std::vector<Prism::Holder>& params) const \
+{ \
+	if(params.size() == 0) return new TypeName; \
+	else if(params.size() == 1 && params[0].GetTypeInfo() == m_AssociatedInfo) return new TypeName(params[0].GetAs<TypeName>()); \
+	else return nullptr; \
+} \
 TypeInfo_ ## StructName TypeInfo_ ## StructName::s_AssemblyInstance;
 
 namespace Prism
@@ -16,7 +22,13 @@ namespace Prism
 				PRISM_STR(""), PRISM_STR("null"), PRISM_DEVSTR("null type info"), 
 				0, false, false
 			) 
-		{} 
+		{}
+		
+		Prism::Holder TypeInfo_nullptr::CreateNew(const std::vector<Prism::Holder>& params) const
+		{ 
+			return nullptr; 
+		}
+
 		TypeInfo_nullptr TypeInfo_nullptr::s_AssemblyInstance;
 
 

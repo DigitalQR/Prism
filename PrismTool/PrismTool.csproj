@@ -83,6 +83,7 @@
     <Compile Include="CodeParsing\HeaderReader.cs" />
     <Compile Include="CodeParsing\Signatures\AccessorSignature.cs" />
     <Compile Include="CodeParsing\Signatures\CommentBlockSignature.cs" />
+    <Compile Include="CodeParsing\Signatures\ConstructorSignature.cs" />
     <Compile Include="CodeParsing\Signatures\EnumEntrySignature.cs" />
     <Compile Include="CodeParsing\Signatures\FriendSignature.cs" />
     <Compile Include="CodeParsing\Signatures\FunctionSignature.cs" />

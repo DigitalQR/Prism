@@ -20,6 +20,19 @@ namespace Prism.Reflection
 		/// </summary>
 		private FunctionInfo m_ReflectionInfo;
 
+		/// <summary>
+		/// Is this currrent function a constructor
+		/// </summary>
+		private bool m_IsConstructor = false;
+		
+		// Constructor reflection
+		public FunctionReflection(StructureReflection parentStructure, ConstructorInfo constructor, ConditionState conditionState, int tokenLine, string tokenParams, string docString)
+			: this(parentStructure, constructor.ToFunctionInfo(), conditionState, tokenLine, tokenParams, docString)
+		{
+			m_IsConstructor = true;
+		}
+
+		// Normal function reflection
 		public FunctionReflection(StructureReflection parentStructure, FunctionInfo function, ConditionState conditionState, int tokenLine, string tokenParams, string docString)
 			: base(conditionState, tokenLine, tokenParams, docString)
 		{
@@ -49,6 +62,11 @@ namespace Prism.Reflection
 		public FunctionInfo ReflectionInfo
 		{
 			get { return m_ReflectionInfo; }
+		}
+
+		public bool IsConstructor
+		{
+			get { return m_IsConstructor; }
 		}
 
 		public override string GenerateHeaderReflectionContent()
@@ -129,6 +147,9 @@ size_t %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetParamCount() const
 Prism::Holder %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::Call(Prism::Holder target, const std::vector<Prism::Holder>& params) const
 {
 	std::vector<Prism::Holder>& safeParams = *const_cast<std::vector<Prism::Holder>*>(&params);
+#if %IS_CONSTRUCTOR%
+	return new %PARENT_STRUCTURE%(%CALL_PARAMS%);
+#else
 #if %IS_STATIC%
 #if %HAS_RETURN%
 	return %PARENT_STRUCTURE%::%FUNCTION_INTERNAL_NAME%(%CALL_PARAMS%);
@@ -143,6 +164,7 @@ Prism::Holder %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::Call(Prism::Holder
 #else
 	obj->%FUNCTION_INTERNAL_NAME%(%CALL_PARAMS%);
 	return nullptr;
+#endif
 #endif
 #endif
 }
@@ -222,6 +244,7 @@ case %PARAM_INDEX%:
 				.Replace("%IS_VIRTUAL%", m_ReflectionInfo.IsVirtual ? "1" : "0")
 				.Replace("%IS_STATIC%", m_ReflectionInfo.IsStatic ? "1" : "0")
 				.Replace("%IS_CONST%", m_ReflectionInfo.IsConst ? "1" : "0")
+				.Replace("%IS_CONSTRUCTOR%", m_IsConstructor ? "1" : "0")
 				.Replace("%PARAM_COUNT%", "" + m_ReflectionInfo.ParamCount)
 				.Replace("%SELECT_PARAM%", paramSelect)
 				.Replace("%CALL_PARAMS%", callParams)

@@ -9,6 +9,8 @@
 #include "TypeInfo.h"
 #include "Holder.h"
 
+#include <vector>
+
 namespace Prism 
 {
 	class Class;
@@ -34,6 +36,13 @@ namespace Prism
 
 	public:
 		inline long GetUniqueId() const { return m_UniqueId; }
+
+		///
+		/// Construct a new object of this type
+		/// @param params		The params that should be used in the constructor for this type
+		/// @returns The newly constructed object or an empty holder if a valid constructor couldn't be found
+		///
+		virtual Prism::Holder CreateNew(const std::vector<Prism::Holder>& params = {}) const = 0;
 
 		///
 		/// The namespace this type was delcared in.

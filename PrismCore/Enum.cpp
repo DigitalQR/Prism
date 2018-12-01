@@ -20,6 +20,55 @@ namespace Prism
 	{
 	}
 
+	Prism::Holder Enum::CreateNew(const std::vector<Prism::Holder>& params) const 
+	{
+		switch (m_Size)
+		{
+		case 1:
+		{
+			if (params.size() == 0)
+				return new __int8;
+			else if (params.size() == 1 && params[0].GetTypeInfo() == m_AssociatedInfo)
+				return new __int8(params[0].GetAs<__int8>());
+			else
+				return nullptr;
+		}
+
+		case 2:
+		{
+			if (params.size() == 0)
+				return new __int16;
+			else if (params.size() == 1 && params[0].GetTypeInfo() == m_AssociatedInfo)
+				return new __int16(params[0].GetAs<__int16>());
+			else
+				return nullptr;
+		}
+
+		case 4:
+		{
+			if (params.size() == 0)
+				return new __int32;
+			else if (params.size() == 1 && params[0].GetTypeInfo() == m_AssociatedInfo)
+				return new __int32(params[0].GetAs<__int32>());
+			else
+				return nullptr;
+		}
+
+		case 8:
+		{
+			if (params.size() == 0)
+				return new __int64;
+			else if (params.size() == 1 && params[0].GetTypeInfo() == m_AssociatedInfo)
+				return new __int64(params[0].GetAs<__int64>());
+			else
+				return nullptr;
+		}
+
+		default:
+			return nullptr;
+		}
+	}
+
 	Prism::String Enum::ToString(Prism::Holder inStorage) const 
 	{
 		switch (m_Size)
