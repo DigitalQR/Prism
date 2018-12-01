@@ -84,8 +84,6 @@ namespace Prism.Reflection
 				content += "namespace " + space + " {\n";
 
 			content += @"
-enum class %ENUM_FORWARD_DECLARE%;
-
 namespace Private { namespace Generated {
 class EnumInfo_%ENUM_NAME% : public Prism::Enum
 {

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -57,6 +58,9 @@ namespace Prism.Export
 		private DateTime m_LastBuildTime;
 		private bool m_FetchedBuildTime;
 
+		private DateTime m_LastToolTime;
+		private bool m_FetchedToolTime;
+
 		/// <summary>
 		/// The last time these files were built
 		/// </summary>
@@ -94,6 +98,28 @@ namespace Prism.Export
 		}
 
 		/// <summary>
+		/// The last time this tool was updated
+		/// </summary>
+		public DateTime LastToolUpdateTime
+		{
+			get
+			{
+				if (!m_FetchedToolTime)
+				{
+					string exePath = Assembly.GetEntryAssembly().Location;
+					if (File.Exists(exePath))
+						m_LastToolTime = File.GetLastWriteTimeUtc(exePath);
+					else
+						m_LastToolTime = DateTime.FromFileTimeUtc(0);
+
+					m_FetchedToolTime = true;
+				}
+
+				return m_LastToolTime;
+			}
+		}
+
+		/// <summary>
 		/// Runs through each file, as specified by the reflector
 		/// </summary>
 		/// <returns>The new reflection files which have been generated</returns>
@@ -108,8 +134,9 @@ namespace Prism.Export
 			List<ExportFile> exports = new List<ExportFile>();
 
 			// Decide whether to reflect the file
+			// Only build if: currently rebuilding everything, file has changed, tool has changed
 			DateTime fileWriteTime = File.GetLastWriteTimeUtc(sourcePath);
-			if(settings.RebuildEverything || fileWriteTime > LastBuildTime)
+			if(settings.RebuildEverything || (fileWriteTime > LastBuildTime) || (LastBuildTime < LastToolUpdateTime))
 			{
 				string includeExportPath = Path.Combine(exportDirectory, Path.GetFileNameWithoutExtension(sourcePath) + m_ExportExtension + Path.GetExtension(sourcePath));
 				string sourceExportPath = Path.Combine(exportDirectory, Path.GetFileNameWithoutExtension(sourcePath) + m_ExportExtension + ".cpp");

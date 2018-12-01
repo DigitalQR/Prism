@@ -22,6 +22,9 @@ namespace Prism
 
 	Prism::Holder Enum::CreateNew(const std::vector<Prism::Holder>& params) const 
 	{
+		if (params.size() != 0)
+			return nullptr;
+
 		switch (m_Size)
 		{
 		case 1:
