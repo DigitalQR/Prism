@@ -241,8 +241,8 @@ namespace Prism.Export
 
 
 						// Fix line-endings
-						includeContent = includeContent.Replace("\r\n", "\n").Replace("\n", "\r\n");
-						sourceContent = sourceContent.Replace("\r\n", "\n").Replace("\n", "\r\n");
+						includeContent = PreExpandDirectives(includeContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
+						sourceContent = PreExpandDirectives(sourceContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
 
 
 						// Export header
@@ -280,6 +280,102 @@ namespace Prism.Export
 				}
 			}
 			return exports;
+		}
+
+		private struct DirectiveState
+		{
+			public bool RecognisedStatement;
+			public bool CurrentWrite;
+		};
+
+		/// <summary>
+		/// Attempt to pre-expande any simple directives
+		/// </summary>
+		/// <returns></returns>
+		private string PreExpandDirectives(string raw)
+		{
+			string output = "";
+			
+			Stack<DirectiveState> stateStack = new Stack<DirectiveState>();
+
+			DirectiveState currentState = new DirectiveState();
+			currentState.RecognisedStatement = true;
+			currentState.CurrentWrite = true;
+
+			foreach (string line in raw.Split('\n'))
+			{
+				string searchLine = line.Trim();
+				if (searchLine.StartsWith("#if"))
+				{
+					stateStack.Push(currentState);
+
+					if (searchLine == "#if 1")
+					{
+						currentState.RecognisedStatement = true;
+						currentState.CurrentWrite = currentState.CurrentWrite && true;
+						continue;
+					}
+					else if (searchLine == "#if 0")
+					{
+						currentState.RecognisedStatement = true;
+						currentState.CurrentWrite = false;
+						continue;
+					}
+					else
+					{
+						currentState.RecognisedStatement = false;
+						currentState.CurrentWrite = true;
+					}
+				}
+				else
+				{
+					if (searchLine.StartsWith("#elif "))
+					{
+						if (currentState.RecognisedStatement)
+						{
+							if (currentState.CurrentWrite)
+							{ 
+								currentState.CurrentWrite = false;
+								continue;
+							}
+							else
+							{
+								currentState.CurrentWrite = !currentState.CurrentWrite;
+								continue;
+							}							
+						}
+					}
+					else if (searchLine == "#else")
+					{
+						if (currentState.RecognisedStatement)
+						{
+							currentState.CurrentWrite = !currentState.CurrentWrite;
+
+							// Make sure we're allowed to be re-enabling it
+							if (stateStack.Count != 0)
+							{
+								currentState.CurrentWrite = currentState.CurrentWrite && stateStack.Peek().CurrentWrite;
+							}
+
+							continue;
+						}
+					}
+					else if (searchLine == "#endif")
+					{
+						bool skip = currentState.RecognisedStatement;
+
+						currentState = stateStack.Pop();
+
+						if(skip)
+							continue;
+					}
+				}
+				
+				if (currentState.CurrentWrite)
+					output += line + "\n";
+			}
+
+			return output;
 		}
 	}
 }
