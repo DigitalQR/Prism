@@ -32,6 +32,7 @@ namespace Prism
 	Holder& Holder::operator=(const Holder& other) 
 	{
 		m_Data = other.m_Data;
+		m_IsPointer = other.m_IsPointer;
 		return *this;
 	}
 

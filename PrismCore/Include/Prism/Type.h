@@ -82,6 +82,11 @@ namespace Prism
 		///
 		inline bool IsEnum() const { return m_IsEnum; }
 
+		///
+		/// Is this type info a valid instance of (Child or original) this type
+		/// @param testType		The desired parent type we would like to check for
+		///
+		virtual bool IsInstanceOf(TypeInfo testType) const;
 
 		///
 		/// Attempt to convert an instance of this type into a string

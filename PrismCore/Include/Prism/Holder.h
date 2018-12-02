@@ -117,6 +117,11 @@ namespace Prism
 
 
 		///
+		/// Is this holder currently only holding onto a nullptr
+		///
+		inline bool IsEmpty() const { return *GetPtrAs<void*>() == nullptr; }
+
+		///
 		/// Is this holder currently the only one refering to this data
 		///
 		inline bool IsUnique() const { return m_Data.unique(); }

@@ -124,18 +124,69 @@ namespace Prism.CodeParsing.Signatures
 							data.IsExplicit = isExplicit;
 
 							// Find out the param info
-							search = search.Substring(1);
+							search = search.Substring(1, search.LastIndexOf(')') - 1);
 							List<VariableInfo> funcParams = new List<VariableInfo>();
 
 							// Context aware split i.e. don't split, if comma is in () or <> etc.
 							string current = "";
 							int blockDepth = 0;
 
-							for(int i = 0; i<search.Length; ++i)
+							if (search != "")
 							{
-								char c = search[i];
-								if (c == ',' && blockDepth == 0)
+								for (int i = 0; i < search.Length; ++i)
 								{
+									char c = search[i];
+									if (c == ',' && blockDepth == 0)
+									{
+										current = current.Trim();
+										SignatureInfo tempSig;
+
+										// Invalid format
+										if (current == "")
+										{
+											sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Found empty param when attempting to parse a constructor.");
+											return true;
+										}
+
+										// Parse the type info
+										if (!VariableSignature.TryParse(firstLine, current + ";", reader, out tempSig))
+										{
+											sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Failed to parse constructor param info.");
+											return true;
+										}
+
+										var varData = (VariableInfo)tempSig.AdditionalParam;
+										funcParams.Add(varData);
+
+										current = "";
+										continue;
+									}
+									else if (c == '<' || c == '(' || c == '[' || c == '{')
+									{
+										++blockDepth;
+									}
+									else if (c == '>' || c == ')' || c == ']' || c == '}')
+									{
+										--blockDepth;
+										if (blockDepth == -1)
+										{
+											if (i != search.Length - 1)
+												search = search.Substring(i + 1);
+											break;
+										}
+									}
+
+									current += c;
+
+									if (i == search.Length - 1)
+									{
+										search = "";
+									}
+								}
+
+								// Parse last param
+								{
+
 									current = current.Trim();
 									SignatureInfo tempSig;
 
@@ -155,57 +206,8 @@ namespace Prism.CodeParsing.Signatures
 
 									var varData = (VariableInfo)tempSig.AdditionalParam;
 									funcParams.Add(varData);
-
-									current = "";
-									continue;
-								}
-								else if (c == '<' || c == '(' || c == '[' || c == '{')
-								{
-									++blockDepth;
-								}
-								else if (c == '>' || c == ')' || c == ']' || c == '}')
-								{
-									--blockDepth;
-									if (blockDepth == -1)
-									{
-										if (i != search.Length - 1)
-											search = search.Substring(i + 1);
-										break;
-									}
-								}
-
-								current += c;
-
-								if (i == search.Length - 1)
-								{
-									search = "";
 								}
 							}
-
-							// Parse last param
-							{
-
-								current = current.Trim();
-								SignatureInfo tempSig;
-
-								// Invalid format
-								if (current == "")
-								{
-									sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Found empty param when attempting to parse a constructor.");
-									return true;
-								}
-
-								// Parse the type info
-								if (!VariableSignature.TryParse(firstLine, current + ";", reader, out tempSig))
-								{
-									sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.InvalidParseFormat, "Failed to parse constructor param info.");
-									return true;
-								}
-
-								var varData = (VariableInfo)tempSig.AdditionalParam;
-								funcParams.Add(varData);
-							}
-
 
 							// Return leftovers
 							string leftover = search;

@@ -19,4 +19,9 @@ namespace Prism
 	{ 
 		return m_Namespace.empty() ? m_Name : m_Namespace + String(PRISM_STR(".")) + m_Name; 
 	}
+
+	bool Type::IsInstanceOf(TypeInfo testType) const 
+	{
+		return testType.Get() == this;
+	}
 }

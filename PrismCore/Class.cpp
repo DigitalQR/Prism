@@ -41,7 +41,21 @@ namespace Prism
 		return false;
 	}
 
-	const Method* Class::GetMethodByName(const String& name) const 
+	bool Class::IsInstanceOf(TypeInfo testType) const
+	{
+		if (__super::IsInstanceOf(testType))
+			return true;
+
+		for (int i = 0; i < (int)GetParentCount(); ++i)
+		{
+			if (GetParentClass(i)->IsInstanceOf(testType))
+				return true;
+		}
+
+		return false;
+	}
+
+	const Method* Class::GetMethodByName(const String& name, bool recurse) const
 	{
 		for (const Method* method : m_Methods)
 		{
@@ -49,10 +63,64 @@ namespace Prism
 				return method;
 		}
 
+		if (recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				const Method* method = GetParentClass(i)->GetMethodByName(name, recurse);
+				if (method != nullptr)
+					return method;
+			}
+		}
+
 		return nullptr;
 	}
 
-	const Property* Class::GetPropertyByName(const String& name) const
+	const Method* Class::GetMethodByIndex(int index, bool recurse) const
+	{
+		int localCount = (int)GetMethodCount(false);
+
+		if (index < localCount)
+		{
+			return m_Methods[index];
+		}
+		else if (recurse)
+		{
+			index -= localCount;
+
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				ClassInfo parentInfo = GetParentClass(i);
+				int parentCount = (int)parentInfo->GetMethodCount(true);
+
+				if (index < parentCount)
+				{
+					return parentInfo->GetMethodByIndex(index, true);
+				}
+
+				index -= parentCount;
+			}
+		}
+
+		return nullptr;
+	}
+
+	size_t Class::GetMethodCount(bool recurse) const
+	{ 
+		size_t size = m_Methods.size();
+
+		if (recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				size += GetParentClass(i)->GetMethodCount(true);
+			}
+		}
+
+		return size;
+	}
+
+	const Property* Class::GetPropertyByName(const String& name, bool recurse) const
 	{
 		for (const Property* property : m_Properties)
 		{
@@ -60,7 +128,61 @@ namespace Prism
 				return property;
 		}
 
+		if (recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				const Property* property = GetParentClass(i)->GetPropertyByName(name, recurse);
+				if (property != nullptr)
+					return property;
+			}
+		}
+
 		return nullptr;
+	}
+
+	const Property* Class::GetPropertyByIndex(int index, bool recurse) const 
+	{
+		int localCount = (int)GetPropertyCount(false);
+
+		if (index < localCount)
+		{
+			return m_Properties[index];
+		}
+		else if (recurse)
+		{
+			index -= localCount;
+
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				ClassInfo parentInfo = GetParentClass(i);
+				int parentCount = (int)parentInfo->GetPropertyCount(true);
+
+				if (index < parentCount)
+				{
+					return parentInfo->GetPropertyByIndex(index, true);
+				}
+
+				index -= parentCount;
+			}
+		}
+
+		return nullptr;
+	}
+
+	size_t Class::GetPropertyCount(bool recurse) const 
+	{
+		size_t size = m_Properties.size();
+
+		if (recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				size += GetParentClass(i)->GetPropertyCount(true);
+			}
+		}
+
+		return size;
 	}
 
 	Prism::String Class::ToString(Prism::Holder inStorage) const 

@@ -112,6 +112,8 @@ class ClassInfo : public Prism::Class
 private:
 	static ClassInfo s_AssemblyInstance;
 	ClassInfo();
+	virtual Prism::ClassInfo GetParentClass(int index) const override;
+	virtual size_t GetParentCount() const override;
 };
 ";
 			// Add method header reflection
@@ -178,6 +180,20 @@ private:
 
 Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get().FindTypeOf<%CLASS_NAME%>(); }
 
+Prism::ClassInfo %CLASS_NAME%::ClassInfo::GetParentClass(int searchIndex) const
+{
+	size_t index = 0;
+%GET_PARENT_BODY%
+	return nullptr;
+}
+
+size_t %CLASS_NAME%::ClassInfo::GetParentCount() const
+{
+	size_t count = 0;
+%PARENT_COUNT_BODY%
+	return count;
+}
+
 %CLASS_NAME%::ClassInfo %CLASS_NAME%::ClassInfo::s_AssemblyInstance;
 ";
 
@@ -216,7 +232,20 @@ Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get(
 				propertyInstances += "new VariableInfo_" + property.ReflectionInfo.VariableName + "(), ";
 				propertyInstances += "\n#endif\n";
 			}
-			
+
+			// Parent function bodies
+			string getParentBody = "";
+			string parentCountBody = "";
+
+			foreach (var parent in m_StructureParents)
+			{
+				getParentBody += "__if_exists(" + parent.DeclerationName + "::ClassInfo) {";
+				getParentBody += "if (index++ == searchIndex) { return Prism::Assembly::Get().FindTypeOf<" + parent.DeclerationName + ">(); }";
+				getParentBody += "}\n";
+
+				parentCountBody += "__if_exists(" + parent.DeclerationName + "::ClassInfo){ ++count; }\n";
+			}
+
 			// Exit into the existing namespace
 			foreach (string space in TokenNamespace)
 				content += "}\n";
@@ -227,6 +256,8 @@ Prism::TypeInfo %CLASS_NAME%::GetTypeInfo() const { return Prism::Assembly::Get(
 				.Replace("%CONSTRUCTOR_INSTANCES%", constructorInstances)
 				.Replace("%METHOD_INSTANCES%", methodInstances)
 				.Replace("%PROPERTY_INSTANCES%", propertyInstances)
+				.Replace("%GET_PARENT_BODY%", getParentBody)
+				.Replace("%PARENT_COUNT_BODY%", parentCountBody)
 				.Replace("%DOC_STRING%", SafeDocString);
 		}
 	}

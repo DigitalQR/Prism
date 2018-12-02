@@ -138,7 +138,7 @@ namespace Prism.Reflection
 						// Handle errors in parsing
 						case SignatureInfo.SigType.InvalidParseFormat:
 							{
-								throw new ReflectionException(ReflectionErrorCode.ParseError, currentSignature, "Prism parser found something unexpected (InvalidParseFormat)");
+								throw new ReflectionException(ReflectionErrorCode.ParseError, currentSignature, "Prism parser found something unexpected (InvalidParseFormat): '" + currentSignature.AdditionalParam + "'");
 							}
 
 						// Keep track of current namespace
@@ -363,11 +363,11 @@ namespace Prism.Reflection
 
 							if (data.MacroName == settings.FunctionToken)
 							{
-								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting function definition to follow)");
+								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting function definition to follow. Got " + currentSignature.SignatureType + " )");
 							}
 							else if (data.MacroName == settings.VariableToken)
 							{
-								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting variable definition to follow)");
+								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting variable definition to follow. Got " + currentSignature.SignatureType + " )");
 							}
 						}
 					}

@@ -25,7 +25,7 @@ namespace Prism.CodeParsing.Signatures
 
 			// Try to check if we are currently looking at a variable
 			// Check it's not a function (TODO - More extensive checks, this doesn't allow callback/func types)
-			if (!string.IsNullOrEmpty(searchString) && !searchString.Contains(')'))
+			if (!string.IsNullOrEmpty(searchString))
 			{
 				// Check string has at least 1 space
 				if (searchString.Contains(' '))
@@ -62,10 +62,15 @@ namespace Prism.CodeParsing.Signatures
 
 						string typeString = searchString.Substring(0, splitIndex + 1).Trim();
 
+						// If variable name contains (), it was actually a function def
 						if (TypeSignature.TryGetFullTypeInfo(typeString, out data.TypeInfo))
 						{
-							sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.VariableDeclare, data);
-							return true;
+							// If variable name contains (), it was actually a function def
+							if (!data.VariableName.Contains("(") && !data.VariableName.Contains(")") && data.VariableName != "const" && data.VariableName != "override")
+							{
+								sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.VariableDeclare, data);
+								return true;
+							}
 						}
 					}
 				}
