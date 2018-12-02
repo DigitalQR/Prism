@@ -3,8 +3,9 @@
 
 namespace Prism
 {
-	Method::Method(const String& name, const String& documentation, bool isStatic, bool isConst, bool isVirtual)
-		: m_Name(name)
+	Method::Method(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, bool isStatic, bool isConst, bool isVirtual)
+		: AttributeStore(attributes)
+		, m_Name(name)
 		, m_Documentation(documentation)
 		, m_IsStatic(isStatic)
 		, m_IsConst(isConst)

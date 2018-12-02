@@ -38,6 +38,7 @@ namespace Prism
 		///
 		bool HasValidConstructor(const std::vector<Prism::Holder>& params = {});
 
+
 		///
 		/// Get the parent class at this index
 		/// @param index		The local index of the parent
@@ -55,6 +56,7 @@ namespace Prism
 		/// @param testType		The desired parent type we would like to check for
 		///
 		virtual bool IsInstanceOf(TypeInfo testType) const override;
+
 
 		///
 		/// Attempt to retrieve a function by it's name
@@ -74,6 +76,7 @@ namespace Prism
 		/// The total count of methods that this class has access to
 		///
 		size_t GetMethodCount(bool recurse = true) const;
+
 
 		///
 		/// Attempt to retrieve a property by it's name
@@ -96,7 +99,7 @@ namespace Prism
 		size_t GetPropertyCount(bool recurse = true) const;
 
 	protected:
-		Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
+		Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
 
 		///
 		/// Convert this given value into a string

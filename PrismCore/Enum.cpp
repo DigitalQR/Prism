@@ -14,8 +14,8 @@ namespace Prism
 	{
 	}
 
-	Enum::Enum(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<Value>& values) 
-		: Type(uniqueId, space, name, documentation, size, false, true)
+	Enum::Enum(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes,  const std::vector<Value>& values)
+		: Type(uniqueId, space, name, documentation, size, attributes, false, true)
 		, m_Values(values)
 	{
 	}

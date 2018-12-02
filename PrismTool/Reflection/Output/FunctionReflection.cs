@@ -26,15 +26,15 @@ namespace Prism.Reflection
 		private bool m_IsConstructor = false;
 		
 		// Constructor reflection
-		public FunctionReflection(StructureReflection parentStructure, ConstructorInfo constructor, ConditionState conditionState, int tokenLine, string tokenParams, string docString)
-			: this(parentStructure, constructor.ToFunctionInfo(), conditionState, tokenLine, tokenParams, docString)
+		public FunctionReflection(StructureReflection parentStructure, ConstructorInfo constructor, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
+			: this(parentStructure, constructor.ToFunctionInfo(), conditionState, tokenFile, tokenLine, tokenParams, docString)
 		{
 			m_IsConstructor = true;
 		}
 
 		// Normal function reflection
-		public FunctionReflection(StructureReflection parentStructure, FunctionInfo function, ConditionState conditionState, int tokenLine, string tokenParams, string docString)
-			: base(conditionState, tokenLine, tokenParams, docString)
+		public FunctionReflection(StructureReflection parentStructure, FunctionInfo function, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
+			: base(conditionState, tokenFile, tokenLine, tokenParams, docString)
 		{
 			m_ParentStructure = parentStructure;
 			m_ReflectionInfo = function;
@@ -106,7 +106,11 @@ public:
 			content += @"
 
 %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::MethodInfo_%FUNCTION_NAME%()
-	: Prism::Method(PRISM_STR(""%FUNCTION_INTERNAL_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""), %IS_STATIC%, %IS_CONST%, %IS_VIRTUAL%)
+	: Prism::Method(
+		PRISM_STR(""%FUNCTION_INTERNAL_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""), 
+		{ %ATTRIBUTES_VALUES% }, 
+		%IS_STATIC%, %IS_CONST%, %IS_VIRTUAL%
+	)
 {}
 
 const Prism::ParamInfo* %PARENT_STRUCTURE%::MethodInfo_%FUNCTION_NAME%::GetReturnInfo() const
@@ -241,6 +245,7 @@ case %PARAM_INDEX%:
 				.Replace("%FUNCTION_NAME%", m_ReflectionInfo.SafeFunctionName)
 				.Replace("%FUNCTION_INTERNAL_NAME%", m_ReflectionInfo.FunctionName)
 				.Replace("%PARENT_STRUCTURE%", m_ParentStructure.DeclerationName)
+				.Replace("%ATTRIBUTES_VALUES%", GenerateAttributeInstancesString("Method"))
 				.Replace("%IS_VIRTUAL%", m_ReflectionInfo.IsVirtual ? "1" : "0")
 				.Replace("%IS_STATIC%", m_ReflectionInfo.IsStatic ? "1" : "0")
 				.Replace("%IS_CONST%", m_ReflectionInfo.IsConst ? "1" : "0")

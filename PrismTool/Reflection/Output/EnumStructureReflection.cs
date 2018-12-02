@@ -36,8 +36,8 @@ namespace Prism.Reflection
 		/// </summary>
 		private List<Value> m_Values;
 
-		public EnumStructureReflection(StructureSignature.ImplementationBeginData data, string[] tokenNamespace, ConditionState conditionState, int bodyLine, string tokenParams, string docString)
-			: base(data.DeclareName, tokenNamespace, conditionState, bodyLine, tokenParams, docString)
+		public EnumStructureReflection(StructureSignature.ImplementationBeginData data, string[] tokenNamespace, ConditionState conditionState, string bodyFile, int bodyLine, string tokenParams, string docString)
+			: base(data.DeclareName, tokenNamespace, conditionState, bodyFile, bodyLine, tokenParams, docString)
 		{
 			m_EnumName = data.DeclareName;
 			m_EnumType = string.Join(" ", data.ParentStructures.Select(v => v.DeclareName));
@@ -54,7 +54,7 @@ namespace Prism.Reflection
 			get { return m_Values.ToArray(); }
 		}
 
-		public override void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, int tokenLine, string tokenParams, string docString)
+		public override void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
 		{
 			// Ignore other values (Will get caught by compiler anyway)
 			if (sigInfo.SignatureType == SignatureInfo.SigType.EnumValueEntry)
@@ -121,6 +121,7 @@ EnumInfo_%ENUM_NAME%::EnumInfo_%ENUM_NAME%()
 		Prism::TypeId::Get<%ENUM_NAME%>(), 
 		PRISM_STR(""%NAMESPACE_STR%""), PRISM_STR(""%ENUM_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
 		sizeof(%ENUM_NAME%),
+		{ %ATTRIBUTES_VALUES% },
 		{ %ENUM_VALUES% }
 	)
 {}
@@ -142,6 +143,7 @@ EnumInfo_%ENUM_NAME% EnumInfo_%ENUM_NAME%::s_AssemblyInstance;
 
 			return content
 				.Replace("%ENUM_NAME%", m_EnumName)
+				.Replace("%ATTRIBUTES_VALUES%", GenerateAttributeInstancesString("Enum"))
 				.Replace("%ENUM_VALUES%", enumValues)
 				.Replace("%NAMESPACE_STR%", TokenNamespaceFormatted.Replace("::", "."))
 				.Replace("%DOC_STRING%", SafeDocString);

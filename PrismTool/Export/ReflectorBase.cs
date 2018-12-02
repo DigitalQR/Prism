@@ -200,7 +200,7 @@ namespace Prism.Export
 				// Reflect the file
 				using (FileStream stream = new FileStream(sourcePath, FileMode.Open))
 				{
-					HeaderReflection file = HeaderReflection.Generate(settings, stream);
+					HeaderReflection file = HeaderReflection.Generate(settings, sourcePath, stream);
 
 					// Export tokens, if any have been found
 					if (file.ReflectedTokenCount != 0)

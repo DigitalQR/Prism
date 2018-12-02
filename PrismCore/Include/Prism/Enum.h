@@ -46,7 +46,7 @@ namespace Prism
 		inline size_t GetValueCount() const { return m_Values.size(); }
 
 	protected:
-		Enum(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<Value>& values);
+		Enum(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, const std::vector<Value>& values);
 
 		///
 		/// Convert this given value into a string

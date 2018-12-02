@@ -6,6 +6,7 @@
 ///
 #pragma once
 #include "Definitions.h"
+#include "AttributeStore.h"
 #include "TypeInfo.h"
 #include "Holder.h"
 
@@ -18,7 +19,7 @@ namespace Prism
 	///
 	/// Prism reflected type info
 	///
-	class PRISMCORE_API Type 
+	class PRISMCORE_API Type : public AttributeStore
 	{
 	protected:
 		const long m_UniqueId;
@@ -32,7 +33,7 @@ namespace Prism
 		const bool m_IsClass : 1;
 		const bool m_IsEnum : 1;
 
-		Type(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, bool isClass, bool isEnum);
+		Type(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, bool isClass, bool isEnum);
 
 	public:
 		inline long GetUniqueId() const { return m_UniqueId; }

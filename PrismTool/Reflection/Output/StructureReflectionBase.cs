@@ -20,8 +20,8 @@ namespace Prism.Reflection
 		/// </summary>
 		private string[] m_TokenNamespace;
 		
-		protected StructureReflectionBase(string name, string[] tokenNamespace, ConditionState conditionState, int bodyLine, string tokenParams, string docString)
-			: base(conditionState, bodyLine, tokenParams, docString)
+		protected StructureReflectionBase(string name, string[] tokenNamespace, ConditionState conditionState, string bodyFile, int bodyLine, string tokenParams, string docString)
+			: base(conditionState, bodyFile, bodyLine, tokenParams, docString)
 		{
 			m_DeclerationName = name;
 			m_TokenNamespace = tokenNamespace == null ? new string[0] : tokenNamespace;
@@ -30,7 +30,7 @@ namespace Prism.Reflection
 		/// <summary>
 		/// Get the appropriate StructureReflection based on the signature
 		/// </summary>
-		public static StructureReflectionBase RetrieveFromSignature(SignatureInfo sigInfo, string[] tokenNamespace, ConditionState conditionState, int tokenBodyLine, string tokenParams, string docString)
+		public static StructureReflectionBase RetrieveFromSignature(SignatureInfo sigInfo, string[] tokenNamespace, ConditionState conditionState, string tokenFile, int tokenBodyLine, string tokenParams, string docString)
 		{
 			if (sigInfo.SignatureType != SignatureInfo.SigType.StructureImplementationBegin)
 			{
@@ -41,11 +41,11 @@ namespace Prism.Reflection
 
 			if (data.StructureType == "class" || data.StructureType == "struct")
 			{
-				return new StructureReflection(data, tokenNamespace, conditionState, tokenBodyLine, tokenParams, docString);
+				return new StructureReflection(data, tokenNamespace, conditionState, tokenFile, tokenBodyLine, tokenParams, docString);
 			}
 			else if (data.StructureType == "enum")
 			{
-				return new EnumStructureReflection(data, tokenNamespace, conditionState, tokenBodyLine, tokenParams, docString);
+				return new EnumStructureReflection(data, tokenNamespace, conditionState, tokenFile, tokenBodyLine, tokenParams, docString);
 			}
 
 			throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, sigInfo, "No reflection structure for this current signature");
@@ -83,7 +83,7 @@ namespace Prism.Reflection
 		/// <summary>
 		/// Add a specific signature to the reflection of this structure
 		/// </summary>
-		public abstract void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, int tokenLine, string tokenParams, string docString);
+		public abstract void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString);
 
 	}
 }

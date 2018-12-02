@@ -7,6 +7,7 @@
 #pragma once
 #include "PrismMinimal.h"
 
+#include "Prism\Attribute.h"
 #include "Prism\Type.h"
 #include "Prism\Class.h"
 #include "Prism\Enum.h"

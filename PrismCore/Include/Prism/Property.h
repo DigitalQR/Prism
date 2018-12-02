@@ -6,13 +6,14 @@
 ///
 #pragma once
 #include "Definitions.h"
+#include "AttributeStore.h"
 #include "Holder.h"
 
 namespace Prism 
 {
 	class TypeInfo;
 
-	class PRISMCORE_API Property
+	class PRISMCORE_API Property : public AttributeStore
 	{
 	private:
 		const String m_Name;
@@ -23,7 +24,7 @@ namespace Prism
 		const bool m_IsStatic : 1;
 		const bool m_IsConst : 1;
 
-		Property(const String& name, const String& documentation, bool isPointer, bool isStatic, bool isConst);
+		Property(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, bool isPointer, bool isStatic, bool isConst);
 	public:
 		inline const String& GetName() const { return m_Name; }
 		inline const String& GetDocumentation() const { return m_Documentation; }

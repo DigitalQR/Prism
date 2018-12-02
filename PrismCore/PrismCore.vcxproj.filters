@@ -57,6 +57,12 @@
     <ClInclude Include="Include\Prism\Enum.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Prism\Attribute.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Prism\AttributeStore.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembly.cpp">
@@ -84,6 +90,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Enum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Attribute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AttributeStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

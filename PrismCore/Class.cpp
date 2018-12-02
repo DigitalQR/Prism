@@ -4,8 +4,8 @@
 
 namespace Prism 
 {
-	Class::Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties)
-		: Type(uniqueId, space, name, documentation, size, true, false)
+	Class::Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties)
+		: Type(uniqueId, space, name, documentation, size, attributes, true, false)
 		, m_IsAbstract(isAbstract)
 		, m_Constructors(constructors)
 		, m_Methods(methods)

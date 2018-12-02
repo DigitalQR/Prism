@@ -91,7 +91,7 @@ namespace Prism.CodeParsing.Signatures
 				}
 
 				// Try to detemine function details
-				if (searchString.EndsWith(")"))
+				if (!searchString.StartsWith(",") && (searchString.StartsWith("::") ? true : !searchString.StartsWith(":")) && searchString.EndsWith(")"))
 				{
 					var data = new FunctionInfo();
 					data.IsConst = isConst;

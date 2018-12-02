@@ -39,8 +39,8 @@ namespace Prism.Reflection
 		/// </summary>
 		private List<FunctionReflection> m_Functions;
 
-		public StructureReflection(StructureSignature.ImplementationBeginData data, string[] tokenNamespace, ConditionState conditionState, int bodyLine, string tokenParams, string docString)
-			: base(data.DeclareName, tokenNamespace, conditionState, bodyLine, tokenParams, docString)
+		public StructureReflection(StructureSignature.ImplementationBeginData data, string[] tokenNamespace, ConditionState conditionState, string bodyFile, int bodyLine, string tokenParams, string docString)
+			: base(data.DeclareName, tokenNamespace, conditionState, bodyFile, bodyLine, tokenParams, docString)
 		{
 			m_StructureType = data.StructureType;
 
@@ -75,24 +75,24 @@ namespace Prism.Reflection
 			get { return m_Variables.ToArray(); }
 		}
 
-		public override void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, int tokenLine, string tokenParams, string docString)
+		public override void AddInternalSignature(SignatureInfo sigInfo, string accessor, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
 		{
 			if (sigInfo.SignatureType == SignatureInfo.SigType.FunctionDeclare)
 			{
 				var data = (FunctionInfo)sigInfo.AdditionalParam;
-				FunctionReflection refl = new FunctionReflection(this, data, conditionState, tokenLine, tokenParams, docString);
+				FunctionReflection refl = new FunctionReflection(this, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
 				m_Functions.Add(refl);
 			}
 			else if (sigInfo.SignatureType == SignatureInfo.SigType.VariableDeclare)
 			{
 				var data = (VariableInfo)sigInfo.AdditionalParam;
-				VariableReflection refl = new VariableReflection(this, data, conditionState, tokenLine, tokenParams, docString);
+				VariableReflection refl = new VariableReflection(this, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
 				m_Variables.Add(refl);
 			}
 			else if (sigInfo.SignatureType == SignatureInfo.SigType.StructureConstructor)
 			{
 				var data = (ConstructorInfo)sigInfo.AdditionalParam;
-				FunctionReflection refl = new FunctionReflection(this, data, conditionState, tokenLine, tokenParams, docString);
+				FunctionReflection refl = new FunctionReflection(this, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
 				m_Functions.Add(refl);
 			}
 		}
@@ -171,6 +171,7 @@ private:
 		Prism::TypeId::Get<%CLASS_NAME%>(), 
 		PRISM_STR(""%NAMESPACE_STR%""), PRISM_STR(""%CLASS_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
 		sizeof(%CLASS_NAME%),
+		{ %ATTRIBUTES_VALUES% },
 		std::is_abstract<%CLASS_NAME%>::value,
 		{ %CONSTRUCTOR_INSTANCES% },
 		{ %METHOD_INSTANCES% },
@@ -253,6 +254,7 @@ size_t %CLASS_NAME%::ClassInfo::GetParentCount() const
 			return content
 				.Replace("%CLASS_NAME%", DeclerationName)
 				.Replace("%NAMESPACE_STR%", TokenNamespaceFormatted.Replace("::", "."))
+				.Replace("%ATTRIBUTES_VALUES%", GenerateAttributeInstancesString(m_StructureType == "class" ? "Classes" : "Structs"))
 				.Replace("%CONSTRUCTOR_INSTANCES%", constructorInstances)
 				.Replace("%METHOD_INSTANCES%", methodInstances)
 				.Replace("%PROPERTY_INSTANCES%", propertyInstances)

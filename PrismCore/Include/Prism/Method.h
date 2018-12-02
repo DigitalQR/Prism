@@ -6,6 +6,7 @@
 ///
 #pragma once
 #include "Definitions.h"
+#include "AttributeStore.h"
 #include "TypeInfo.h"
 #include "Holder.h"
 
@@ -21,7 +22,7 @@ namespace Prism
 		bool IsConst : 1;
 	};
 
-	class PRISMCORE_API Method
+	class PRISMCORE_API Method : public AttributeStore
 	{
 	private:
 		const String m_Name;
@@ -32,7 +33,7 @@ namespace Prism
 		const bool m_IsConst : 1;
 		const bool m_IsVirtual : 1;
 
-		Method(const String& name, const String& documentation, bool isStatic, bool isConst, bool isVirtual);
+		Method(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, bool isStatic, bool isConst, bool isVirtual);
 
 	public:
 		inline const String& GetName() const { return m_Name; }

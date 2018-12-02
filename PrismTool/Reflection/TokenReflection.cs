@@ -17,11 +17,17 @@ namespace Prism.Reflection
 		/// </summary>
 		private string m_PreProcessorCondition;
 		
+		
 		/// <summary>
 		/// Any doc string which is associated with this token
 		/// </summary>
 		private string m_DocString;
-		
+
+		/// <summary>
+		/// The file that this token exists in
+		/// </summary>
+		private string m_TokenFilePath;
+
 		/// <summary>
 		/// The line that the macro token for was place on
 		/// </summary>
@@ -32,12 +38,13 @@ namespace Prism.Reflection
 		/// </summary>
 		private string[] m_TokenParams;
 
-		public TokenReflection(ConditionState conditionState, int tokenLine, string tokenParams, string docString)
+		public TokenReflection(ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
 		{
 			m_PreProcessorCondition = conditionState.CurrentCondition;
 			if (m_PreProcessorCondition == "")
 				m_PreProcessorCondition = "1";
 
+			m_TokenFilePath = tokenFile;
 			m_TokenLineNumber = tokenLine;
 			m_DocString = docString;
 
@@ -126,7 +133,7 @@ namespace Prism.Reflection
 		{
 			get { return m_TokenParams; }
 		}
-
+		
 		/// <summary>
 		/// The line that the macro token for was place on
 		/// </summary>
@@ -149,5 +156,61 @@ namespace Prism.Reflection
 		/// The content to place in the source reflection file
 		/// </summary>
 		public abstract string GenerateSourceReflectionContent();
+
+		/// <summary>
+		/// Generate the C++ side attributes which should be placed in the auto-content
+		/// </summary>
+		public string GenerateAttributeInstancesString(string usage)
+		{
+			// TODO - Pre-filter any C# side attributes
+			string content = "";
+
+			foreach (string param in m_TokenParams)
+			{
+				// Convert from format MyThing(x,y,z) -> MyThingAttribute(x,y,z)
+				int index = param.IndexOf("(");
+				
+				string attributeName;
+				string attrInstance;
+
+				if (index != -1)
+				{
+					attributeName = param.Substring(0, index);
+					attrInstance = param.Insert(index, "Attribute");
+				}
+				else
+				{
+					attributeName = param;
+					attrInstance = param + "Attribute()";
+				}
+
+				// The error message to display, if this attribute doesn't exist
+				string errorMessage = m_TokenFilePath + "(" + m_TokenLineNumber + "): error P" + (int)ReflectionErrorCode.TokenMissuse + ": Cannot find any reflection info for Attribute '" + attributeName + "'";
+
+				content += "__if_exists(" + attributeName + "Attribute::ClassInfo) {\n";
+
+				// Check if usage matches
+				content += "([]() -> const Prism::Attribute* { \n";
+				content += "const Prism::Attribute* attr = new " + attrInstance + ";\n"; // TODO - check constructor is valid and handle gracefully
+
+				// Add big comment block to inform users to check the constructor (Cannot check it C++ side)
+				content += "//////////////////////////////////////////// \n";
+				content += "/// NOTICE TO USER\n";
+				content += "/// If a compilation error has occured and brought you herei t is likely you are attempting to call a constructor that does exist \n";
+				content += "///   Check the construction of '" + attributeName + "' is valid at:\n";
+				content += "///   '" + m_TokenFilePath + " @ Line " + m_TokenLineNumber + "'\n";
+				content += "//////////////////////////////////////////// \n";
+
+				content += "PRISM_ASSERT(( (int)attr->GetUsageFlags() & (int)Prism::Attribute::Usage::" + usage + " ) != 0, \"Attribute '" + attributeName + "' cannot be used in this context\", R\"(" + m_TokenFilePath + ")\", " + m_TokenLineNumber + ");\n";
+				content += "return attr;\n})(),\n";
+				content += "}\n";
+
+				content += "__if_not_exists(" + attributeName + "Attribute::ClassInfo) {";
+				content += "__pragma(message(R\"(" + errorMessage + ")\")) }\n";
+
+			}
+
+			return content;
+		}
 	}
 }

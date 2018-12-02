@@ -38,6 +38,8 @@
     <ClInclude Include="Include\Prism.h" />
     <ClInclude Include="Include\PrismMinimal.h" />
     <ClInclude Include="Include\Prism\Assembly.h" />
+    <ClInclude Include="Include\Prism\Attribute.h" />
+    <ClInclude Include="Include\Prism\AttributeStore.h" />
     <ClInclude Include="Include\Prism\Class.h" />
     <ClInclude Include="Include\Prism\CommonTypes.h" />
     <ClInclude Include="Include\Prism\Definitions.h" />
@@ -51,6 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembly.cpp" />
+    <ClCompile Include="Attribute.cpp" />
+    <ClCompile Include="AttributeStore.cpp" />
     <ClCompile Include="Class.cpp" />
     <ClCompile Include="CommonTypes.cpp" />
     <ClCompile Include="Enum.cpp" />

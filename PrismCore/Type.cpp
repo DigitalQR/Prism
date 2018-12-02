@@ -3,8 +3,9 @@
 
 namespace Prism 
 {
-	Type::Type(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, bool isClass, bool isEnum)
-		: m_UniqueId(uniqueId)
+	Type::Type(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, bool isClass, bool isEnum)
+		: AttributeStore(attributes)
+		, m_UniqueId(uniqueId)
 		, m_Namespace(space)
 		, m_Documentation(documentation)
 		, m_Name(name)

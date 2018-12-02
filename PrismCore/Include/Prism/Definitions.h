@@ -6,6 +6,7 @@
 ///
 #pragma once
 #include <string>
+#include <assert.h>
 
 ///
 /// Allow for switching between single and wide string
@@ -25,6 +26,24 @@ namespace Prism
 	#define PRISM_STR(s) L##s
 #endif
 }
+
+///
+/// Internal assert macro used for content generated issues (Will only define, if user hasn't provided any handling for this)
+/// (Default is non-dev mode, must define _PRISM_DEV to enable dev content)
+///
+#ifdef _PRISM_DEV
+#ifndef PRISM_ASSERT
+#define PRISM_ASSERT(cond, msg, file, line) (void)(                                     \
+            (!!(cond)) ||                                                               \
+            (_wassert(_CRT_WIDE(msg " (" #cond ")"), _CRT_WIDE(file), (unsigned)(line)), 0) \
+		)
+#endif
+#else
+#ifdef PRISM_ASSERT
+#undef PRISM_ASSERT
+#endif
+#define PRISM_ASSERT(cond, msg, file, line) (void)()
+#endif
 
 ///
 /// Allow for dev only strings which will be empty if PRISM_DEVSTR is not defined e.g. doc strings

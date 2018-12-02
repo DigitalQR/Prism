@@ -20,8 +20,8 @@ namespace Prism.Reflection
 		/// </summary>
 		private VariableInfo m_ReflectionInfo;
 
-		public VariableReflection(StructureReflection parentStructure, VariableInfo variable, ConditionState conditionState, int tokenLine, string tokenParams, string docString)
-			: base(conditionState, tokenLine, tokenParams, docString)
+		public VariableReflection(StructureReflection parentStructure, VariableInfo variable, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
+			: base(conditionState, tokenFile, tokenLine, tokenParams, docString)
 		{
 			m_ParentStructure = parentStructure;
 			m_ReflectionInfo = variable;
@@ -75,6 +75,7 @@ public:
 %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::VariableInfo_%VARIABLE_NAME%()
 	: Prism::Property(
 		PRISM_STR(""%VARIABLE_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
+		{ %ATTRIBUTES_VALUES% },
 		%IS_POINTER%, %IS_STATIC%, %IS_CONST%
 	)
 {
@@ -126,6 +127,7 @@ Prism::Holder %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::Get(Prism::Holde
 				.Replace("%PARENT_STRUCTURE%", m_ParentStructure.DeclerationName)
 				.Replace("%VARIABLE_NAME%", m_ReflectionInfo.VariableName)
 				.Replace("%VARIABLE_TYPE%", m_ReflectionInfo.TypeInfo.InnerType.TypeName)
+				.Replace("%ATTRIBUTES_VALUES%", GenerateAttributeInstancesString("Properties"))
 				.Replace("%IS_POINTER%", m_ReflectionInfo.TypeInfo.PointerCount != 0 ? "1" : "0")
 				.Replace("%IS_STATIC%", m_ReflectionInfo.TypeInfo.IsStatic ? "1" : "0")
 				.Replace("%IS_CONST%", m_ReflectionInfo.TypeInfo.IsConst ? "1" : "0")
