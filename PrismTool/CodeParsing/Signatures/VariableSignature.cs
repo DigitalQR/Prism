@@ -24,7 +24,6 @@ namespace Prism.CodeParsing.Signatures
 			}
 
 			// Try to check if we are currently looking at a variable
-			// Check it's not a function (TODO - More extensive checks, this doesn't allow callback/func types)
 			if (!string.IsNullOrEmpty(searchString))
 			{
 				// Check string has at least 1 space

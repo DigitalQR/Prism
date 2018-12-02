@@ -15,7 +15,6 @@ namespace Prism
 
 	///
 	/// Reloadable type (Allows for hotreload of DLLs)
-	/// (TODO make multi-thread safe)
 	///
 	class PRISMCORE_API TypePointer
 	{
@@ -27,14 +26,8 @@ namespace Prism
 		TypePointer(const TypePointer&) = delete;
 		void operator=(const TypePointer&) = delete;
 
-		///
-		/// (TODO make multi-thread safe)
-		///
 		void Set(const Type* type) { m_Type = type; }
 	public:
-		///
-		/// (TODO make multi-thread safe)
-		///
 		const Type* Get() const { return m_Type; }
 
 		///
