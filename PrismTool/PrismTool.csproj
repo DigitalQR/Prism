@@ -97,6 +97,7 @@
     <Compile Include="CodeParsing\Signatures\VariableSignature.cs" />
     <Compile Include="Export\DirectoryReflector.cs" />
     <Compile Include="Export\ReflectorBase.cs" />
+    <Compile Include="Export\VisualStudioReflector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\ConditionState.cs" />

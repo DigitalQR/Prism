@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Prism.CodeParsing;
 using Prism.Export;
 using Prism.Reflection;
@@ -13,6 +14,19 @@ namespace Prism
 {
 	class Program
 	{
+		/// <summary>
+		/// Determine to use folder or project exporting based on cmd arg presence
+		/// </summary>
+		internal class ReflectionSelector
+		{
+			[CmdArg(Arg = "src-dir")]
+			public string DirectorySource = null;
+
+			[CmdArg(Arg = "src-vsproj")]
+			public string VisualStudioSource = null;
+		}
+
+
 		/// <summary>
 		/// Format a message in the Visual Studio message format 
 		/// {file}({line}): error {code}: {message}
@@ -24,12 +38,38 @@ namespace Prism
 
 		static void Main(string[] args)
 		{
+			ReflectionSelector selector = new ReflectionSelector();
+			CmdArgs.Parse(selector, args);
+
 #if !DEBUG
 			try
 			{
 #endif
-			DirectoryReflector reflector = new DirectoryReflector(args);
-			reflector.Run();
+			// Multiple reflection
+			if (selector.DirectorySource != null && selector.VisualStudioSource != null)
+			{
+				throw new Exception("Found --src-dir and --src-vsproj. Only supports a single one at a time.");
+			}
+
+			// Reflect directory
+			else if (selector.DirectorySource != null)
+			{
+				DirectoryReflector reflector = new DirectoryReflector(args);
+				reflector.Run();
+			}
+
+			// Reflect project
+			else if (selector.VisualStudioSource != null)
+			{
+				VisualStudioReflector reflector = new VisualStudioReflector(args);
+				reflector.Run();
+			}
+
+			// No reflection
+			else
+			{
+				throw new Exception("Not found code source. Exprect --src-dir or --src-vsproj.");
+			}
 #if !DEBUG
 			}
 

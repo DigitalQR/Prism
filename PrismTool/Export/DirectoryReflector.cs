@@ -53,32 +53,8 @@ namespace Prism.Export
 
 		public override List<ExportFile> Run()
 		{
-			List<ExportFile> outputFiles = new List<ExportFile>();
-
 			var sourceFiles = Directory.EnumerateFiles(m_SourceDirectory, "*.*", SearchOption.AllDirectories).Where(f => m_WhitelistedExtensions.Contains(Path.GetExtension(f)));
-			string outputDir = m_OutputDirectory.ToLower();
-
-			Console.WriteLine("Generating Prism Reflection -> " + m_OutputDirectory);
-			foreach (var file in sourceFiles)
-			{
-				try
-				{
-					// Don't read in output directory
-					if (!file.ToLower().StartsWith(outputDir))
-					{
-						List<ExportFile> exports = ReflectFile(m_ReflectionSettings, file, m_OutputDirectory);
-						outputFiles.AddRange(exports);
-					}
-				}
-				catch (ReflectionException e)
-				{
-					throw new HeaderReflectionException(file, e.ErrorCode, e.Signature, e);
-				}
-			}
-			Console.WriteLine("Prism Reflection Generated.");
-
-			LastBuildTime = DateTime.UtcNow;
-			return outputFiles;
+			return RunInternal(m_ReflectionSettings, sourceFiles, m_OutputDirectory);
 		}
 	}
 }

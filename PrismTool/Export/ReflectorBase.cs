@@ -27,13 +27,20 @@ namespace Prism.Export
 		/// The extension which will be applied to export files
 		/// </summary>
 		[CmdArg(Arg = "export-ext", Usage = "The extention all exported files will prepend to thier current", MustExist = false)]
-		private string m_ExportExtension = ".refl";
+		protected string m_ExportExtension = ".refl";
 
 		/// <summary>
 		/// File information about a 
 		/// </summary>
 		public class ExportFile
 		{
+			public enum FileState
+			{
+				New,
+				Updated,
+				Removed
+			}
+
 			/// <summary>
 			/// The full path to this file
 			/// </summary>
@@ -45,9 +52,9 @@ namespace Prism.Export
 			public bool IsInclude;
 
 			/// <summary>
-			/// Is this file newly made
+			/// The state of this particular file
 			/// </summary>
-			public bool IsNewFile;
+			public FileState State;
 		}
 
 		/// <summary>
@@ -126,6 +133,37 @@ namespace Prism.Export
 		public abstract List<ExportFile> Run();
 
 		/// <summary>
+		/// Runs through the given files and exports any reflection data
+		/// </summary>
+		/// <returns>The new reflection files which have been generated</returns>
+		protected List<ExportFile> RunInternal(ReflectionSettings settings, IEnumerable<string> reflectableFiles, string exportDirectory)
+		{
+			List<ExportFile> outputFiles = new List<ExportFile>();
+			
+			Console.WriteLine("Generating Prism Reflection -> " + exportDirectory);
+			foreach (var file in reflectableFiles)
+			{
+				try
+				{
+					// Don't read in output directory
+					if (!file.Equals(exportDirectory, StringComparison.CurrentCultureIgnoreCase))
+					{
+						List<ExportFile> exports = ReflectFile(settings, file, exportDirectory);
+						outputFiles.AddRange(exports);
+					}
+				}
+				catch (ReflectionException e)
+				{
+					throw new HeaderReflectionException(file, e.ErrorCode, e.Signature, e);
+				}
+			}
+			Console.WriteLine("Prism Reflection Generated.");
+
+			LastBuildTime = DateTime.UtcNow;
+			return outputFiles;
+		}
+
+		/// <summary>
 		/// Reflect a given input file and return the export information about any new files
 		/// </summary>
 		/// <returns>All the reflection files which have been created from these</returns>
@@ -202,8 +240,35 @@ namespace Prism.Export
 				{
 					HeaderReflection file = HeaderReflection.Generate(settings, sourcePath, stream);
 
+					// If there were no tokens, check if there are artefacts from previous runs (If so, the files need to be wiped)
+					if (file.ReflectedTokenCount == 0)
+					{
+						// Check for include refl
+						if (File.Exists(includeExportPath))
+						{
+							ExportFile includeExport = new ExportFile();
+							includeExport.IsInclude = true;
+							includeExport.State = ExportFile.FileState.Removed;
+							includeExport.Path = includeExportPath;
+
+							File.Delete(includeExportPath);
+							exports.Add(includeExport);
+						}
+						// Check for source refl
+						if (File.Exists(sourceExportPath))
+						{
+							ExportFile sourceExport = new ExportFile();
+							sourceExport.IsInclude = false;
+							sourceExport.State = ExportFile.FileState.Removed;
+							sourceExport.Path = sourceExportPath;
+
+							File.Delete(sourceExportPath);
+							exports.Add(sourceExport);
+						}
+					}
+
 					// Export tokens, if any have been found
-					if (file.ReflectedTokenCount != 0)
+					else
 					{
 						// This has valid tokens to reflect, so check that the includes are present
 						bool foundReflInclude = false;
@@ -214,9 +279,9 @@ namespace Prism.Export
 						{
 							if (fileInclude.LineNumber > firstTokenLine)
 								continue;
-							
+
 							string path = fileInclude.Path.ToLower().Replace('/', '\\');
-							if(requiredPreInclude.EndsWith(path))
+							if (requiredPreInclude.EndsWith(path))
 							{
 								foundReflInclude = true;
 								break;
@@ -281,7 +346,7 @@ namespace Prism.Export
 								Directory.CreateDirectory(includeExportDir);
 
 							includeExport.IsInclude = true;
-							includeExport.IsNewFile = !File.Exists(includeExportPath);
+							includeExport.State = !File.Exists(includeExportPath) ? ExportFile.FileState.New : ExportFile.FileState.Updated;
 							includeExport.Path = includeExportPath;
 
 							File.WriteAllText(includeExportPath, includeContent);
@@ -297,7 +362,7 @@ namespace Prism.Export
 								Directory.CreateDirectory(sourceExportDir);
 
 							sourceExport.IsInclude = false;
-							sourceExport.IsNewFile = !File.Exists(sourceExportPath);
+							sourceExport.State = !File.Exists(sourceExportDir) ? ExportFile.FileState.New : ExportFile.FileState.Updated;
 							sourceExport.Path = sourceExportPath;
 
 							File.WriteAllText(sourceExportPath, sourceContent);
