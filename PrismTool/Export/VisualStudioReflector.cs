@@ -22,10 +22,16 @@ namespace Prism.Export
 		private string m_SourceProject;
 
 		/// <summary>
+		/// Where all the output files will be placed
+		/// </summary>
+		[CmdArg(Arg = "out-dir", Usage = "The directory where output files will be placed", MustExist = false)]
+		private string m_OutputDirectory = null;
+
+		/// <summary>
 		/// Where all the reflection files will be outputed to
 		/// </summary>
-		[CmdArg(Arg = "out-vsproj", Usage = "The project where all reflection files should be placed", MustExist = true)]
-		private string m_OutputProject;
+		[CmdArg(Arg = "out-vsproj", Usage = "The project where all reflection files should be placed", MustExist = false)]
+		private string m_OutputProject = null;
 
 		/// <summary>
 		/// The extensions that are supported
@@ -48,14 +54,37 @@ namespace Prism.Export
 
 			if (!File.Exists(m_SourceProject))
 				throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find source project file");
+			
+			// Check output location exists and haven't provided multiple
+			if (m_OutputDirectory != null && m_OutputProject != null)
+				throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Cannot contain both --out-dir and --out-vsproj arguments");
 
-			if (!File.Exists(m_OutputProject))
-				throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find output project file");
+			else if (m_OutputDirectory != null)
+			{
+				if (!Directory.Exists(m_OutputDirectory))
+					throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find output directory");
+			}
+			else if (m_OutputProject != null)
+			{
+				if (!File.Exists(m_OutputProject))
+					throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find output project file");
+			}
+			else
+				throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Missing required --out-dir argument");
 		}
 
 		public string OutputDirectory
 		{
-			get { return Path.Combine(Path.GetDirectoryName(m_OutputProject), "Prism"); }
+			get
+			{
+				// Output to location in project
+				if (m_OutputProject != null)
+					return Path.Combine(Path.GetFullPath(Path.GetDirectoryName(m_OutputProject)), "Prism");
+				// Output to given location
+				else
+					return Path.GetFullPath(m_OutputDirectory);
+
+			}
 		}
 
 		public override string IntermediateFolder
@@ -91,8 +120,17 @@ namespace Prism.Export
 		public override List<ExportFile> Run()
 		{
 			var sourceFiles = FetchReflectableFiles();
-			string outProjDir = Path.GetDirectoryName(m_OutputProject);
 			List<ExportFile> files = RunInternal(m_ReflectionSettings, sourceFiles, OutputDirectory);
+
+			if (m_OutputProject != null)
+				WriteToProject(files);
+
+			return files;
+		}
+
+		private void WriteToProject(List<ExportFile> files)
+		{
+			string outProjDir = Path.GetDirectoryName(m_OutputProject);
 
 			// TODO - Add these files to filters (Will fail to load if filter file missmatch)
 			// Add these files to the export project
@@ -124,7 +162,7 @@ namespace Prism.Export
 				foreach (ExportFile file in files.Where(f => f.State == ExportFile.FileState.New))
 				{
 					XmlElement fileNode;
-					
+
 					// Create new entry for this reflection
 					if (file.IsInclude)
 						fileNode = project.CreateElement("ClInclude", reflGroup.NamespaceURI);
@@ -141,7 +179,7 @@ namespace Prism.Export
 					reflGroup.AppendChild(fileNode);
 					requiresChanges = true;
 				}
-				
+
 				// Remove old files from project
 				foreach (ExportFile file in files.Where(f => f.State == ExportFile.FileState.Removed))
 				{
@@ -179,8 +217,6 @@ namespace Prism.Export
 					// TODO - Handle this better? throw new Exception("New files added to project. (Requires reload before build..)");
 				}
 			}
-						
-			return files;
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace Prism
 		/// </summary>
 		private static string FormatErrorMessage(string message, string source, int line = -1, ReflectionErrorCode errorCode = ReflectionErrorCode.GenericError)
 		{
-			return source + "(" + line + "): error PER" + (int)errorCode + ": " + message;
+			return source + "(" + line + "): error PRI" + (int)errorCode + ": " + message;
 		}
 
 		static void Main(string[] args)
@@ -43,36 +43,35 @@ namespace Prism
 
 #if !DEBUG
 			try
-			{
 #endif
-			// Multiple reflection
-			if (selector.DirectorySource != null && selector.VisualStudioSource != null)
 			{
-				throw new Exception("Found --src-dir and --src-vsproj. Only supports a single one at a time.");
-			}
+				// Multiple reflection
+				if (selector.DirectorySource != null && selector.VisualStudioSource != null)
+				{
+					throw new Exception("Found --src-dir and --src-vsproj. Only supports a single one at a time.");
+				}
 
-			// Reflect directory
-			else if (selector.DirectorySource != null)
-			{
-				DirectoryReflector reflector = new DirectoryReflector(args);
-				reflector.Run();
-			}
+				// Reflect directory
+				else if (selector.DirectorySource != null)
+				{
+					DirectoryReflector reflector = new DirectoryReflector(args);
+					reflector.Run();
+				}
 
-			// Reflect project
-			else if (selector.VisualStudioSource != null)
-			{
-				VisualStudioReflector reflector = new VisualStudioReflector(args);
-				reflector.Run();
-			}
+				// Reflect project
+				else if (selector.VisualStudioSource != null)
+				{
+					VisualStudioReflector reflector = new VisualStudioReflector(args);
+					reflector.Run();
+				}
 
-			// No reflection
-			else
-			{
-				throw new Exception("Not found code source. Exprect --src-dir or --src-vsproj.");
+				// No reflection
+				else
+				{
+					throw new Exception("Not found code source. Exprect --src-dir or --src-vsproj.");
+				}
 			}
 #if !DEBUG
-			}
-
 			// Report errors in the VS message format <file>(<line>): error <code>: <message>
 			catch (CmdArgParseException e)
 			{
@@ -80,21 +79,21 @@ namespace Prism
 				Console.Error.WriteLine(FormatErrorMessage(e.Message, "PrismTool.exe"));
 				Console.Error.WriteLine(FormatErrorMessage(e.Usage, "PrismTool.exe"));
 				Console.Error.WriteLine(e.StackTrace);
-				Environment.Exit(400);
+				Environment.Exit(-1);
 			}
 			catch (HeaderReflectionException e)
 			{
 				Console.Error.WriteLine("HeaderReflectionException Caught");
 				Console.Error.WriteLine(FormatErrorMessage(e.Message, e.FilePath, (int)e.Signature.LineNumber, e.ErrorCode));
 				Console.Error.WriteLine(e.InnerException.StackTrace);
-				Environment.Exit(400);
+				Environment.Exit(-1);
 			}
 			catch (Exception e)
 			{
 				Console.Error.WriteLine("Exception Caught");
 				Console.Error.WriteLine(FormatErrorMessage(e.Message, "PrismTool.exe"));
 				Console.Error.WriteLine(e.StackTrace);
-				Environment.Exit(400);
+				Environment.Exit(-1);
 			}
 #endif
 		}
