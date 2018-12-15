@@ -24,20 +24,26 @@ namespace Prism.Reflection
 		/// Is this currrent function a constructor
 		/// </summary>
 		private bool m_IsConstructor = false;
+
+		/// <summary>
+		/// The accessor of this function
+		/// </summary>
+		private string m_Accessor;
 		
 		// Constructor reflection
-		public FunctionReflection(StructureReflection parentStructure, ConstructorInfo constructor, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
-			: this(parentStructure, constructor.ToFunctionInfo(), conditionState, tokenFile, tokenLine, tokenParams, docString)
+		public FunctionReflection(StructureReflection parentStructure, string accessor, ConstructorInfo constructor, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
+			: this(parentStructure, accessor, constructor.ToFunctionInfo(), conditionState, tokenFile, tokenLine, tokenParams, docString)
 		{
 			m_IsConstructor = true;
 		}
 
 		// Normal function reflection
-		public FunctionReflection(StructureReflection parentStructure, FunctionInfo function, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
+		public FunctionReflection(StructureReflection parentStructure, string accessor, FunctionInfo function, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
 			: base(conditionState, tokenFile, tokenLine, tokenParams, docString)
 		{
 			m_ParentStructure = parentStructure;
 			m_ReflectionInfo = function;
+			m_Accessor = accessor.ToLower();
 
 			if (function.ReturnType != null && function.ReturnType.PointerCount > 1)
 			{
@@ -109,6 +115,7 @@ public:
 	: Prism::Method(
 		PRISM_STR(""%FUNCTION_INTERNAL_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""), 
 		{ %ATTRIBUTES_VALUES% }, 
+		Prism::Accessor::%ACCESSOR%,
 		%IS_STATIC%, %IS_CONST%, %IS_VIRTUAL%
 	)
 {}
@@ -246,6 +253,7 @@ case %PARAM_INDEX%:
 				.Replace("%FUNCTION_INTERNAL_NAME%", m_ReflectionInfo.FunctionName)
 				.Replace("%PARENT_STRUCTURE%", m_ParentStructure.DeclerationName)
 				.Replace("%ATTRIBUTES_VALUES%", GenerateAttributeInstancesString("Method"))
+				.Replace("%ACCESSOR%", char.ToUpper(m_Accessor[0]) + m_Accessor.Substring(1))
 				.Replace("%IS_VIRTUAL%", m_ReflectionInfo.IsVirtual ? "1" : "0")
 				.Replace("%IS_STATIC%", m_ReflectionInfo.IsStatic ? "1" : "0")
 				.Replace("%IS_CONST%", m_ReflectionInfo.IsConst ? "1" : "0")

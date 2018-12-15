@@ -6,6 +6,7 @@
 ///
 #pragma once
 #include "Definitions.h"
+#include "Accessor.h"
 #include "AttributeStore.h"
 #include "Holder.h"
 
@@ -18,13 +19,14 @@ namespace Prism
 	private:
 		const String m_Name;
 		const String m_Documentation;
+		const Accessor m_Accessor;
 
 	protected:
 		const bool m_IsPointer : 1;
 		const bool m_IsStatic : 1;
 		const bool m_IsConst : 1;
 
-		Property(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, bool isPointer, bool isStatic, bool isConst);
+		Property(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, Accessor accessor, bool isPointer, bool isStatic, bool isConst);
 	public:
 		inline const String& GetName() const { return m_Name; }
 		inline const String& GetDocumentation() const { return m_Documentation; }
@@ -32,6 +34,7 @@ namespace Prism
 		inline bool IsPointer() const { return m_IsPointer; }
 		inline bool IsStatic() const { return m_IsStatic; }
 		inline bool IsConst() const { return m_IsConst; }
+		inline Accessor GetAccessor() const { return m_Accessor; }
 
 		///
 		/// Get the prism type info for the parent of this property

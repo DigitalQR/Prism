@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClInclude Include="Include\Prism.h" />
     <ClInclude Include="Include\PrismMinimal.h" />
+    <ClInclude Include="Include\Prism\Accessor.h" />
     <ClInclude Include="Include\Prism\Assembly.h" />
     <ClInclude Include="Include\Prism\Attribute.h" />
     <ClInclude Include="Include\Prism\AttributeStore.h" />

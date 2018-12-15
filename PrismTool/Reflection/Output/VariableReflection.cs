@@ -20,11 +20,17 @@ namespace Prism.Reflection
 		/// </summary>
 		private VariableInfo m_ReflectionInfo;
 
-		public VariableReflection(StructureReflection parentStructure, VariableInfo variable, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
+		/// <summary>
+		/// The accessor of this function
+		/// </summary>
+		private string m_Accessor;
+
+		public VariableReflection(StructureReflection parentStructure, string accessor, VariableInfo variable, ConditionState conditionState, string tokenFile, int tokenLine, string tokenParams, string docString)
 			: base(conditionState, tokenFile, tokenLine, tokenParams, docString)
 		{
 			m_ParentStructure = parentStructure;
 			m_ReflectionInfo = variable;
+			m_Accessor = accessor.ToLower();
 
 			if (variable.TypeInfo.PointerCount > 1)
 			{
@@ -76,6 +82,7 @@ public:
 	: Prism::Property(
 		PRISM_STR(""%VARIABLE_NAME%""), PRISM_DEVSTR(R""(%DOC_STRING%)""),
 		{ %ATTRIBUTES_VALUES% },
+		Prism::Accessor::%ACCESSOR%,
 		%IS_POINTER%, %IS_STATIC%, %IS_CONST%
 	)
 {
@@ -128,6 +135,7 @@ Prism::Holder %PARENT_STRUCTURE%::VariableInfo_%VARIABLE_NAME%::Get(Prism::Holde
 				.Replace("%VARIABLE_NAME%", m_ReflectionInfo.VariableName)
 				.Replace("%VARIABLE_TYPE%", m_ReflectionInfo.TypeInfo.InnerType.TypeName)
 				.Replace("%ATTRIBUTES_VALUES%", GenerateAttributeInstancesString("Properties"))
+				.Replace("%ACCESSOR%", char.ToUpper(m_Accessor[0]) + m_Accessor.Substring(1))
 				.Replace("%IS_POINTER%", m_ReflectionInfo.TypeInfo.PointerCount != 0 ? "1" : "0")
 				.Replace("%IS_STATIC%", m_ReflectionInfo.TypeInfo.IsStatic ? "1" : "0")
 				.Replace("%IS_CONST%", m_ReflectionInfo.TypeInfo.IsConst ? "1" : "0")

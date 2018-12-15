@@ -3,10 +3,11 @@
 
 namespace Prism
 {
-	Method::Method(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, bool isStatic, bool isConst, bool isVirtual)
+	Method::Method(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, Accessor accessor, bool isStatic, bool isConst, bool isVirtual)
 		: AttributeStore(attributes)
 		, m_Name(name)
 		, m_Documentation(documentation)
+		, m_Accessor(accessor)
 		, m_IsStatic(isStatic)
 		, m_IsConst(isConst)
 		, m_IsVirtual(isVirtual)

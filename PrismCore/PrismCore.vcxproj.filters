@@ -63,6 +63,9 @@
     <ClInclude Include="Include\Prism\AttributeStore.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Prism\Accessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembly.cpp">

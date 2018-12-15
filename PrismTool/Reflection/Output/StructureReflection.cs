@@ -80,19 +80,19 @@ namespace Prism.Reflection
 			if (sigInfo.SignatureType == SignatureInfo.SigType.FunctionDeclare)
 			{
 				var data = (FunctionInfo)sigInfo.AdditionalParam;
-				FunctionReflection refl = new FunctionReflection(this, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
+				FunctionReflection refl = new FunctionReflection(this, accessor, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
 				m_Functions.Add(refl);
 			}
 			else if (sigInfo.SignatureType == SignatureInfo.SigType.VariableDeclare)
 			{
 				var data = (VariableInfo)sigInfo.AdditionalParam;
-				VariableReflection refl = new VariableReflection(this, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
+				VariableReflection refl = new VariableReflection(this, accessor, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
 				m_Variables.Add(refl);
 			}
 			else if (sigInfo.SignatureType == SignatureInfo.SigType.StructureConstructor)
 			{
 				var data = (ConstructorInfo)sigInfo.AdditionalParam;
-				FunctionReflection refl = new FunctionReflection(this, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
+				FunctionReflection refl = new FunctionReflection(this, accessor, data, conditionState, tokenFile, tokenLine, tokenParams, docString);
 				m_Functions.Add(refl);
 			}
 		}
