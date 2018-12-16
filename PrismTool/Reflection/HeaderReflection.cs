@@ -270,7 +270,7 @@ namespace Prism.Reflection
 						// Add any variables to structure
 						case SignatureInfo.SigType.VariableDeclare:
 							{
-								if (previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
+								if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
 								{
 									var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
 
@@ -300,7 +300,7 @@ namespace Prism.Reflection
 						// Add any function to structure
 						case SignatureInfo.SigType.FunctionDeclare:
 							{
-								if (previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
+								if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
 								{
 									var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
 
@@ -392,9 +392,9 @@ namespace Prism.Reflection
 
 			if (data.MacroName == token)
 			{
-				if (previousSignature.SignatureType == SignatureInfo.SigType.StructureImplementationBegin)
+				if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.StructureImplementationBegin)
 				{
-					var structureData = (previousSignature != null ? (StructureSignature.ImplementationBeginData)previousSignature.AdditionalParam : null);
+					var structureData = (StructureSignature.ImplementationBeginData)previousSignature.AdditionalParam;
 					if (structureData.StructureType == structure)
 					{
 						return true;
