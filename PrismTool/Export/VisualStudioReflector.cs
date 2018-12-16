@@ -61,8 +61,9 @@ namespace Prism.Export
 
 			else if (m_OutputDirectory != null)
 			{
-				if (!Directory.Exists(m_OutputDirectory))
-					throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find output directory");
+				// Output directory will be found, so it's fine
+				//if (!Directory.Exists(m_OutputDirectory))
+				//	throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find output directory");
 			}
 			else if (m_OutputProject != null)
 			{
