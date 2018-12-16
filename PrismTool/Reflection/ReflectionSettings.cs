@@ -10,6 +10,12 @@ namespace Prism.Reflection
 	public class ReflectionSettings
 	{
 		/// <summary>
+		/// The extension which will be applied to export files
+		/// </summary>
+		[CmdArg(Arg = "export-ext", Usage = "The extention all exported files will prepend to thier current", MustExist = false)]
+		public string ExportExtension = ".refl";
+
+		/// <summary>
 		/// The token to indicate a class which should be reflected
 		/// Expected to be found as the first line of the class body
 		/// </summary>
@@ -64,5 +70,11 @@ namespace Prism.Reflection
 		/// </summary>
 		[CmdArg(Arg = "rebuild", ShortArg = "r", Usage = "Force all files to be rescanned and rebuilt", MustExist = false)]
 		public bool RebuildEverything = false;
+
+		/// <summary>
+		/// If an exception is thrown in a file which doesn't have the required reflection include, will it be treated as an error
+		/// </summary>
+		[CmdArg(Arg = "ignore-badform", Usage = "If an exception is thrown in a file which doesn't have the required reflection include, will it be treated as an error", MustExist = false)]
+		public bool IgnoreBadForm = true;
 	}
 }

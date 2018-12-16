@@ -94,295 +94,327 @@ namespace Prism.Reflection
 		{
 			HeaderReflection reflection = new HeaderReflection(settings);
 
-			using (HeaderReader reader = new HeaderReader(content))
+			try
 			{
-				SignatureInfo previousSignature = null;
-				SignatureInfo currentSignature;
-
-				// Setup file states
-				string recentDocString = "";
-				bool reuseDocString = false;
-
-				string[] activeNamespace = null;
-				string currentAccessScope = "private";
-
-				ConditionState macroCondition = new ConditionState();
-				StructureReflectionBase currentStructure = null;
-
-				while (reader.TryReadNext(out currentSignature))
+				using (HeaderReader reader = new HeaderReader(content))
 				{
-					bool macroTokenClaimed = false;
+					SignatureInfo previousSignature = null;
+					SignatureInfo currentSignature;
 
-					/*
-						Unknown, 
-						InvalidParseFormat,
-						
-						UsingNamespace,
-						
-						StructureForwardDeclare,
-						
-						FriendDeclare,
-						TypeDefDeclare,
-						TemplateDeclare,
-					 */
+					// Setup file states
+					string recentDocString = "";
+					bool reuseDocString = false;
 
-					// Keep track of most recent comment (Do not store this as last signature)
-					if (currentSignature.SignatureType == SignatureInfo.SigType.CommentBlock)
+					string[] activeNamespace = null;
+					string currentAccessScope = "private";
+
+					ConditionState macroCondition = new ConditionState();
+					StructureReflectionBase currentStructure = null;
+
+					while (reader.TryReadNext(out currentSignature))
 					{
-						recentDocString = currentSignature.LineContent;
-						continue;
-					}
+						bool macroTokenClaimed = false;
 
-					switch (currentSignature.SignatureType)
-					{
-						// Handle errors in parsing
-						case SignatureInfo.SigType.InvalidParseFormat:
-							{
-								throw new ReflectionException(ReflectionErrorCode.ParseError, currentSignature, "Prism parser found something unexpected (InvalidParseFormat): '" + currentSignature.AdditionalParam + "'");
-							}
+						/*
+							Unknown, 
+							InvalidParseFormat,
 
-						// Keep track of current namespace
-						case SignatureInfo.SigType.NamespaceBegin:
-						case SignatureInfo.SigType.NamespaceEnd:
-							{
-								var sigData = (NamespaceSignature.ActiveData)currentSignature.AdditionalParam;
-								activeNamespace = sigData.CurrentNamespace;
-								break;
-							}
-						// TODO - Some handling for 'using namespace'
+							UsingNamespace,
 
-						// Keep track of current pre-processor condition
-						case SignatureInfo.SigType.PreProcessorDirective:
-							{
-								string macroString = currentSignature.LineContent;
+							StructureForwardDeclare,
 
-								if (macroString.StartsWith("#include"))
+							FriendDeclare,
+							TypeDefDeclare,
+							TemplateDeclare,
+						 */
+
+						// Keep track of most recent comment (Do not store this as last signature)
+						if (currentSignature.SignatureType == SignatureInfo.SigType.CommentBlock)
+						{
+							recentDocString = currentSignature.LineContent;
+							continue;
+						}
+
+						switch (currentSignature.SignatureType)
+						{
+							// Handle errors in parsing
+							case SignatureInfo.SigType.InvalidParseFormat:
 								{
-									string includeFile = macroString.Substring("#include".Length).Trim();
-									// Remove <> or ""
-									includeFile = includeFile.Substring(1, includeFile.Length - 2);
-
-									IncludeFile include = new IncludeFile();
-									include.Path = includeFile;
-									include.LineNumber = (int)currentSignature.LineNumber;
-
-									reflection.m_Includes.Add(include);
+									throw new ReflectionException(ReflectionErrorCode.ParseError, currentSignature, "Prism parser found something unexpected (InvalidParseFormat): '" + currentSignature.AdditionalParam + "'");
 								}
 
-								else if (macroString.StartsWith("#ifdef"))
+							// Keep track of current namespace
+							case SignatureInfo.SigType.NamespaceBegin:
+							case SignatureInfo.SigType.NamespaceEnd:
 								{
-									string condition = macroString.Substring("#ifdef".Length).Trim();
-									macroCondition.AddIF("defined(" + condition + ")");
+									var sigData = (NamespaceSignature.ActiveData)currentSignature.AdditionalParam;
+									activeNamespace = sigData.CurrentNamespace;
+									break;
 								}
-								else if (macroString.StartsWith("#if"))
+							// TODO - Some handling for 'using namespace'
+
+							// Keep track of current pre-processor condition
+							case SignatureInfo.SigType.PreProcessorDirective:
 								{
-									string condition = macroString.Substring("#if".Length).Trim();
-									macroCondition.AddIF(condition);
+									string macroString = currentSignature.LineContent;
 
-								}
-								else if (macroString.StartsWith("#elif"))
-								{
-									string condition = macroString.Substring("#elif".Length).Trim();
-									macroCondition.AddELSEIF(condition);
-								}
-								else if (macroString.StartsWith("#else"))
-								{
-									macroCondition.AddELSE();
-								}
-								else if (macroString.StartsWith("#endif"))
-								{
-									macroCondition.EndIF();
-								}
-
-								string a = macroCondition.CurrentCondition;
-								break;
-							}
-
-						case SignatureInfo.SigType.AccessorSet:
-							{
-								var data = (AccessorSignature.ParseData)currentSignature.AdditionalParam;
-								currentAccessScope = data.Accessor;
-								break;
-							}
-
-						// Keep an eye out for macro calls of relevence
-						case SignatureInfo.SigType.MacroCall:
-							{
-								var data = (MacroCallSignature.ParseData)currentSignature.AdditionalParam;
-
-								// Look for any structures which are supported
-								string errorMessage = null;
-
-								foreach (var supportedStructure in reflection.m_SupportedStructureTokens)
-								{
-									if (data.MacroName == supportedStructure.MacroToken && ValidateStructureReflection(currentSignature, previousSignature, supportedStructure.MacroToken, supportedStructure.StructureType))
+									if (macroString.StartsWith("#include"))
 									{
-										if (currentStructure != null)
-										{
-											errorMessage = "Found unexpected '" + supportedStructure.MacroToken + "' (Prism does not currently support reflecting embedded '" + supportedStructure.StructureType + "' structures)";
-										}
-										else
-										{
-											// Create new structure for this signature
-											currentStructure = StructureReflectionBase.RetrieveFromSignature(previousSignature, activeNamespace, macroCondition, filePath, (int)currentSignature.LineNumber, data.MacroParams, recentDocString);
-											currentAccessScope = supportedStructure.DefaultAccess;
-											reflection.m_ReflectedTokens.Add(currentStructure);
+										string includeFile = macroString.Substring("#include".Length).Trim();
+										// Remove <> or ""
+										includeFile = includeFile.Substring(1, includeFile.Length - 2);
 
-											// Reset any previous error (Originated for shared macro token)
-											errorMessage = null;
+										IncludeFile include = new IncludeFile();
+										include.Path = includeFile;
+										include.LineNumber = (int)currentSignature.LineNumber;
+
+										reflection.m_Includes.Add(include);
+									}
+
+									else if (macroString.StartsWith("#ifdef"))
+									{
+										string condition = macroString.Substring("#ifdef".Length).Trim();
+										macroCondition.AddIF("defined(" + condition + ")");
+									}
+									else if (macroString.StartsWith("#if"))
+									{
+										string condition = macroString.Substring("#if".Length).Trim();
+										macroCondition.AddIF(condition);
+
+									}
+									else if (macroString.StartsWith("#elif"))
+									{
+										string condition = macroString.Substring("#elif".Length).Trim();
+										macroCondition.AddELSEIF(condition);
+									}
+									else if (macroString.StartsWith("#else"))
+									{
+										macroCondition.AddELSE();
+									}
+									else if (macroString.StartsWith("#endif"))
+									{
+										macroCondition.EndIF();
+									}
+
+									string a = macroCondition.CurrentCondition;
+									break;
+								}
+
+							case SignatureInfo.SigType.AccessorSet:
+								{
+									var data = (AccessorSignature.ParseData)currentSignature.AdditionalParam;
+									currentAccessScope = data.Accessor;
+									break;
+								}
+
+							// Keep an eye out for macro calls of relevence
+							case SignatureInfo.SigType.MacroCall:
+								{
+									var data = (MacroCallSignature.ParseData)currentSignature.AdditionalParam;
+
+									// Look for any structures which are supported
+									string errorMessage = null;
+
+									foreach (var supportedStructure in reflection.m_SupportedStructureTokens)
+									{
+										if (data.MacroName == supportedStructure.MacroToken && ValidateStructureReflection(currentSignature, previousSignature, supportedStructure.MacroToken, supportedStructure.StructureType))
+										{
+											if (currentStructure != null)
+											{
+												errorMessage = "Found unexpected '" + supportedStructure.MacroToken + "' (Prism does not currently support reflecting embedded '" + supportedStructure.StructureType + "' structures)";
+											}
+											else
+											{
+												// Create new structure for this signature
+												currentStructure = StructureReflectionBase.RetrieveFromSignature(previousSignature, activeNamespace, macroCondition, filePath, (int)currentSignature.LineNumber, data.MacroParams, recentDocString);
+												currentAccessScope = supportedStructure.DefaultAccess;
+												reflection.m_ReflectedTokens.Add(currentStructure);
+
+												// Reset any previous error (Originated for shared macro token)
+												errorMessage = null;
+												break;
+											}
+										}
+									}
+
+									if (errorMessage != null)
+										throw new ReflectionException(ReflectionErrorCode.TokenMissuse, currentSignature, errorMessage);
+
+
+									reuseDocString = true;
+									break;
+								}
+
+							// Keep an eye out for the currentStructure ending
+							case SignatureInfo.SigType.StructureImplementationBegin:
+								{
+									// Wait for macro to appear before reflecting
+									reuseDocString = true;
+									break;
+								}
+
+							// Keep an eye out for the currentStructure ending
+							case SignatureInfo.SigType.StructureImplementationEnd:
+								{
+									var data = (StructureSignature.ImplementationEndData)currentSignature.AdditionalParam;
+									if (currentStructure != null)
+									{
+										// Found end of the current structure
+										if (currentStructure.StructureType == data.StructureType && currentStructure.DeclerationName == data.DeclareName)
+										{
+											currentStructure = null;
+										}
+									}
+
+									break;
+								}
+
+							// Add any variables to structure
+							case SignatureInfo.SigType.VariableDeclare:
+								{
+									if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
+									{
+										var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
+
+										if (data.MacroName == settings.VariableToken)
+										{
+											macroTokenClaimed = true;
+
+											if (currentStructure != null)
+												currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
+											else
+											{
+												throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.VariableToken + "' (Prism does not currently support reflecting outside of a type structure)");
+											}
 											break;
 										}
 									}
-								}
 
-								if(errorMessage != null)
-									throw new ReflectionException(ReflectionErrorCode.TokenMissuse, currentSignature, errorMessage);
-
-
-								reuseDocString = true;
-								break;
-							}
-
-						// Keep an eye out for the currentStructure ending
-						case SignatureInfo.SigType.StructureImplementationBegin:
-							{
-								// Wait for macro to appear before reflecting
-								reuseDocString = true;
-								break;
-							}
-
-						// Keep an eye out for the currentStructure ending
-						case SignatureInfo.SigType.StructureImplementationEnd:
-							{
-								var data = (StructureSignature.ImplementationEndData)currentSignature.AdditionalParam;
-								if (currentStructure != null)
-								{
-									// Found end of the current structure
-									if (currentStructure.StructureType == data.StructureType && currentStructure.DeclerationName == data.DeclareName)
+									if (settings.UseImplicitVariables)
 									{
-										currentStructure = null;
-									}
-								}
-
-								break;
-							}
-
-						// Add any variables to structure
-						case SignatureInfo.SigType.VariableDeclare:
-							{
-								if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
-								{
-									var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
-
-									if (data.MacroName == settings.VariableToken)
-									{
-										macroTokenClaimed = true;
-
 										if (currentStructure != null)
-											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
-										else
-										{
-											throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.VariableToken + "' (Prism does not currently support reflecting outside of a type structure)");
-										}
-										break;
+											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
 									}
+
+									break;
 								}
 
-								if (settings.UseImplicitVariables)
+							// Add any function to structure
+							case SignatureInfo.SigType.FunctionDeclare:
+								{
+									if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
+									{
+										var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
+
+										if (data.MacroName == settings.FunctionToken)
+										{
+											macroTokenClaimed = true;
+
+											if (currentStructure != null)
+												currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
+											else
+											{
+												throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.FunctionToken + "' (Prism does not currently support reflecting outside of a type structure)");
+											}
+											break;
+										}
+									}
+
+									if (settings.UseImplicitFunctions)
+									{
+										if (currentStructure != null)
+											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
+									}
+
+									break;
+								}
+
+							// Add any enum value to structure
+							case SignatureInfo.SigType.EnumValueEntry:
 								{
 									if (currentStructure != null)
 										currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
+
+									break;
 								}
 
-								break;
-							}
-
-						// Add any function to structure
-						case SignatureInfo.SigType.FunctionDeclare:
-							{
-								if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
-								{
-									var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
-
-									if (data.MacroName == settings.FunctionToken)
-									{
-										macroTokenClaimed = true;
-
-										if (currentStructure != null)
-											currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)previousSignature.LineNumber, data.MacroParams, recentDocString);
-										else
-										{
-											throw new ReflectionException(ReflectionErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.FunctionToken + "' (Prism does not currently support reflecting outside of a type structure)");
-										}
-										break;
-									}
-								}
-
-								if (settings.UseImplicitFunctions)
+							// Add any constructor to current structure
+							case SignatureInfo.SigType.StructureConstructor:
 								{
 									if (currentStructure != null)
 										currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
+									break;
 								}
 
-								break;
-							}
+							// Add any destructor to current structure
+							case SignatureInfo.SigType.StructureDestructor:
+								{
+									if (currentStructure != null)
+										currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
+									break;
+								}
 
-						// Add any enum value to structure
-						case SignatureInfo.SigType.EnumValueEntry:
-							{
-								if (currentStructure != null)
-									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
+						}
 
-								break;
-							}
-
-						// Add any constructor to current structure
-						case SignatureInfo.SigType.StructureConstructor:
-							{
-								if (currentStructure != null)
-									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
-								break;
-							}
-
-						// Add any destructor to current structure
-						case SignatureInfo.SigType.StructureDestructor:
-							{
-								if (currentStructure != null)
-									currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
-								break;
-							}
-
-					}
-					
-					// Check for miss-use of macro tokens
-					if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
-					{
-						if (!macroTokenClaimed)
+						// Check for miss-use of macro tokens
+						if (previousSignature != null && previousSignature.SignatureType == SignatureInfo.SigType.MacroCall)
 						{
-							var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
+							if (!macroTokenClaimed)
+							{
+								var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
 
-							if (data.MacroName == settings.FunctionToken)
-							{
-								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting function definition to follow. Got " + currentSignature.SignatureType + " )");
+								if (data.MacroName == settings.FunctionToken)
+								{
+									throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting function definition to follow. Got " + currentSignature.SignatureType + " )");
+								}
+								else if (data.MacroName == settings.VariableToken)
+								{
+									throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting variable definition to follow. Got " + currentSignature.SignatureType + " )");
+								}
 							}
-							else if (data.MacroName == settings.VariableToken)
-							{
-								throw new ReflectionException(ReflectionErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting variable definition to follow. Got " + currentSignature.SignatureType + " )");
-							}
+						}
+
+						// Should keep same doc-string between statements
+						if (reuseDocString)
+							reuseDocString = false;
+						else
+							recentDocString = "";
+
+						// Refresh previous signature
+						previousSignature = currentSignature;
+					}
+
+					return reflection;
+				}
+			}
+			catch (Exception e)
+			{
+				if (settings.IgnoreBadForm)
+				{
+					// Look for export include
+					bool foundReflInclude = false;
+					string includeExportPath = Path.GetFileNameWithoutExtension(filePath) + settings.ExportExtension + Path.GetExtension(filePath);
+					string requiredPreInclude = includeExportPath.ToLower().Replace('/', '\\');
+
+					foreach (var fileInclude in reflection.FileIncludes)
+					{
+						string path = fileInclude.Path.ToLower().Replace('/', '\\');
+						if (requiredPreInclude.EndsWith(path))
+						{
+							foundReflInclude = true;
+							break;
 						}
 					}
 
-					// Should keep same doc-string between statements
-					if (reuseDocString)
-						reuseDocString = false;
+					// Ignore bad parsing, if expected include is not present
+					if (foundReflInclude)
+						throw e;
 					else
-						recentDocString = "";
-
-					// Refresh previous signature
-					previousSignature = currentSignature;
+						// Return empty reflection
+						return new HeaderReflection(settings);
 				}
-
-				return reflection;
+				else
+					throw e;
 			}
 		}
 
