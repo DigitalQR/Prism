@@ -94,7 +94,9 @@ namespace Prism.Reflection
 		{
 			HeaderReflection reflection = new HeaderReflection(settings);
 
+#if !DEBUG
 			try
+#endif
 			{
 				using (HeaderReader reader = new HeaderReader(content))
 				{
@@ -387,6 +389,7 @@ namespace Prism.Reflection
 					return reflection;
 				}
 			}
+#if !DEBUG
 			catch (Exception e)
 			{
 				if (settings.IgnoreBadForm)
@@ -398,8 +401,8 @@ namespace Prism.Reflection
 
 					foreach (var fileInclude in reflection.FileIncludes)
 					{
-						string path = fileInclude.Path.ToLower().Replace('/', '\\');
-						if (requiredPreInclude.EndsWith(path))
+						string path = fileInclude.Path.Replace('/', '\\');
+						if (path.EndsWith(requiredPreInclude, StringComparison.CurrentCultureIgnoreCase))
 						{
 							foundReflInclude = true;
 							break;
@@ -416,6 +419,7 @@ namespace Prism.Reflection
 				else
 					throw e;
 			}
+#endif
 		}
 
 		private static bool ValidateStructureReflection(SignatureInfo currentSignature, SignatureInfo previousSignature, string token, string structure)

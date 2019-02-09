@@ -40,7 +40,7 @@ namespace Prism.Reflection
 			: base(data.DeclareName, tokenNamespace, conditionState, bodyFile, bodyLine, tokenParams, docString)
 		{
 			m_EnumName = data.DeclareName;
-			m_EnumType = string.Join(" ", data.ParentStructures.Select(v => v.DeclareName));
+			m_EnumType = data.ParentStructures == null ? "" : string.Join(" ", data.ParentStructures.Select(v => v.DeclareName));
 			m_Values = new List<Value>();
 		}
 
