@@ -23,9 +23,14 @@ namespace Prism.CodeParsing
 		private long m_CurrentLine = 0;
 
 		/// <summary>
-		/// The current leftovers which are going to be read during next SafeReadNext
+		/// Any contents which were left over from the current read
 		/// </summary>
 		private string m_LeftOverContent = "";
+
+		/// <summary>
+		/// Any contents which should be appended to this current line (Leftovers during pre-read i.e. { or ;)
+		/// </summary>
+		private string m_AppendContents = "";
 
 
 		public SafeLineReader(Stream inputStream)
@@ -49,11 +54,80 @@ namespace Prism.CodeParsing
 		/// </summary>
 		public string LeftOverContent { set => m_LeftOverContent += value.Trim(); }
 
+
+		/// <summary>
+		/// Consume whatever the next line should be;
+		/// </summary>
+		private bool ConsumeLine(out string line)
+		{
+			if (!string.IsNullOrEmpty(m_LeftOverContent))
+			{
+				line = m_LeftOverContent + m_AppendContents;
+				m_LeftOverContent = "";
+				m_AppendContents = "";
+				return true;
+			}
+			else if (!string.IsNullOrEmpty(m_AppendContents))
+			{
+				line = m_AppendContents;
+				m_AppendContents = "";
+				return true;
+			}
+			else
+			{
+				line = "";
+
+				do
+				{
+					if (m_Reader.EndOfStream)
+					{
+						line = "";
+						return false;
+					}
+					else
+					{
+						line = m_Reader.ReadLine().Replace('\t', ' ').Trim();
+						++m_CurrentLine;
+					}
+				} while (line == "");
+
+				return true;
+			}
+		}
+
 		/// <summary>
 		/// Safely read the next line content (Re-use any old content
 		/// </summary>
 		public bool SafeReadNext(out string line)
 		{
+			if (ConsumeLine(out line))
+			{
+				// Split at ; and {
+				int endLineIndex = line.IndexOf(';');
+				int startBlockIndex = line.IndexOf('{');
+
+				int index = -1;
+				if (endLineIndex != -1 && startBlockIndex != -1)
+				{
+					index = Math.Min(endLineIndex, startBlockIndex);
+				}
+				else if (endLineIndex == -1)
+				{
+					index = startBlockIndex;
+				}
+
+				if (index != -1)
+				{
+					m_AppendContents = line.Substring(index + 1).Trim();
+					line = line.Substring(0, index + 1).Trim();
+				}
+
+				return true;
+			}
+
+			return false;
+
+			/*
 			// Re-use anything that was leftover from last read
 			if (m_LeftOverContent.Length != 0)
 			{
@@ -88,30 +162,13 @@ namespace Prism.CodeParsing
 						line = m_Reader.ReadLine().Replace('\t', ' ').Trim();
 						++m_CurrentLine;
 
-						// Split at ; and {
-						int endLineIndex = line.IndexOf(';');
-						int startBlockIndex = line.IndexOf('{');
-
-						int index = -1;
-						if (endLineIndex != -1 && startBlockIndex != -1)
-						{
-							index = Math.Min(endLineIndex, startBlockIndex);
-						}
-						else if (endLineIndex == -1)
-						{
-							index = startBlockIndex;
-						}
-
-						if (index != -1)
-						{
-							m_LeftOverContent = line.Substring(index + 1).Trim();
-							line = line.Substring(0, index + 1).Trim();
-						}								
+						
 					}
 				} while (line == "");
 
 				return true;
 			}
+			*/
 		}
 
 		/// <summary>

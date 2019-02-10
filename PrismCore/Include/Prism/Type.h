@@ -101,7 +101,7 @@ namespace Prism
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ToString(storageHolder);
 			else
-				return false;
+				return PRISM_STR("");
 		}
 
 		///
@@ -116,7 +116,7 @@ namespace Prism
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ToString(storageHolder);
 			else
-				return false;
+				return PRISM_STR("");
 		}
 
 

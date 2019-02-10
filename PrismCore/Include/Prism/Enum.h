@@ -15,7 +15,7 @@ namespace Prism
 	class PRISMCORE_API Enum : public Type
 	{
 	public:
-		struct Value
+		struct PRISMCORE_API Value
 		{
 			String Name;
 			size_t NumberValue;

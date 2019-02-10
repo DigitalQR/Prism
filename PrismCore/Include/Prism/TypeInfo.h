@@ -12,6 +12,7 @@ namespace Prism
 {
 	class Type;
 	class Class;
+	class Enum;
 
 	///
 	/// Reloadable type (Allows for hotreload of DLLs)
@@ -118,6 +119,7 @@ namespace Prism
 		inline bool operator!=(const TypeInfo& other) const { return m_TypePtr != other.m_TypePtr; };
 
 		friend class ClassInfo;
+		friend class EnumInfo;
 	};
 
 	///
@@ -190,6 +192,109 @@ namespace Prism
 		/// Compare class info
 		///
 		inline bool operator!=(const ClassInfo& other) const { return m_TypePtr != other.m_TypePtr; };
+
+
+		///
+		/// Compare type info
+		///
+		inline bool operator>(const TypeInfo& other) const { return m_TypePtr > other.m_TypePtr; };
+
+		///
+		/// Compare type info
+		///
+		inline bool operator<(const TypeInfo& other) const { return m_TypePtr < other.m_TypePtr; };
+
+		///
+		/// Compare type info
+		///
+		inline bool operator>=(const TypeInfo& other) const { return m_TypePtr >= other.m_TypePtr; };
+
+		///
+		/// Compare type info
+		///
+		inline bool operator<=(const TypeInfo& other) const { return m_TypePtr <= other.m_TypePtr; };
+
+		///
+		/// Compare type info
+		///
+		inline bool operator==(const TypeInfo& other) const { return m_TypePtr == other.m_TypePtr; };
+
+		///
+		/// Compare type info
+		///
+		inline bool operator!=(const TypeInfo& other) const { return m_TypePtr != other.m_TypePtr; };
+	};
+
+	///
+	/// Safe way to pass around enum type information (Is reload safe)
+	///
+	class PRISMCORE_API EnumInfo
+	{
+	private:
+		const TypePointer* m_TypePtr;
+
+	public:
+		EnumInfo();
+		EnumInfo(const TypePointer* type);
+
+		EnumInfo(const EnumInfo& other);
+		EnumInfo& operator=(const EnumInfo& other);
+
+		EnumInfo(const TypeInfo& other);
+		EnumInfo& operator=(const TypeInfo& other);
+
+		///
+		/// Is this type info currently pointing towards a valid type
+		///
+		inline const bool IsValid() const { return m_TypePtr != nullptr; }
+
+		///
+		/// Implicit type conversion to TypeInfo
+		///
+		inline operator TypeInfo() const { return TypeInfo(m_TypePtr); }
+
+		///
+		/// Get the prism type this is holding 
+		/// (Check with IsValid before use)
+		///
+		inline const Enum* Get() const { return (const Enum*)m_TypePtr->Get(); }
+
+		///
+		/// Get the prism type this is holding 
+		/// (Check with IsValid before use)
+		///
+		inline const Enum* operator->() const { return (const Enum*)m_TypePtr->Get(); }
+
+
+		///
+		/// Compare emum info
+		///
+		inline bool operator>(const EnumInfo& other) const { return m_TypePtr > other.m_TypePtr; };
+
+		///
+		/// Compare emum info
+		///
+		inline bool operator<(const EnumInfo& other) const { return m_TypePtr < other.m_TypePtr; };
+
+		///
+		/// Compare emum info
+		///
+		inline bool operator>=(const EnumInfo& other) const { return m_TypePtr >= other.m_TypePtr; };
+
+		///
+		/// Compare emum info
+		///
+		inline bool operator<=(const EnumInfo& other) const { return m_TypePtr <= other.m_TypePtr; };
+
+		///
+		/// Compare emum info
+		///
+		inline bool operator==(const EnumInfo& other) const { return m_TypePtr == other.m_TypePtr; };
+
+		///
+		/// Compare emum info
+		///
+		inline bool operator!=(const EnumInfo& other) const { return m_TypePtr != other.m_TypePtr; };
 
 
 		///
