@@ -188,6 +188,8 @@ namespace Prism.Export
 #pragma once
 #include <Prism.h>
 
+#define %FILE_REFLECTION_DEFINE%
+
 #ifndef PRISM_DEFER
 #define PRISM_DEFER(...) __VA_ARGS__
 #endif
@@ -220,7 +222,18 @@ namespace Prism.Export
 				// Setup defaults
 				sourceContent = @"%FILE_EXPORT_HEADER%
 #include ""%FILE_PATH%""
+
+#ifdef %FILE_REFLECTION_DEFINE%
 ";
+
+				string fileReflectionDefine = sourcePath.ToUpper()
+					.Replace(' ', '_')
+					.Replace('-', '_')
+					.Replace('.', '_')
+					.Replace(':', '_')
+					.Replace('\\', '_')
+					.Replace('/', '_')
+					+ "_REFL";
 
 				// Resolve placeholders
 				includeContent = includeContent
@@ -229,11 +242,13 @@ namespace Prism.Export
 					.Replace("%STRUCT_TOKEN%", settings.StructToken)
 					.Replace("%ENUM_TOKEN%", settings.EnumToken)
 					.Replace("%FUNCTION_TOKEN%", settings.FunctionToken)
-					.Replace("%VARIABLE_TOKEN%", settings.VariableToken);
+					.Replace("%VARIABLE_TOKEN%", settings.VariableToken)
+					.Replace("%FILE_REFLECTION_DEFINE%", fileReflectionDefine);
 
 				sourceContent = sourceContent
 					.Replace("%FILE_EXPORT_HEADER%", s_ExportHeader)
-					.Replace("%FILE_PATH%", sourcePath);
+					.Replace("%FILE_PATH%", sourcePath)
+					.Replace("%FILE_REFLECTION_DEFINE%", fileReflectionDefine);
 
 				// Reflect the file
 				using (FileStream stream = new FileStream(sourcePath, FileMode.Open))
@@ -330,12 +345,15 @@ namespace Prism.Export
 							includeContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalInclude + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
 							sourceContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalSource + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
 						}
-
+						
+						// Endif for ifdef FILE_REFLECTION_DEFINE
+						// *Prevents source from being compiled, if header is excluded in build
+						sourceContent += "\n#endif";
 
 						// Fix line-endings
 						includeContent = PreExpandDirectives(includeContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
 						sourceContent = PreExpandDirectives(sourceContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
-
+						
 
 						// Export header
 						{

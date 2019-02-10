@@ -77,4 +77,41 @@ namespace Prism
 			m_TypePtr = nullptr;
 		return *this;
 	}
+
+
+	EnumInfo::EnumInfo()
+		: m_TypePtr(nullptr)
+	{
+
+	}
+
+	EnumInfo::EnumInfo(const TypePointer* type)
+		: m_TypePtr(type != nullptr && type->IsEnum() ? type : nullptr)
+	{
+	}
+
+	EnumInfo::EnumInfo(const EnumInfo& other)
+		: m_TypePtr(other.m_TypePtr)
+	{
+	}
+
+	EnumInfo& EnumInfo::operator=(const EnumInfo& other)
+	{
+		m_TypePtr = other.m_TypePtr;
+		return *this;
+	}
+
+	EnumInfo::EnumInfo(const TypeInfo& other)
+		: EnumInfo(other.m_TypePtr)
+	{
+	}
+
+	EnumInfo& EnumInfo::operator=(const TypeInfo& other)
+	{
+		if (other.IsValid() && other.IsEnum())
+			m_TypePtr = other.m_TypePtr;
+		else
+			m_TypePtr = nullptr;
+		return *this;
+	}
 }
