@@ -36,7 +36,48 @@ namespace Prism.CodeParsing.Signatures
 						VariableInfo data = new VariableInfo();
 
 						// Find any default value
-						int equalsIndex = searchString.LastIndexOf('=');
+						// Search for equals that is not encased by ()
+						int equalsStartIndex = 0;
+						int equalsIndex;
+						bool isEncased = true;
+
+						while ((equalsIndex = searchString.LastIndexOf('=', equalsStartIndex)) != -1 && isEncased)
+						{
+							// Check to see if incased
+							isEncased = false;
+							int startEncase = -1;
+							int endEncase = -1;
+							int depth = -1;
+
+							for (int i = equalsStartIndex; i < searchString.Length; ++i)
+							{
+								char c = searchString[i];
+								if (c == '(')
+								{
+									++depth;
+
+									if (startEncase != -1)
+										startEncase = i;
+								}
+								else if (c == ')')
+								{
+									--depth;
+
+									if (depth == 0)
+									{
+										if (startEncase < equalsIndex && equalsIndex < i)
+										{
+											isEncased = true;
+											endEncase = i;
+											break;
+										}
+									}
+								}
+							}
+							
+							equalsStartIndex = endEncase;
+						}
+						
 						if (equalsIndex != -1)
 						{
 							data.DefaultValue = searchString.Substring(equalsIndex + 1).Trim();

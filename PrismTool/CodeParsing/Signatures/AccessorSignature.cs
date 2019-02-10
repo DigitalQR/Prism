@@ -17,18 +17,19 @@ namespace Prism.CodeParsing.Signatures
 		{
 			ParseData data = new ParseData();
 			bool found = false;
+			string searchString = content;
 
-			if (CheckForAccessor("public", ref content, reader))
+			if (CheckForAccessor("public", ref searchString, reader))
 			{
 				data.Accessor = "public";
 				found = true;
 			}
-			else if (CheckForAccessor("private", ref content, reader))
+			else if (CheckForAccessor("private", ref searchString, reader))
 			{
 				data.Accessor = "private";
 				found = true;
 			}
-			else if (CheckForAccessor("protected", ref content, reader))
+			else if (CheckForAccessor("protected", ref searchString, reader))
 			{
 				data.Accessor = "protected";
 				found = true;

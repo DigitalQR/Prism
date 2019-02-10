@@ -126,49 +126,6 @@ namespace Prism.CodeParsing
 			}
 
 			return false;
-
-			/*
-			// Re-use anything that was leftover from last read
-			if (m_LeftOverContent.Length != 0)
-			{
-				int index = m_LeftOverContent.IndexOf('\n');
-
-				if (index == -1)
-				{
-					line = m_LeftOverContent;
-					m_LeftOverContent = "";
-				}
-				else
-				{
-					line = m_LeftOverContent.Substring(0, index);
-					m_LeftOverContent = m_LeftOverContent.Substring(index + 1).Trim();
-				}
-				return true;
-			}
-			// Attempt to read a new fresh line
-			else
-			{
-				line = "";
-
-				do
-				{
-					if (m_Reader.EndOfStream)
-					{
-						line = "";
-						return false;
-					}
-					else
-					{
-						line = m_Reader.ReadLine().Replace('\t', ' ').Trim();
-						++m_CurrentLine;
-
-						
-					}
-				} while (line == "");
-
-				return true;
-			}
-			*/
 		}
 
 		/// <summary>

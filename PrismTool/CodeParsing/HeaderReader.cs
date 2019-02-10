@@ -68,35 +68,40 @@ namespace Prism.CodeParsing
 				// Don't try to parse, if we're in an uncaptured {} block
 				if (m_BraceBlockDepth == 0)
 				{
-					// Try to figure out what is currently being read
+					// Intial shared-parsing
 					parseResult = CommentBlockSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| PreProcessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
-						|| ConstructorSignature.TryParse(ref m_BraceBlockDepth, m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
-						|| MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
-						|| TypeDefSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
-						|| TemplateSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("class", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("struct", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| StructureSignature.TryParse("enum", m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
 						|| NamespaceSignature.TryParse(m_NamespaceStack, currentLine, content, m_SafeReader, out sigInfo)
+						|| TypeDefSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
 						|| FriendSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
-						|| VariableSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
-						|| FunctionSignature.TryParse(ref m_BraceBlockDepth, currentLine, content, m_SafeReader, out sigInfo)
-						;
+						|| TemplateSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo);
 
-					// Try structure only parsing, if all else fails
+					// Structure specific parsing
+					// *MacroCallSignature needs to be before EnumEntry but after Constructor
 					if (!parseResult && m_StructureStack.Count != 0)
 					{
 						string currentStructureType = m_StructureStack.Peek().StructureType;
-
 						if (currentStructureType == "enum")
 						{
-							parseResult = EnumEntrySignature.TryParse(currentLine, content, m_SafeReader, out sigInfo);
+							parseResult = MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+								|| EnumEntrySignature.TryParse(currentLine, content, m_SafeReader, out sigInfo);
 						}
 						else
 						{
-							parseResult = AccessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo);
+							parseResult = AccessorSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+								|| ConstructorSignature.TryParse(ref m_BraceBlockDepth, m_StructureStack, currentLine, content, m_SafeReader, out sigInfo)
+								|| MacroCallSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo);
 						}
+					}
+
+					// Post structure specific parsing
+					if (!parseResult)
+					{
+						parseResult = VariableSignature.TryParse(currentLine, content, m_SafeReader, out sigInfo)
+						|| FunctionSignature.TryParse(ref m_BraceBlockDepth, currentLine, content, m_SafeReader, out sigInfo);
 					}
 				}
 
@@ -108,19 +113,15 @@ namespace Prism.CodeParsing
 						if (content[i] == '{')
 						{
 							++m_BraceBlockDepth;
-							m_SafeReader.LeftOverContent = content.Substring(i + 1);
-							break;
 						}
 						else if (content[i] == '}')
 						{
 							--m_BraceBlockDepth;
-							m_SafeReader.LeftOverContent = content.Substring(i + 1);
-							break;
-						}
-						else if (content[i] == ';')
-						{
-							m_SafeReader.LeftOverContent = content.Substring(i + 1);
-							break;
+							if (m_BraceBlockDepth == 0)
+							{
+								m_SafeReader.LeftOverContent = content.Substring(i + 1);
+								break;
+							}
 						}
 					}
 				}

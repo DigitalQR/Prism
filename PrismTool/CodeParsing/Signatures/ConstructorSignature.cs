@@ -57,6 +57,9 @@ namespace Prism.CodeParsing.Signatures
 				if (content.Contains(structureName))
 				{
 					string search = content;
+					bool hasPresetBody = search.EndsWith("{");
+					search = search.Substring(0, search.Length - 1); // Remove ';' or '{'
+
 					bool IsInline = false;
 					bool isExplicit = false;
 					bool isVirtual = false;
@@ -88,25 +91,7 @@ namespace Prism.CodeParsing.Signatures
 						data.IsVirtual = isVirtual;
 
 						// Return leftovers
-						string leftover = search.Substring(search.IndexOf(')'));
-						for (int i = 0; i < leftover.Length; ++i)
-						{
-							char c = leftover[i];
-							if (c == ';')
-							{
-								if (i != leftover.Length - 1)
-									reader.LeftOverContent = leftover.Substring(i + 1);
-								break;
-							}
-							else if (c == '{')
-							{
-								++braceBlockDepth;
-								if (i != leftover.Length - 1)
-									reader.LeftOverContent = leftover.Substring(i + 1);
-								break;
-							}
-						}
-
+						reader.LeftOverContent = search.Substring(search.IndexOf(')') + 1);
 						sigInfo = new SignatureInfo(firstLine, content, SignatureInfo.SigType.StructureDestructor, data);
 						return true;
 					}
@@ -210,24 +195,7 @@ namespace Prism.CodeParsing.Signatures
 							}
 
 							// Return leftovers
-							string leftover = search;
-							for (int i = 0; i < leftover.Length; ++i)
-							{
-								char c = leftover[i];
-								if (c == ';')
-								{
-									if (i != leftover.Length - 1)
-										reader.LeftOverContent = leftover.Substring(i + 1);
-									break;
-								}
-								else if (c == '{')
-								{
-									++braceBlockDepth;
-									if (i != leftover.Length - 1)
-										reader.LeftOverContent = leftover.Substring(i + 1);
-									break;
-								}
-							}
+							reader.LeftOverContent = search;
 
 							data.ParamCount = funcParams.Count;
 							if (data.ParamCount != 0)
