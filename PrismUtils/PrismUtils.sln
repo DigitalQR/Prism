@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrismShared", "PrismShared\PrismShared.csproj", "{A42D973E-F6BD-4935-A308-7DEAC624C87C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrismTool", "PrismTool\PrismTool.csproj", "{32041ACA-D286-4746-96C8-888202B5CA43}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A42D973E-F6BD-4935-A308-7DEAC624C87C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A42D973E-F6BD-4935-A308-7DEAC624C87C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A42D973E-F6BD-4935-A308-7DEAC624C87C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A42D973E-F6BD-4935-A308-7DEAC624C87C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32041ACA-D286-4746-96C8-888202B5CA43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32041ACA-D286-4746-96C8-888202B5CA43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32041ACA-D286-4746-96C8-888202B5CA43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32041ACA-D286-4746-96C8-888202B5CA43}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {58FD8584-E69A-47D0-A77D-5FD6629995E5}
+	EndGlobalSection
+EndGlobal
