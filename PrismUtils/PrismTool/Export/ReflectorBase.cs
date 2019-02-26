@@ -1,5 +1,7 @@
-﻿using Prism.CodeParsing;
+﻿using Prism.Parsing;
 using Prism.Reflection;
+using Prism.Reflection.Behaviour;
+using Prism.Reflection.Tokens;
 using Prism.Utils;
 using System;
 using System.Collections.Generic;
@@ -26,7 +28,7 @@ namespace Prism.Export
 		/// <summary>
 		/// The extension which will be applied to export files
 		/// </summary>
-		[CmdArg(Arg = "export-ext", Usage = "The extention all exported files will prepend to thier current", MustExist = false)]
+		[CommandLineArgument(Arg = "export-ext", Usage = "The extention all exported files will prepend to thier current", MustExist = false)]
 		protected string m_ExportExtension = ".refl";
 
 		/// <summary>
@@ -56,6 +58,11 @@ namespace Prism.Export
 			/// </summary>
 			public FileState State;
 		}
+
+		/// <summary>
+		/// The reflection behaviour controller for thie reflector
+		/// </summary>
+		private BehaviourController m_BehaviourController = new BehaviourController();
 
 		/// <summary>
 		/// Where any persistant build data can be stored
@@ -143,7 +150,9 @@ namespace Prism.Export
 			Console.WriteLine("Generating Prism Reflection -> " + exportDirectory);
 			foreach (var file in reflectableFiles)
 			{
+#if !DEBUG
 				try
+#endif
 				{
 					// Don't read in output directory
 					if (!file.Equals(exportDirectory, StringComparison.CurrentCultureIgnoreCase))
@@ -152,10 +161,12 @@ namespace Prism.Export
 						outputFiles.AddRange(exports);
 					}
 				}
-				catch (ReflectionException e)
+#if !DEBUG
+				catch (ParseException e)
 				{
-					throw new HeaderReflectionException(file, e.ErrorCode, e.Signature, e);
+					throw new HeaderParseException(file, e.ErrorCode, e.Signature, e);
 				}
+#endif
 			}
 			Console.WriteLine("Prism Reflection Generated.");
 
@@ -186,41 +197,41 @@ namespace Prism.Export
 
 				includeContent = @"%FILE_EXPORT_HEADER%
 #pragma once
-#include <Prism.h>
+# include <Prism.h>
 
 #define %FILE_REFLECTION_DEFINE%
 
-#ifndef PRISM_DEFER
+# ifndef PRISM_DEFER
 #define PRISM_DEFER(...) __VA_ARGS__
 #endif
 
-#ifdef %CLASS_TOKEN%
+# ifdef %CLASS_TOKEN%
 #undef %CLASS_TOKEN%
 #endif
 #define %CLASS_TOKEN%(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
 
-#ifdef %STRUCT_TOKEN%
+# ifdef %STRUCT_TOKEN%
 #undef %STRUCT_TOKEN%
 #endif
 #define %STRUCT_TOKEN%(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
 
-#ifdef %ENUM_TOKEN%
+# ifdef %ENUM_TOKEN%
 #undef %ENUM_TOKEN%
 #endif
 #define %ENUM_TOKEN%(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
 
-#ifdef %FUNCTION_TOKEN%
+# ifdef %FUNCTION_TOKEN%
 #undef %FUNCTION_TOKEN%
 #endif
 #define %FUNCTION_TOKEN%(...)
 
-#ifdef %VARIABLE_TOKEN%
+# ifdef %VARIABLE_TOKEN%
 #undef %VARIABLE_TOKEN%
 #endif
 #define %VARIABLE_TOKEN%(...)
-";
+			";
 				// Setup defaults
-				sourceContent = @"%FILE_EXPORT_HEADER%
+			sourceContent = @"%FILE_EXPORT_HEADER%
 #include ""%FILE_PATH%""
 
 #ifdef %FILE_REFLECTION_DEFINE%
@@ -253,8 +264,29 @@ namespace Prism.Export
 				// Reflect the file
 				using (FileStream stream = new FileStream(sourcePath, FileMode.Open))
 				{
-					HeaderReflection file = HeaderReflection.Generate(settings, sourcePath, stream);
+					ParsedHeader file = ParsedHeader.Generate(settings, sourcePath, stream);
+					
+					// Perform any reflection
+					foreach (IReflectableToken token in file.ParsedTokens)
+					{
+						m_BehaviourController.ProcessToken(token);
 
+						includeContent += "\n// TOKEN XYZ START\n";
+						includeContent += token.GenerateIncludeContent(null);
+						includeContent += "\n// TODO ACTUAL HOOKUP HERE\n";
+						includeContent += token.GenerateDeclarationContent(null);
+						includeContent += "\n// TOKEN XYZ END\n";
+						
+						sourceContent += "\n// TOKEN XYZ START\n";
+						sourceContent += token.GenerateImplementationContent(null);
+						sourceContent += "\n// TOKEN XYZ END\n";
+					}
+
+					Console.WriteLine(includeContent);
+					Console.WriteLine(sourceContent);
+					Console.WriteLine("ok");
+
+					/*
 					// If there were no tokens, check if there are artefacts from previous runs (If so, the files need to be wiped)
 					if (file.ReflectedTokenCount == 0)
 					{
@@ -351,8 +383,8 @@ namespace Prism.Export
 						sourceContent += "\n#endif";
 
 						// Fix line-endings
-						includeContent = PreExpandDirectives(includeContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
-						sourceContent = PreExpandDirectives(sourceContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
+						includeContent = ConditionState.PreExpandDirectives(includeContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
+						sourceContent = ConditionState.PreExpandDirectives(sourceContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
 						
 
 						// Export header
@@ -387,105 +419,10 @@ namespace Prism.Export
 							exports.Add(sourceExport);
 						}
 					}
+					*/
 				}
 			}
 			return exports;
-		}
-
-		private struct DirectiveState
-		{
-			public bool RecognisedStatement;
-			public bool CurrentWrite;
-		};
-
-		/// <summary>
-		/// Attempt to pre-expande any simple directives
-		/// </summary>
-		/// <returns></returns>
-		private string PreExpandDirectives(string raw)
-		{
-			string output = "";
-			
-			Stack<DirectiveState> stateStack = new Stack<DirectiveState>();
-
-			DirectiveState currentState = new DirectiveState();
-			currentState.RecognisedStatement = true;
-			currentState.CurrentWrite = true;
-
-			foreach (string line in raw.Split('\n'))
-			{
-				string searchLine = line.Trim();
-				if (searchLine.StartsWith("#if"))
-				{
-					stateStack.Push(currentState);
-
-					if (searchLine == "#if 1")
-					{
-						currentState.RecognisedStatement = true;
-						currentState.CurrentWrite = currentState.CurrentWrite && true;
-						continue;
-					}
-					else if (searchLine == "#if 0")
-					{
-						currentState.RecognisedStatement = true;
-						currentState.CurrentWrite = false;
-						continue;
-					}
-					else
-					{
-						currentState.RecognisedStatement = false;
-						currentState.CurrentWrite = true;
-					}
-				}
-				else
-				{
-					if (searchLine.StartsWith("#elif "))
-					{
-						if (currentState.RecognisedStatement)
-						{
-							if (currentState.CurrentWrite)
-							{ 
-								currentState.CurrentWrite = false;
-								continue;
-							}
-							else
-							{
-								currentState.CurrentWrite = !currentState.CurrentWrite;
-								continue;
-							}							
-						}
-					}
-					else if (searchLine == "#else")
-					{
-						if (currentState.RecognisedStatement)
-						{
-							currentState.CurrentWrite = !currentState.CurrentWrite;
-
-							// Make sure we're allowed to be re-enabling it
-							if (stateStack.Count != 0)
-							{
-								currentState.CurrentWrite = currentState.CurrentWrite && stateStack.Peek().CurrentWrite;
-							}
-
-							continue;
-						}
-					}
-					else if (searchLine == "#endif")
-					{
-						bool skip = currentState.RecognisedStatement;
-
-						currentState = stateStack.Pop();
-
-						if(skip)
-							continue;
-					}
-				}
-				
-				if (currentState.CurrentWrite)
-					output += line + "\n";
-			}
-
-			return output;
 		}
 	}
 }

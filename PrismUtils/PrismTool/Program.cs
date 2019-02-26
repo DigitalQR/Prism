@@ -5,9 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Prism.CodeParsing;
 using Prism.Export;
+using Prism.Parsing;
 using Prism.Reflection;
+using Prism.Reflection.Behaviour;
 using Prism.Utils;
 
 namespace Prism
@@ -19,10 +20,10 @@ namespace Prism
 		/// </summary>
 		internal class ReflectionSelector
 		{
-			[CmdArg(Arg = "src-dir")]
+			[CommandLineArgument(Arg = "src-dir")]
 			public string DirectorySource = null;
 
-			[CmdArg(Arg = "src-vsproj")]
+			[CommandLineArgument(Arg = "src-vsproj")]
 			public string VisualStudioSource = null;
 		}
 
@@ -31,15 +32,17 @@ namespace Prism
 		/// Format a message in the Visual Studio message format 
 		/// {file}({line}): error {code}: {message}
 		/// </summary>
-		private static string FormatErrorMessage(string message, string source, int line = -1, ReflectionErrorCode errorCode = ReflectionErrorCode.GenericError)
+		private static string FormatErrorMessage(string message, string source, int line = -1, ParseErrorCode errorCode = ParseErrorCode.GenericError)
 		{
 			return source + "(" + line + "): error PRI" + (int)errorCode + ": " + message;
 		}
 
 		static void Main(string[] args)
 		{
+			CommandLineArguments.ProvideArguments(args);
+
 			ReflectionSelector selector = new ReflectionSelector();
-			CmdArgs.Parse(selector, args);
+			CommandLineArguments.FillValues(selector);
 
 #if !DEBUG
 			try
@@ -54,14 +57,14 @@ namespace Prism
 				// Reflect directory
 				else if (selector.DirectorySource != null)
 				{
-					DirectoryReflector reflector = new DirectoryReflector(args);
+					DirectoryReflector reflector = new DirectoryReflector();
 					reflector.Run();
 				}
 
 				// Reflect project
 				else if (selector.VisualStudioSource != null)
 				{
-					VisualStudioReflector reflector = new VisualStudioReflector(args);
+					VisualStudioReflector reflector = new VisualStudioReflector();
 					reflector.Run();
 				}
 
@@ -73,9 +76,9 @@ namespace Prism
 			}
 #if !DEBUG
 			// Report errors in the VS message format <file>(<line>): error <code>: <message>
-			catch (CmdArgParseException e)
+			catch (CommandLineArgumentParseException e)
 			{
-				Console.Error.WriteLine("CmdArgParseException caught");
+				Console.Error.WriteLine("CommandLineArgumentParseException caught");
 				Console.Error.WriteLine(FormatErrorMessage(e.Message, "PrismTool.exe"));
 				Console.Error.WriteLine(FormatErrorMessage(e.Usage, "PrismTool.exe"));
 				Console.Error.WriteLine(e.StackTrace);

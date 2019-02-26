@@ -1,4 +1,5 @@
-﻿using Prism.Reflection;
+﻿using Prism.Parsing;
+using Prism.Reflection;
 using Prism.Utils;
 using System;
 using System.Collections.Generic;
@@ -17,19 +18,19 @@ namespace Prism.Export
 		/// <summary>
 		/// Where all the source files will be read from
 		/// </summary>
-		[CmdArg(Arg = "src-dir", Usage = "The directory of the files to be read", MustExist = true)]
+		[CommandLineArgument(Arg = "src-dir", Usage = "The directory of the files to be read", MustExist = true)]
 		private string m_SourceDirectory;
 
 		/// <summary>
 		/// Where all the output files will be placed
 		/// </summary>
-		[CmdArg(Arg = "out-dir", Usage = "The directory where output files will be placed", MustExist = true)]
+		[CommandLineArgument(Arg = "out-dir", Usage = "The directory where output files will be placed", MustExist = true)]
 		private string m_OutputDirectory;
 
 		/// <summary>
 		/// The extensions that are supported
 		/// </summary>
-		[CmdArg(Arg = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
+		[CommandLineArgument(Arg = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
 		private string[] m_WhitelistedExtensions;
 		
 		/// <summary>
@@ -37,13 +38,13 @@ namespace Prism.Export
 		/// </summary>
 		private ReflectionSettings m_ReflectionSettings;
 
-		public DirectoryReflector(string[] args)
+		public DirectoryReflector()
 		{
 			m_ReflectionSettings = new ReflectionSettings();
 			m_WhitelistedExtensions = new string[] { ".h", ".hpp" };
 
-			CmdArgs.Parse(this, args);
-			CmdArgs.Parse(m_ReflectionSettings, args);
+			CommandLineArguments.FillValues(this);
+			CommandLineArguments.FillValues(m_ReflectionSettings);
 		}
 
 		public override string IntermediateFolder

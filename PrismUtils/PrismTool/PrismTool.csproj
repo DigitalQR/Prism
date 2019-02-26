@@ -78,40 +78,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeParsing\SafeLineReader.cs" />
-    <Compile Include="CodeParsing\SignatureInfo.cs" />
-    <Compile Include="CodeParsing\HeaderReader.cs" />
-    <Compile Include="CodeParsing\Signatures\AccessorSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\CommentBlockSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\ConstructorSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\EnumEntrySignature.cs" />
-    <Compile Include="CodeParsing\Signatures\FriendSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\FunctionSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\MacroCallSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\NamespaceSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\PreProcessorSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\StructureSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\TemplateSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\TypeDefSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\TypeSignature.cs" />
-    <Compile Include="CodeParsing\Signatures\VariableSignature.cs" />
     <Compile Include="Export\DirectoryReflector.cs" />
     <Compile Include="Export\ReflectorBase.cs" />
     <Compile Include="Export\VisualStudioReflector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\ConditionState.cs" />
-    <Compile Include="Reflection\Output\EnumStructureReflection.cs" />
-    <Compile Include="Reflection\HeaderReflection.cs" />
-    <Compile Include="Reflection\Output\FunctionReflection.cs" />
-    <Compile Include="Reflection\Output\StructureReflection.cs" />
-    <Compile Include="Reflection\Output\VariableReflection.cs" />
-    <Compile Include="Reflection\ReflectionException.cs" />
-    <Compile Include="Reflection\ReflectionSettings.cs" />
-    <Compile Include="Reflection\Output\StructureReflectionBase.cs" />
-    <Compile Include="Reflection\TokenReflection.cs" />
-    <Compile Include="Reflection\Output\IReflectionOutput.cs" />
-    <Compile Include="Utils\CommandLine.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -127,6 +98,16 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PrismParsing\PrismParsing.csproj">
+      <Project>{be441d71-8a22-4b1f-bae4-611450b35953}</Project>
+      <Name>PrismParsing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PrismReflection\PrismReflection.csproj">
+      <Project>{64F55F42-2711-4EA4-A59B-42F84111C116}</Project>
+      <Name>PrismReflection</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

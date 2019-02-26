@@ -1,4 +1,5 @@
-﻿using Prism.Reflection;
+﻿using Prism.Parsing;
+using Prism.Reflection;
 using Prism.Utils;
 using System;
 using System.Collections.Generic;
@@ -18,25 +19,25 @@ namespace Prism.Export
 		/// <summary>
 		/// Where all the source files will be read from
 		/// </summary>
-		[CmdArg(Arg = "src-vsproj", Usage = "The project with all the files to reflect", MustExist = true)]
+		[CommandLineArgument(Arg = "src-vsproj", Usage = "The project with all the files to reflect", MustExist = true)]
 		private string m_SourceProject;
 
 		/// <summary>
 		/// Where all the output files will be placed
 		/// </summary>
-		[CmdArg(Arg = "out-dir", Usage = "The directory where output files will be placed", MustExist = false)]
+		[CommandLineArgument(Arg = "out-dir", Usage = "The directory where output files will be placed", MustExist = false)]
 		private string m_OutputDirectory = null;
 
 		/// <summary>
 		/// Where all the reflection files will be outputed to
 		/// </summary>
-		[CmdArg(Arg = "out-vsproj", Usage = "The project where all reflection files should be placed", MustExist = false)]
+		[CommandLineArgument(Arg = "out-vsproj", Usage = "The project where all reflection files should be placed", MustExist = false)]
 		private string m_OutputProject = null;
 
 		/// <summary>
 		/// The extensions that are supported
 		/// </summary>
-		[CmdArg(Arg = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
+		[CommandLineArgument(Arg = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
 		private string[] m_WhitelistedExtensions;
 
 		/// <summary>
@@ -44,20 +45,20 @@ namespace Prism.Export
 		/// </summary>
 		private ReflectionSettings m_ReflectionSettings;
 
-		public VisualStudioReflector(string[] args)
+		public VisualStudioReflector()
 		{
 			m_ReflectionSettings = new ReflectionSettings();
 			m_WhitelistedExtensions = new string[] { ".h", ".hpp" };
 
-			CmdArgs.Parse(this, args);
-			CmdArgs.Parse(m_ReflectionSettings, args);
+			CommandLineArguments.FillValues(this);
+			CommandLineArguments.FillValues(m_ReflectionSettings);
 
 			if (!File.Exists(m_SourceProject))
-				throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find source project file");
+				throw new ParseException(ParseErrorCode.GenericError, null, "Failed to find source project file");
 			
 			// Check output location exists and haven't provided multiple
 			if (m_OutputDirectory != null && m_OutputProject != null)
-				throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Cannot contain both --out-dir and --out-vsproj arguments");
+				throw new ParseException(ParseErrorCode.GenericError, null, "Cannot contain both --out-dir and --out-vsproj arguments");
 
 			else if (m_OutputDirectory != null)
 			{
@@ -68,10 +69,10 @@ namespace Prism.Export
 			else if (m_OutputProject != null)
 			{
 				if (!File.Exists(m_OutputProject))
-					throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Failed to find output project file");
+					throw new ParseException(ParseErrorCode.GenericError, null, "Failed to find output project file");
 			}
 			else
-				throw new ReflectionException(ReflectionErrorCode.GenericError, null, "Missing required --out-dir argument");
+				throw new ParseException(ParseErrorCode.GenericError, null, "Missing required --out-dir argument");
 		}
 
 		public string OutputDirectory
