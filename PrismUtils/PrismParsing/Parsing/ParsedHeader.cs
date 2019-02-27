@@ -233,9 +233,13 @@ namespace Prism.Parsing
 													new TokenOrigin(filePath, (int)currentSignature.LineNumber),
 													data.MacroParams, recentDocString
 												);
-											
-												currentAccessScope = supportedStructure.DefaultAccess;
-												reflection.m_ParsedTokens.Add(currentStructure);
+
+												// TEMP WORK AROUND FOR LACK OF ENUM
+												if (currentStructure != null)
+												{
+													currentAccessScope = supportedStructure.DefaultAccess;
+													reflection.m_ParsedTokens.Add(currentStructure);
+												}
 
 												// Reset any previous error (Originated for shared macro token)
 												errorMessage = null;
@@ -442,7 +446,7 @@ namespace Prism.Parsing
 					string includeExportPath = Path.GetFileNameWithoutExtension(filePath) + settings.ExportExtension + Path.GetExtension(filePath);
 					string requiredPreInclude = includeExportPath.ToLower().Replace('/', '\\');
 
-					foreach (var fileInclude in reflection.FileIncludes)
+					foreach (var fileInclude in reflection.Includes)
 					{
 						string path = fileInclude.Path.Replace('/', '\\');
 						if (path.EndsWith(requiredPreInclude, StringComparison.CurrentCultureIgnoreCase))
@@ -457,7 +461,7 @@ namespace Prism.Parsing
 						throw e;
 					else
 						// Return empty reflection
-						return new HeaderReflection(settings);
+						return new ParsedHeader(settings);
 				}
 				else
 					throw e;

@@ -31,7 +31,6 @@ namespace Prism.Reflection.Behaviour.Custom
 			StringBuilder builder = new StringBuilder();
 
 			builder.Append(@"
-#if $(PreProcessorCondition)
 public:
 	virtual Prism::TypeInfo GetTypeInfo() const;
 
@@ -44,7 +43,6 @@ private:
 	virtual Prism::ClassInfo GetParentClass(int index) const override;
 	virtual size_t GetParentCount() const override;
 };
-#endif
 ");
 
 			return builder;
@@ -61,7 +59,7 @@ $(Name)::ClassInfo $(Name)::ClassInfo::s_AssemblyInstance;
 $(Name)::ClassInfo::ClassInfo()
 	: Prism::Class(
 		Prism::TypeId::Get<$(Name)>(),
-		PRISM_STR(""$(NamespaceList[.])""), PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""$(Documentation)""),
+		PRISM_STR(""$(NamespaceList[.])""), PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""($(Documentation))""),
 		sizeof($(Name)),
 		{ /* TODO - Attributes for StructureToken */ },
 		std::is_abstract<$(Name)>::value,

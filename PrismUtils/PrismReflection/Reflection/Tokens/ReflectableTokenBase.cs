@@ -7,13 +7,15 @@ namespace Prism.Reflection.Tokens
 {
 	public abstract class ReflectableTokenBase : IReflectableToken
 	{
+		private TokenOrigin m_TokenOrigin;
 		private BehaviourTarget m_BehaviourTarget;
 		private StringBuilder m_DeclarationContent;
 		private StringBuilder m_ImplementationContent;
 		private StringBuilder m_IncludeContent;
 
-		public ReflectableTokenBase(BehaviourTarget supportedTargets)
+		public ReflectableTokenBase(TokenOrigin origin, BehaviourTarget supportedTargets)
 		{
+			m_TokenOrigin = origin;
 			m_BehaviourTarget = supportedTargets;
 			m_DeclarationContent = new StringBuilder();
 			m_ImplementationContent = new StringBuilder();
@@ -21,9 +23,20 @@ namespace Prism.Reflection.Tokens
 		}
 
 		/// <summary>
+		/// Get the origin information for this token
+		/// </summary>
+		public TokenOrigin Origin => m_TokenOrigin; 
+
+		/// <summary>
 		/// Behaviour targets which this token will/can target
 		/// </summary>
 		public BehaviourTarget SupportedTargets => m_BehaviourTarget;
+
+		/// <summary>
+		/// Get a enumerator of all the internal tokens this token may have
+		/// (Will return null, if there are no tokens)
+		/// </summary>
+		public virtual IEnumerable<IReflectableToken> InternalTokens => null;
 
 		/// <summary>
 		/// Append content which will be added to the refl.h inside of the REFLECT_TOKEN

@@ -29,7 +29,7 @@ namespace Prism.Parsing.Code.Signatures
 				}
 
 				// Try to check if we are currently looking at a variable
-				if (!string.IsNullOrEmpty(searchString))
+				if (!string.IsNullOrEmpty(searchString) && searchString.Length >= 3)
 				{
 					// Check string has at least 1 space
 					if (searchString.Contains(' '))
@@ -42,8 +42,8 @@ namespace Prism.Parsing.Code.Signatures
 						int equalsStartIndex = 0;
 						int equalsIndex;
 						bool isEncased = true;
-
-						while ((equalsIndex = searchString.LastIndexOf('=', equalsStartIndex)) != -1 && isEncased)
+						
+						while ((equalsIndex = searchString.LastIndexOf('=', searchString.Length - 1, searchString.Length - equalsStartIndex - 1)) != -1 && isEncased)
 						{
 							// Check to see if incased
 							isEncased = false;

@@ -13,6 +13,12 @@ namespace Prism.Reflection.Tokens
 		BehaviourTarget SupportedTargets { get; }
 
 		/// <summary>
+		/// Get a enumerator of all the internal tokens this token may have
+		/// (Will return null, if there are no tokens)
+		/// </summary>
+		IEnumerable<IReflectableToken> InternalTokens { get; }
+
+		/// <summary>
 		/// Generate any content which will be added to the refl.h outside of the REFLECT_TOKEN
 		/// </summary>
 		/// <param name="context">If there is any context that this reflectable token is inside of e.g. function context will be class, class context will be null</param>

@@ -106,8 +106,8 @@ namespace Prism.Reflection.Tokens
 			get { return m_ImplementationReflectionState; }
 		}
 
-		public FunctionToken(AccessorMode accessor, string name, string preProcessorCondition, NamedTypeToken[] paramTypes, TypeToken returnType, FunctionProperties properties, ReflectionState declarationState)
-			: base(BehaviourTarget.Function)
+		public FunctionToken(TokenOrigin origin, AccessorMode accessor, string name, string preProcessorCondition, NamedTypeToken[] paramTypes, TypeToken returnType, FunctionProperties properties, ReflectionState declarationState)
+			: base(origin, BehaviourTarget.Function)
 		{
 			m_Accessor = accessor;
 			m_Name = name;
@@ -229,6 +229,24 @@ namespace Prism.Reflection.Tokens
 			builder.Replace("$(ParamDeclarationList)", paramDeclarations);
 
 			return builder;
+		}
+
+		public override StringBuilder GenerateDeclarationContent(IReflectableToken context)
+		{
+			StringBuilder builder = base.GenerateDeclarationContent(context);
+			return ExpandMacros(builder);
+		}
+
+		public override StringBuilder GenerateImplementationContent(IReflectableToken context)
+		{
+			StringBuilder builder = base.GenerateImplementationContent(context);
+			return ExpandMacros(builder);
+		}
+
+		public override StringBuilder GenerateIncludeContent(IReflectableToken context)
+		{
+			StringBuilder builder = base.GenerateIncludeContent(context);
+			return ExpandMacros(builder);
 		}
 	}
 }

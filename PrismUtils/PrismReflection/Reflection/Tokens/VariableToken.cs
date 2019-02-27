@@ -63,8 +63,8 @@ namespace Prism.Reflection.Tokens
 			get { return m_DeclarationReflecitonState; }
 		}
 
-		public VariableToken(AccessorMode accessor, string name, TypeToken typeToken, string preProcessorCondition, ReflectionState declarationState)
-			: base(BehaviourTarget.Variable)
+		public VariableToken(TokenOrigin origin, AccessorMode accessor, string name, TypeToken typeToken, string preProcessorCondition, ReflectionState declarationState)
+			: base(origin, BehaviourTarget.Variable)
 		{
 			m_Accessor = accessor;
 			m_TypeToken = new NamedTypeToken(name, typeToken);
@@ -158,6 +158,12 @@ $(FullTypeToken) $(Parent.Name)::$(Name);
 ");
 			}
 			
+			return ExpandMacros(builder, context);
+		}
+
+		public override StringBuilder GenerateIncludeContent(IReflectableToken context)
+		{
+			StringBuilder builder = base.GenerateIncludeContent(context);
 			return ExpandMacros(builder, context);
 		}
 	}

@@ -20,7 +20,7 @@ namespace Prism.Parsing.Conversion
 				var data = (FunctionInfo)sigInfo.AdditionalParam;
 
 				token = new FunctionToken(
-					AccessorModeUtils.Parse(currentScope), data.FunctionName, conditionState.CurrentCondition,
+					origin, AccessorModeUtils.Parse(currentScope), data.FunctionName, conditionState.CurrentCondition,
 					ConvertToTypeTokens(data.ParamTypes),
 					data.ReturnType != null ? data.ReturnType.ToTypeToken() : TypeToken.VoidType, 
 					data.ToFunctionProperties(), ReflectionState.Discovered
@@ -35,7 +35,7 @@ namespace Prism.Parsing.Conversion
 				if (data.IsExplicit) properties |= FunctionProperties.Explicit;
 
 				token = new FunctionToken(
-					AccessorModeUtils.Parse(currentScope), data.DeclareName, conditionState.CurrentCondition,
+					origin, AccessorModeUtils.Parse(currentScope), data.DeclareName, conditionState.CurrentCondition,
 					ConvertToTypeTokens(data.ParamTypes), TypeToken.VoidType,
 					properties, ReflectionState.Discovered
 				);
@@ -49,7 +49,7 @@ namespace Prism.Parsing.Conversion
 				if (data.IsVirtual) properties |= FunctionProperties.Virtual;
 
 				token = new FunctionToken(
-					AccessorModeUtils.Parse(currentScope), data.DeclareName, conditionState.CurrentCondition,
+					origin, AccessorModeUtils.Parse(currentScope), data.DeclareName, conditionState.CurrentCondition,
 					ConvertToTypeTokens(null), TypeToken.VoidType,
 					properties, ReflectionState.Discovered
 				);

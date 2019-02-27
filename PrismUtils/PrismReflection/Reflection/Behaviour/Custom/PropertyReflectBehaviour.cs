@@ -21,30 +21,42 @@ namespace Prism.Reflection.Behaviour.Custom
 				throw new Exception("Invalid state reached. Internal_ReflectProperty expected a VariableToken target");
 			}
 
+			token.AppendIncludeContent(GenerateIncludeContent(token));
 			token.AppendDeclarationContent(GenerateDeclarationContent(token));
 			token.AppendImplementationContent(GenerateImplementationContent(token));
 		}
-		
-		private StringBuilder GenerateDeclarationContent(VariableToken target)
+
+		private StringBuilder GenerateIncludeContent(VariableToken target)
 		{
 			StringBuilder builder = new StringBuilder();
 
 			builder.Append(@"
 #if $(PreProcessorCondition)
-private:
-class VariableInfo_$(ReflectedName) : public Prism::Property
-{
-public:
-	VariableInfo_$(ReflectedName)();
-
-	virtual Prism::TypeInfo GetParentInfo() const override;
-	virtual Prism::TypeInfo GetTypeInfo() const override;
-
-	virtual void Set(Prism::Holder, Prism::Holder) const override;
-	virtual Prism::Holder Get(Prism::Holder) const override;
+#define VAR_$(ReflectedName)_DECL() \
+private: \
+class VariableInfo_$(ReflectedName) : public Prism::Property \
+{ \
+public: \
+	VariableInfo_$(ReflectedName)(); \
+\
+	virtual Prism::TypeInfo GetParentInfo() const override; \
+	virtual Prism::TypeInfo GetTypeInfo() const override; \
+\
+	virtual void Set(Prism::Holder, Prism::Holder) const override; \
+	virtual Prism::Holder Get(Prism::Holder) const override;\
 };
+#else
+#define VAR_$(ReflectedName)_DECL()
 #endif
 ");
+			return builder;
+		}
+
+		private StringBuilder GenerateDeclarationContent(VariableToken target)
+		{
+			StringBuilder builder = new StringBuilder();
+
+			builder.Append("VAR_$(ReflectedName)_DECL() ");
 			return builder;
 		}
 
@@ -56,7 +68,7 @@ public:
 #if $(PreProcessorCondition)
 $(Parent.Name)::VariableInfo_$(ReflectedName)::VariableInfo_$(ReflectedName)()
 	: Prism::Property(
-		PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""$(Documentation)""),
+		PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""($(Documentation))""),
 		{ /* TODO - Attributes in PropertyReflectBehaviour.cs */ },
 		Prism::Accessor::$(AccessorPretty),
 		$(IsPointer), $(IsStatic), $(IsConst)

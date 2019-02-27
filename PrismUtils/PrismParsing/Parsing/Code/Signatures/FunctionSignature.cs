@@ -76,7 +76,7 @@ namespace Prism.Parsing.Code.Signatures
 				searchString = content.Substring(0, content.Length - 1);
 			}
 
-			if (searchString != "")
+			if (!string.IsNullOrEmpty(searchString) && searchString.Length >= 4)
 			{
 				searchString = searchString.Replace("override", "").Trim(); // Ignore override completely
 

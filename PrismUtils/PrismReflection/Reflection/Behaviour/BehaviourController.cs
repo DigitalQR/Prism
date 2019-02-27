@@ -87,36 +87,78 @@ namespace Prism.Reflection.Behaviour
 		}
 
 
-		private struct BehaviourInstance
+		private class BehaviourInstance : IComparable
 		{
 			public IReflectionBehaviour Behaviour;
 			public AttributeData Data;
+			public IReflectableToken TargetToken;
+
+			public int CompareTo(object obj)
+			{
+				BehaviourInstance other = obj as BehaviourInstance;
+				if (other != null)
+				{
+					// Queue based on queue priority
+					int compare = Behaviour.QueuePriority.CompareTo(other.Behaviour.QueuePriority);
+
+					// In same queue priority, just compare based on whether it's a struct or not
+					if (compare == 0)
+					{
+						BehaviourTarget thisStruct = (TargetToken.SupportedTargets & BehaviourTarget.Structure);
+						BehaviourTarget otherStruct = (other.TargetToken.SupportedTargets & BehaviourTarget.Structure);
+
+						compare = thisStruct.CompareTo(otherStruct);
+					}
+
+					return compare;
+				}
+
+				return 0;
+			}
+
+			public void Run()
+			{
+				Behaviour.RunBehaviour(TargetToken, Data);
+			}
 		}
 
 		/// <summary>
 		/// Fetch all attributes for a given token
 		/// </summary>
-		public void ProcessToken(IReflectableToken target)
+		public void ProcessToken(IReflectableToken baseToken)
 		{
-			SortedList<int, BehaviourInstance> behaviourQueue = new SortedList<int, BehaviourInstance>();
+			List<BehaviourInstance> behaviourQueue = new List<BehaviourInstance>();
+			QueueBehaviours(baseToken, behaviourQueue);
 
+			// Sort behaviours based on priority
+			behaviourQueue.Sort();
+
+			// Execute all behaviours
+			foreach (BehaviourInstance task in behaviourQueue)
+				task.Run();
+		}
+
+		private void QueueBehaviours(IReflectableToken token, List<BehaviourInstance> behaviourQueue)
+		{
 			// Queue any behaviour to apply
 			// Add global behaviour
-			foreach(var pair in m_BehaviourLookup)
+			foreach (var pair in m_BehaviourLookup)
 			{
 				IReflectionBehaviour behaviour = pair.Value;
 
-				if (behaviour.ApplicationMode == BehaviourApplication.Implicit && (behaviour.SupportedTargets & target.SupportedTargets) != 0)
-					behaviourQueue.Add(behaviour.QueuePriority, new BehaviourInstance { Behaviour = behaviour, Data = null });
+				if (behaviour.ApplicationMode == BehaviourApplication.Implicit && (behaviour.SupportedTargets & token.SupportedTargets) != 0)
+					behaviourQueue.Add(new BehaviourInstance { Behaviour = behaviour, Data = null, TargetToken = token });
 			}
 
 			// TODO - Add Attribute Behaviours
 			// ...
 
-			// Execute behaviour
-			foreach (BehaviourInstance task in behaviourQueue.Values)
+			// Queue any sub-tokens aswell
+			var internalTokens = token.InternalTokens;
+			if (internalTokens != null)
 			{
-				task.Behaviour.RunBehaviour(target, task.Data);
+				foreach (IReflectableToken subToken in internalTokens)
+					QueueBehaviours(subToken, behaviourQueue);
 			}
 		}
 	}

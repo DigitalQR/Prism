@@ -84,7 +84,7 @@ namespace Prism
 				Console.Error.WriteLine(e.StackTrace);
 				Environment.Exit(-1);
 			}
-			catch (HeaderReflectionException e)
+			catch (HeaderParseException e)
 			{
 				Console.Error.WriteLine("HeaderReflectionException Caught");
 				Console.Error.WriteLine(FormatErrorMessage(e.Message, e.FilePath, (int)e.Signature.LineNumber, e.ErrorCode));

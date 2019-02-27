@@ -191,104 +191,14 @@ namespace Prism.Export
 				string sourceExportPath = Path.Combine(exportDirectory, Path.GetFileNameWithoutExtension(sourcePath) + m_ExportExtension + ".cpp");
 
 				Console.WriteLine("\tReflecting " + Path.GetFileName(sourcePath) + " -> " + Path.GetFileName(includeExportPath));
-
-				string includeContent = "";
-				string sourceContent = "";
-
-				includeContent = @"%FILE_EXPORT_HEADER%
-#pragma once
-# include <Prism.h>
-
-#define %FILE_REFLECTION_DEFINE%
-
-# ifndef PRISM_DEFER
-#define PRISM_DEFER(...) __VA_ARGS__
-#endif
-
-# ifdef %CLASS_TOKEN%
-#undef %CLASS_TOKEN%
-#endif
-#define %CLASS_TOKEN%(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
-
-# ifdef %STRUCT_TOKEN%
-#undef %STRUCT_TOKEN%
-#endif
-#define %STRUCT_TOKEN%(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
-
-# ifdef %ENUM_TOKEN%
-#undef %ENUM_TOKEN%
-#endif
-#define %ENUM_TOKEN%(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
-
-# ifdef %FUNCTION_TOKEN%
-#undef %FUNCTION_TOKEN%
-#endif
-#define %FUNCTION_TOKEN%(...)
-
-# ifdef %VARIABLE_TOKEN%
-#undef %VARIABLE_TOKEN%
-#endif
-#define %VARIABLE_TOKEN%(...)
-			";
-				// Setup defaults
-			sourceContent = @"%FILE_EXPORT_HEADER%
-#include ""%FILE_PATH%""
-
-#ifdef %FILE_REFLECTION_DEFINE%
-";
-
-				string fileReflectionDefine = sourcePath.ToUpper()
-					.Replace(' ', '_')
-					.Replace('-', '_')
-					.Replace('.', '_')
-					.Replace(':', '_')
-					.Replace('\\', '_')
-					.Replace('/', '_')
-					+ "_REFL";
-
-				// Resolve placeholders
-				includeContent = includeContent
-					.Replace("%FILE_EXPORT_HEADER%", s_ExportHeader)
-					.Replace("%CLASS_TOKEN%", settings.ClassToken)
-					.Replace("%STRUCT_TOKEN%", settings.StructToken)
-					.Replace("%ENUM_TOKEN%", settings.EnumToken)
-					.Replace("%FUNCTION_TOKEN%", settings.FunctionToken)
-					.Replace("%VARIABLE_TOKEN%", settings.VariableToken)
-					.Replace("%FILE_REFLECTION_DEFINE%", fileReflectionDefine);
-
-				sourceContent = sourceContent
-					.Replace("%FILE_EXPORT_HEADER%", s_ExportHeader)
-					.Replace("%FILE_PATH%", sourcePath)
-					.Replace("%FILE_REFLECTION_DEFINE%", fileReflectionDefine);
-
+				
 				// Reflect the file
 				using (FileStream stream = new FileStream(sourcePath, FileMode.Open))
 				{
 					ParsedHeader file = ParsedHeader.Generate(settings, sourcePath, stream);
-					
-					// Perform any reflection
-					foreach (IReflectableToken token in file.ParsedTokens)
-					{
-						m_BehaviourController.ProcessToken(token);
-
-						includeContent += "\n// TOKEN XYZ START\n";
-						includeContent += token.GenerateIncludeContent(null);
-						includeContent += "\n// TODO ACTUAL HOOKUP HERE\n";
-						includeContent += token.GenerateDeclarationContent(null);
-						includeContent += "\n// TOKEN XYZ END\n";
-						
-						sourceContent += "\n// TOKEN XYZ START\n";
-						sourceContent += token.GenerateImplementationContent(null);
-						sourceContent += "\n// TOKEN XYZ END\n";
-					}
-
-					Console.WriteLine(includeContent);
-					Console.WriteLine(sourceContent);
-					Console.WriteLine("ok");
-
-					/*
+										
 					// If there were no tokens, check if there are artefacts from previous runs (If so, the files need to be wiped)
-					if (file.ReflectedTokenCount == 0)
+					if (file.ParsedTokens.Count == 0)
 					{
 						// Check for include refl
 						if (File.Exists(includeExportPath))
@@ -317,10 +227,11 @@ namespace Prism.Export
 					// Export tokens, if any have been found
 					else
 					{
+						/*
 						// This has valid tokens to reflect, so check that the includes are present
 						bool foundReflInclude = false;
 						string requiredPreInclude = includeExportPath.ToLower().Replace('/', '\\');
-						int firstTokenLine = file.ReflectedTokens[0].TokenLineNumber;
+						int firstTokenLine = file.ParsedTokens.First(). .TokenLineNumber;
 
 						foreach (var fileInclude in file.FileIncludes)
 						{
@@ -341,47 +252,21 @@ namespace Prism.Export
 							SignatureInfo fakeSig = new SignatureInfo(token.TokenLineNumber, "", SignatureInfo.SigType.Unknown);
 							throw new ReflectionException(ReflectionErrorCode.ParseExpectedInclude, fakeSig, "Expected include to '" + Path.GetFileName(includeExportPath) + "' to appear before first token.");
 						}
+						*/
 
 
-						// Generate the reflection export data for all tokens found
-						for (int i = 0; i < file.ReflectedTokenCount; ++i)
+						// Perform reflection
+						foreach (IReflectableToken token in file.ParsedTokens)
 						{
-							var token = file.ReflectedTokens[i];
-
-							string tokenHeader = token.GenerateHeaderReflectionContent();
-							string tokenInclude = token.GenerateIncludeReflectionContent();
-							string tokenSource = token.GenerateSourceReflectionContent();
-
-							// Raw include content
-							string finalInclude = "";
-							string finalSource = tokenSource;
-
-							finalInclude += tokenInclude + "\n";
-
-							// Macro replacement 
-							string headerMacro = @"
-#if %TOKEN_CONDITION%
-#ifdef PRISM_REFLECTION_BODY_%TOKEN_LINE%
-#undef PRISM_REFLECTION_BODY_%TOKEN_LINE%
-#endif
-#define PRISM_REFLECTION_BODY_%TOKEN_LINE% %MACRO_CONTENT%
-#endif
-";
-							finalInclude += headerMacro
-								.Replace("%TOKEN_CONDITION%", "" + token.PreProcessorCondition)
-								.Replace("%TOKEN_LINE%", "" + token.TokenLineNumber)
-								.Replace("%MACRO_CONTENT%", tokenHeader.Replace("\r\n", " \\\n"));
-
-
-							// Add line breaks to make debugging easier on the eyes
-							includeContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalInclude + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
-							sourceContent += "\n//=========== TOKEN " + token.TokenLineNumber + " START ===========//\n" + finalSource + "\n//=========== TOKEN " + token.TokenLineNumber + " END ===========//\n";
+							m_BehaviourController.ProcessToken(token);
 						}
-						
-						// Endif for ifdef FILE_REFLECTION_DEFINE
-						// *Prevents source from being compiled, if header is excluded in build
-						sourceContent += "\n#endif";
 
+						// Export results
+						ReflectionExporter exporter = new ReflectionExporter(new FileInfo(sourcePath), file, settings);
+
+						string includeContent = exporter.GenerateIncludeContent().ToString();
+						string sourceContent = exporter.GenerateSourceContent().ToString();
+						
 						// Fix line-endings
 						includeContent = ConditionState.PreExpandDirectives(includeContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
 						sourceContent = ConditionState.PreExpandDirectives(sourceContent).Replace("\r\n", "\n").Replace("\n", "\r\n");
@@ -419,9 +304,9 @@ namespace Prism.Export
 							exports.Add(sourceExport);
 						}
 					}
-					*/
 				}
 			}
+
 			return exports;
 		}
 	}
