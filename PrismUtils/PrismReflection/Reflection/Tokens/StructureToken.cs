@@ -67,7 +67,7 @@ namespace Prism.Reflection.Tokens
 		/// <summary>
 		/// Any parents for this structure
 		/// </summary>
-		public ICollection<ScopedStructure> ParentStructures
+		public List<ScopedStructure> ParentStructures
 		{
 			get { return m_Parents; }
 		}
@@ -75,7 +75,7 @@ namespace Prism.Reflection.Tokens
 		/// <summary>
 		/// Any methods for this structure
 		/// </summary>
-		public ICollection<FunctionToken> Methods
+		public List<FunctionToken> Methods
 		{
 			get { return m_Methods; }
 		}
@@ -83,7 +83,7 @@ namespace Prism.Reflection.Tokens
 		/// <summary>
 		/// Any properties for this structure
 		/// </summary>
-		public ICollection<VariableToken> Properties
+		public List<VariableToken> Properties
 		{
 			get { return m_Properties; }
 		}

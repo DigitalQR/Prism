@@ -317,7 +317,7 @@ namespace Prism.Parsing
 										{
 											VariableToken token = VariableTokenConverter.Convert(
 												currentSignature, currentAccessScope, macroCondition,
-												new TokenOrigin(filePath, (int)previousSignature.LineNumber),
+												new TokenOrigin(filePath, (int)currentSignature.LineNumber),
 												"", recentDocString
 											);
 
@@ -365,7 +365,7 @@ namespace Prism.Parsing
 										{
 											FunctionToken token = FunctionTokenConverter.Convert(
 												currentSignature, currentAccessScope, macroCondition,
-												new TokenOrigin(filePath, (int)previousSignature.LineNumber),
+												new TokenOrigin(filePath, (int)currentSignature.LineNumber),
 												"", recentDocString
 											);
 
@@ -395,7 +395,7 @@ namespace Prism.Parsing
 									{
 										FunctionToken token = FunctionTokenConverter.Convert(
 											currentSignature, currentAccessScope, macroCondition,
-											new TokenOrigin(filePath, (int)previousSignature.LineNumber),
+											new TokenOrigin(filePath, (int)currentSignature.LineNumber),
 											"", recentDocString
 										);
 

@@ -63,8 +63,8 @@ $(Name)::ClassInfo::ClassInfo()
 		sizeof($(Name)),
 		{ /* TODO - Attributes for StructureToken */ },
 		std::is_abstract<$(Name)>::value,
-		{ /* TODO - Constructors for StructureToken */},
-		{ /* TODO - Methods for StructureToken */},
+		{ $(ConstructorInstances)},
+		{ $(MethodInstances) },
 		{ $(PropertyInstances) }
 	)
 {
@@ -92,9 +92,27 @@ $(FuncBody_GetParentCount)
 ");
 
 			// Expand custom macros
+			string template_ConstructorInstances = "";
+			string template_MethodInstances = "";
 			string template_PropertyInstances = "";
 			string template_GetParentClass = "";
 			string template_GetParentCount = "";
+
+			for (int i = 0; i < target.Methods.Count; ++i)
+			{
+				if (target.Methods[i].IsDestructor)
+					continue;
+				
+					string current = @"
+#if $(Method[%i].PreProcessorCondition)
+new MethodInfo_$(Method[%i].ReflectedName)(),
+#endif
+";
+				if (target.Methods[i].IsConstructor)
+					template_ConstructorInstances += current.Replace("%i", i.ToString());
+				else
+					template_MethodInstances += current.Replace("%i", i.ToString());
+			}
 
 			for (int i = 0; i < target.Properties.Count; ++i)
 			{
@@ -123,6 +141,8 @@ __if_exists($(Parent[%i].Name)::ClassInfo)
 				template_GetParentCount += current_GetParentCount.Replace("%i", i.ToString());
 			}
 
+			builder.Replace("$(ConstructorInstances)", template_ConstructorInstances);
+			builder.Replace("$(MethodInstances)", template_MethodInstances);
 			builder.Replace("$(PropertyInstances)", template_PropertyInstances);
 			builder.Replace("$(FuncBody_GetParentClass)", template_GetParentClass);
 			builder.Replace("$(FuncBody_GetParentCount)", template_GetParentCount);

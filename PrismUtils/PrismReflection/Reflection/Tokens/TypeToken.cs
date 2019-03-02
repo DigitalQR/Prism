@@ -211,6 +211,7 @@ namespace Prism.Reflection.Tokens
 		/// <summary>
 		/// Expand any macros relating to this type (Missing macros will be left)
 		/// $(TypeName)
+		/// $(IsVoid)
 		/// $(PointerToken)			e.g. If is const pointer: "* const". If is nothing: ""
 		/// $(ReferenceToken)
 		/// $(ConstToken)
@@ -236,6 +237,7 @@ namespace Prism.Reflection.Tokens
 		public StringBuilder ExpandMacros(StringBuilder builder, string prefix = "", string suffix = "")
 		{
 			builder.Replace("$(" + prefix + "TypeName" + suffix + ")", m_TypeName);
+			builder.Replace("$(" + prefix + "IsVoid" + suffix + ")", Equals(s_VoidType) ? "1" : "0");
 
 			builder.Replace("$(" + prefix + "PointerToken" + suffix + ")", IsPointer ? (IsConst ? "*" : "* const") : "");
 			builder.Replace("$(" + prefix + "ReferenceToken" + suffix + ")", IsReference ? "&" : "");
@@ -265,6 +267,17 @@ namespace Prism.Reflection.Tokens
 			hash = hash * 31 + m_TypeName.GetHashCode();
 			hash = hash * 31 + m_Properties.GetHashCode();
 			return hash;
+		}
+
+		public override bool Equals(object obj)
+		{
+			TypeToken token = obj as TypeToken;
+			if (token != null)
+			{
+				return m_TypeName == token.m_TypeName && m_Properties == token.m_Properties;
+			}
+
+			return base.Equals(obj);
 		}
 	}
 
@@ -452,6 +465,17 @@ namespace Prism.Reflection.Tokens
 			int hash = InnerType.GetReflectionHash();
 			hash = hash * 31 + m_Name.GetHashCode();
 			return hash;
+		}
+
+		public override bool Equals(object obj)
+		{
+			NamedTypeToken token = obj as NamedTypeToken;
+			if (token != null)
+			{
+				return m_Name == token.m_Name && m_TypeToken.Equals(token.m_TypeToken);
+			}
+
+			return base.Equals(obj);
 		}
 	}
 }

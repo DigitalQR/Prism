@@ -125,11 +125,11 @@ namespace Prism.Reflection.Tokens
 			return m_TypeToken.GetReflectionHash().ToString("x");
 		}
 		
-		
 		public override StringBuilder GenerateDeclarationContent(IReflectableToken context)
 		{
 			StringBuilder builder = base.GenerateDeclarationContent(context);
 
+			/* // TODO - ADD PROPER
 			// Create new variable, as requested
 			if (m_DeclarationReflecitonState == ReflectionState.ProvideDefault)
 			{
@@ -140,6 +140,7 @@ $(FullTypeToken) $(Name);
 #endif
 ");
 			}
+			*/
 			
 			return ExpandMacros(builder, context);
 		}
@@ -148,6 +149,7 @@ $(FullTypeToken) $(Name);
 		{
 			StringBuilder builder = base.GenerateImplementationContent(context);
 
+			/* // TODO - ADD PROPER
 			// Create new variable as requested
 			if (m_DeclarationReflecitonState == ReflectionState.ProvideDefault && m_TypeToken.IsStatic)
 			{
@@ -157,6 +159,7 @@ $(FullTypeToken) $(Parent.Name)::$(Name);
 #endif
 ");
 			}
+			*/
 			
 			return ExpandMacros(builder, context);
 		}
