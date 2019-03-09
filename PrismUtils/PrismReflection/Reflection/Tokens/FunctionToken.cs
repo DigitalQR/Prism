@@ -273,7 +273,7 @@ namespace Prism.Reflection.Tokens
 		public StringBuilder ExpandMacros(StringBuilder builder, string prefix = "", string suffix = "")
 		{
 			builder.Replace("$(" + prefix + "PreProcessorCondition" + suffix + ")", string.IsNullOrWhiteSpace(m_PreProcessorCondition) ? "1" : m_PreProcessorCondition);
-			builder.Replace("$(" + prefix + "ReflectedName" + suffix + ")", SafeName + (IsConstructor ? "Constructor" : (IsDestructor ? "Destructor" : "")) + "_" + GetReflectionHash());
+			builder.Replace("$(" + prefix + "ReflectedName" + suffix + ")", SafeName + "_" + GetReflectionHash());
 			builder.Replace("$(" + prefix + "ReflectHash" + suffix + ")", GetReflectionHash());
 			builder.Replace("$(" + prefix + "Documentation" + suffix + ")", m_Documentation);
 			builder.Replace("$(" + prefix + "Accessor" + suffix + ")", m_Accessor.ToString().ToLower());
@@ -284,12 +284,12 @@ namespace Prism.Reflection.Tokens
 			builder.Replace("$(" + prefix + "Name" + suffix + ")", m_Name);
 			builder.Replace("$(" + prefix + "SafeName" + suffix + ")", SafeName);
 
-			m_ReturnType.ExpandMacros(builder, "ReturnType.");
+			m_ReturnType.ExpandMacros(builder, prefix + "ReturnType" + suffix + ".");
 
-			builder.Replace("$(ParamCount)", m_ParamTypes.Length.ToString());
+			builder.Replace("$(" + prefix + "ParamCount" + suffix + ")", m_ParamTypes.Length.ToString());
 
 			for (int i = 0; i < m_ParamTypes.Length; ++i)
-				m_ParamTypes[i].ExpandMacros(builder, "Param[" + i + "].");
+				m_ParamTypes[i].ExpandMacros(builder, prefix + "Param" + suffix + "[" + i + "].");
 
 
 			string paramTypes = "";

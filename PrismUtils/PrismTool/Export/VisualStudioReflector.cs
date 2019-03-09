@@ -19,25 +19,25 @@ namespace Prism.Export
 		/// <summary>
 		/// Where all the source files will be read from
 		/// </summary>
-		[CommandLineArgument(Arg = "src-vsproj", Usage = "The project with all the files to reflect", MustExist = true)]
+		[CommandLineArgument(Name = "src-vsproj", Usage = "The project with all the files to reflect", MustExist = true)]
 		private string m_SourceProject;
 
 		/// <summary>
 		/// Where all the output files will be placed
 		/// </summary>
-		[CommandLineArgument(Arg = "out-dir", Usage = "The directory where output files will be placed", MustExist = false)]
+		[CommandLineArgument(Name = "out-dir", Usage = "The directory where output files will be placed", MustExist = false)]
 		private string m_OutputDirectory = null;
 
 		/// <summary>
 		/// Where all the reflection files will be outputed to
 		/// </summary>
-		[CommandLineArgument(Arg = "out-vsproj", Usage = "The project where all reflection files should be placed", MustExist = false)]
+		[CommandLineArgument(Name = "out-vsproj", Usage = "The project where all reflection files should be placed", MustExist = false)]
 		private string m_OutputProject = null;
 
 		/// <summary>
 		/// The extensions that are supported
 		/// </summary>
-		[CommandLineArgument(Arg = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
+		[CommandLineArgument(Name = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
 		private string[] m_WhitelistedExtensions;
 
 		/// <summary>

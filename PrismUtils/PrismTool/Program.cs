@@ -20,10 +20,10 @@ namespace Prism
 		/// </summary>
 		internal class ReflectionSelector
 		{
-			[CommandLineArgument(Arg = "src-dir")]
+			[CommandLineArgument(Name = "src-dir")]
 			public string DirectorySource = null;
 
-			[CommandLineArgument(Arg = "src-vsproj")]
+			[CommandLineArgument(Name = "src-vsproj")]
 			public string VisualStudioSource = null;
 		}
 

@@ -28,7 +28,7 @@ namespace Prism.Export
 		/// <summary>
 		/// The extension which will be applied to export files
 		/// </summary>
-		[CommandLineArgument(Arg = "export-ext", Usage = "The extention all exported files will prepend to thier current", MustExist = false)]
+		[CommandLineArgument(Name = "export-ext", Usage = "The extention all exported files will prepend to thier current", MustExist = false)]
 		protected string m_ExportExtension = ".refl";
 
 		/// <summary>
@@ -181,6 +181,7 @@ namespace Prism.Export
 		protected List<ExportFile> ReflectFile(ReflectionSettings settings, string sourcePath, string exportDirectory)
 		{
 			List<ExportFile> exports = new List<ExportFile>();
+			HeaderParser parser = new HeaderParser(settings);
 
 			// Decide whether to reflect the file
 			// Only build if: currently rebuilding everything, file has changed, tool has changed
@@ -195,10 +196,13 @@ namespace Prism.Export
 				// Reflect the file
 				using (FileStream stream = new FileStream(sourcePath, FileMode.Open))
 				{
-					ParsedHeader file = ParsedHeader.Generate(settings, sourcePath, stream);
-										
+					FileToken fileToken = parser.Parse(sourcePath, stream);
+
+					// Perform reflection
+					m_BehaviourController.ProcessToken(fileToken);
+
 					// If there were no tokens, check if there are artefacts from previous runs (If so, the files need to be wiped)
-					if (file.ParsedTokens.Count == 0)
+					if (fileToken.InternalTokens.Count == 0)
 					{
 						// Check for include refl
 						if (File.Exists(includeExportPath))
@@ -253,16 +257,9 @@ namespace Prism.Export
 							throw new ReflectionException(ReflectionErrorCode.ParseExpectedInclude, fakeSig, "Expected include to '" + Path.GetFileName(includeExportPath) + "' to appear before first token.");
 						}
 						*/
-
-
-						// Perform reflection
-						foreach (IReflectableToken token in file.ParsedTokens)
-						{
-							m_BehaviourController.ProcessToken(token);
-						}
-
+						
 						// Export results
-						ReflectionExporter exporter = new ReflectionExporter(new FileInfo(sourcePath), file, settings);
+						ReflectionExporter exporter = new ReflectionExporter(fileToken, settings);
 
 						string includeContent = exporter.GenerateIncludeContent().ToString();
 						string sourceContent = exporter.GenerateSourceContent().ToString();

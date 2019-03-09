@@ -10,7 +10,7 @@ namespace Prism.Reflection.Behaviour
 {
 	public class BehaviourController
 	{
-		[CommandLineArgument(Arg = "custom-behaviour", Usage = "File path to any additional assemblies")]
+		[CommandLineArgument(Name = "custom-behaviour", Usage = "File path to any additional assemblies")]
 		private string[] m_AdditionalAssemblies;
 
 		private Dictionary<string, IReflectionBehaviour> m_BehaviourLookup;

@@ -53,6 +53,7 @@
     <Compile Include="Reflection\ReflectionState.cs" />
     <Compile Include="Reflection\Tokens\FunctionToken.cs" />
     <Compile Include="Reflection\Tokens\IReflectableToken.cs" />
+    <Compile Include="Reflection\Tokens\FileToken.cs" />
     <Compile Include="Reflection\Tokens\ReflectableTokenBase.cs" />
     <Compile Include="Reflection\Tokens\ScopedTokens.cs" />
     <Compile Include="Reflection\Tokens\StructureToken.cs" />

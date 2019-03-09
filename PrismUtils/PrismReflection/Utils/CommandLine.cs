@@ -13,12 +13,12 @@ namespace Prism.Utils
 		/// <summary>
 		/// Name that is checked for in the form --my-name (Only my-name should be provided)
 		/// </summary>
-		public string Arg { get; set; }
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Name that is checked for in the form -myname (Only myname should be provided, no spaces '-' allowed)
 		/// </summary>
-		public string ShortArg { get; set; }
+		public string ShortName { get; set; }
 
 		/// <summary>
 		/// Usage for this argument (Output when parse fails)
@@ -37,17 +37,17 @@ namespace Prism.Utils
 
 		public CommandLineArgumentParseException(CommandLineArgumentAttribute arg, string message) : base(message)
 		{
-			if (string.IsNullOrEmpty(arg.Arg))
+			if (string.IsNullOrEmpty(arg.Name))
 			{
-				Usage = "-" + arg.ShortArg;
+				Usage = "-" + arg.ShortName;
 			}
-			else if (string.IsNullOrEmpty(arg.ShortArg))
+			else if (string.IsNullOrEmpty(arg.ShortName))
 			{
-				Usage = "--" + arg.Arg;
+				Usage = "--" + arg.Name;
 			}
 			else
 			{
-				Usage = "--" + arg.Arg + "/-" + arg.ShortArg;
+				Usage = "--" + arg.Name + "/-" + arg.ShortName;
 			}
 
 			Usage = "(" + Usage + "): " + arg.Usage;
@@ -105,9 +105,9 @@ namespace Prism.Utils
 				bool found = false;
 
 				// Look for full name
-				if (!string.IsNullOrEmpty(arg.Arg))
+				if (!string.IsNullOrEmpty(arg.Name))
 				{
-					string key = "--" + arg.Arg.ToLower().Replace(' ', '-');
+					string key = "--" + arg.Name.ToLower().Replace(' ', '-');
 					if (s_ArgTable.ContainsKey(key))
 					{
 						found = true;
@@ -116,9 +116,9 @@ namespace Prism.Utils
 				}
 
 				// Look for short name
-				if (!string.IsNullOrEmpty(arg.ShortArg))
+				if (!string.IsNullOrEmpty(arg.ShortName))
 				{
-					string key = "-" + arg.ShortArg.ToLower().Replace(" ", "");
+					string key = "-" + arg.ShortName.ToLower().Replace(" ", "");
 					if (s_ArgTable.ContainsKey(key))
 					{
 						if (found)

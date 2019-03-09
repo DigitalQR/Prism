@@ -9,12 +9,6 @@ using System.Threading.Tasks;
 
 namespace Prism.Export
 {
-	public enum ReflectionExportState
-	{
-		SucT,
-		NoWrite,
-	}
-
 	public class ReflectionExporter
 	{
 		/// <summary>
@@ -28,14 +22,12 @@ namespace Prism.Export
 ///////////////////////////////////////////////////////////////////////////////////////////
 ";
 
-		private FileInfo m_SourceFile;
-		private ParsedHeader m_ParsedHeader;
+		private FileToken m_FileToken;
 		private ReflectionSettings m_Settings;
 
-		public ReflectionExporter(FileInfo sourceFile, ParsedHeader header, ReflectionSettings settings)
+		public ReflectionExporter(FileToken file, ReflectionSettings settings)
 		{
-			m_SourceFile = sourceFile;
-			m_ParsedHeader = header;
+			m_FileToken = file;
 			m_Settings = settings;
 		}
 
@@ -45,58 +37,7 @@ namespace Prism.Export
 		public StringBuilder GenerateIncludeContent()
 		{
 			StringBuilder builder = new StringBuilder(s_ExportHeader);
-			builder.Append(@"#pragma once
-#include <Prism.h>
-
-#ifndef NO_REFL_$(UniqueSourceName)
-#define REFL_$(UniqueSourcePath)
-
-///
-/// DEFINE SUPPORTED TOKENS
-///
-
-#ifdef PRISM_DEFER
-#undef PRISM_DEFER
-#endif
-#define PRISM_DEFER(...) __VA_ARGS__
-
-#ifdef $(ClassReflectionToken)
-#undef $(ClassReflectionToken)
-#endif
-#define $(ClassReflectionToken)(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
-
-#ifdef $(StructReflectionToken)
-#undef $(StructReflectionToken)
-#endif
-#define $(StructReflectionToken)(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
-
-#ifdef $(EnumReflectionToken)
-#undef $(EnumReflectionToken)
-#endif
-#define $(EnumReflectionToken)(...) //PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
-
-#ifdef $(FunctionReflectionToken)
-#undef $(FunctionReflectionToken)
-#endif
-#define $(FunctionReflectionToken)(...)
-
-#ifdef $(VariableReflectionToken)
-#undef $(VariableReflectionToken)
-#endif
-#define $(VariableReflectionToken)(...)
-
-///////////////////////////////////////
-");
-
-			foreach (IReflectableToken token in m_ParsedHeader.ParsedTokens)
-			{
-				builder.Append(token.GenerateIncludeContent(null));
-				builder.Append(@"
-///////////////////////////////////////
-");
-			}
-
-			builder.Append("\n#endif\n");
+			builder.Append(m_FileToken.GenerateIncludeContent(null));
 			return ExpandMacros(builder);
 		}
 
@@ -106,41 +47,12 @@ namespace Prism.Export
 		public StringBuilder GenerateSourceContent()
 		{
 			StringBuilder builder = new StringBuilder(s_ExportHeader);
-			builder.Append(@"#include ""$(SourceFilePath)""
-#ifdef REFL_$(UniqueSourcePath)
-");
-
-			foreach (IReflectableToken token in m_ParsedHeader.ParsedTokens)
-			{
-				builder.Append(token.GenerateImplementationContent(null));
-				builder.Append(@"
-///////////////////////////////////////
-");
-			}
-
-			builder.Append("\n#endif\n");
+			builder.Append(m_FileToken.GenerateImplementationContent(null));
 			return ExpandMacros(builder);
 		}
-
-		/// <summary>
-		/// Convert a path into a code-safe token
-		/// </summary>
-		private static string MakePathSafe(string path)
-		{
-			return path.Replace(' ', '_')
-					.Replace('-', '_')
-					.Replace('.', '_')
-					.Replace(':', '_')
-					.Replace('\\', '_')
-					.Replace('/', '_');
-		}
-
+		
 		/// <summary>
 		/// Expand any macros relating to this type (Missing macros will be left)
-		/// $(SourceFileName)
-		/// $(SourceFilePath)
-		/// $(UniqueSourceName)
-		/// $(UniqueSourcePath)
 		/// $(ClassReflectionToken)
 		/// $(StructReflectionToken)
 		/// $(EnumReflectionToken)
@@ -152,11 +64,6 @@ namespace Prism.Export
 		/// <returns>The string with all relevent macros expanded</returns>
 		public StringBuilder ExpandMacros(StringBuilder builder, string prefix = "", string suffix = "")
 		{
-			builder.Replace("$(" + prefix + "SourceFileName" + suffix + ")", m_SourceFile.Name);
-			builder.Replace("$(" + prefix + "SourceFilePath" + suffix + ")", m_SourceFile.FullName);
-			builder.Replace("$(" + prefix + "UniqueSourceName" + suffix + ")", MakePathSafe(m_SourceFile.Name.ToUpper()));
-			builder.Replace("$(" + prefix + "UniqueSourcePath" + suffix + ")", MakePathSafe(m_SourceFile.FullName.ToUpper()));
-
 			builder.Replace("$(" + prefix + "ClassReflectionToken" + suffix + ")", m_Settings.ClassToken);
 			builder.Replace("$(" + prefix + "StructReflectionToken" + suffix + ")", m_Settings.StructToken);
 			builder.Replace("$(" + prefix + "EnumReflectionToken" + suffix + ")", m_Settings.EnumToken);

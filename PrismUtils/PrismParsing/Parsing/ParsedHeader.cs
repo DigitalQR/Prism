@@ -15,7 +15,7 @@ namespace Prism.Parsing
 	/// <summary>
 	/// Generate reflection information for a single file
 	/// </summary>
-	public class ParsedHeader
+	public class HeaderParser
 	{
 		/// <summary>
 		/// Supported tokens to lookout for
@@ -35,64 +35,33 @@ namespace Prism.Parsing
 		}
 
 		/// <summary>
-		/// When an include is found
+		/// The settings to use when parsing the header
 		/// </summary>
-		public class IncludeStatement
-		{
-			public string Path;
-			public int LineNumber;
-		}
+		private ReflectionSettings m_Settings;
 
 		/// <summary>
 		/// The supported structures to look to reflect
 		/// </summary>
 		private ReflectableStructure[] m_SupportedReflectableStructures;
-
-		/// <summary>
-		/// All the reflected tokens found in this file
-		/// </summary>
-		private List<IReflectableToken> m_ParsedTokens;
-
-		/// <summary>
-		/// All the includes found in this file
-		/// </summary>
-		private List<IncludeStatement> m_Includes;
 		
-
-		private ParsedHeader(ReflectionSettings settings)
+		public HeaderParser(ReflectionSettings settings)
 		{
-			m_ParsedTokens = new List<IReflectableToken>();
-			m_Includes = new List<IncludeStatement>();
+			m_Settings = settings;
+
 			m_SupportedReflectableStructures = new ReflectableStructure[] {
 				new ReflectableStructure(settings.ClassToken, "class", "private"),
 				new ReflectableStructure(settings.StructToken, "struct", "public"),
 				new ReflectableStructure(settings.EnumToken, "enum", "")
 			};
 		}
-
-		/// <summary>
-		/// All tokens which have been discovered in this header
-		/// </summary>
-		public ICollection<IReflectableToken> ParsedTokens
-		{
-			get { return m_ParsedTokens; }
-		}
-		
-		/// <summary>
-		/// All includes which have been discovered in this header
-		/// </summary>
-		public ICollection<IncludeStatement> Includes
-		{
-			get { return m_Includes; }
-		}
-		
+				
 		/// <summary>
 		/// Fetched the desired header reflection from an input stream
 		/// </summary>
-		public static ParsedHeader Generate(ReflectionSettings settings, string filePath, Stream content)
+		public FileToken Parse(string filePath, Stream content)
 		{
-			ParsedHeader reflection = new ParsedHeader(settings);
-
+			FileToken outputFile = new FileToken(filePath);
+			
 #if !DEBUG
 			try
 #endif
@@ -166,11 +135,8 @@ namespace Prism.Parsing
 										// Remove <> or ""
 										includeFile = includeFile.Substring(1, includeFile.Length - 2);
 
-										IncludeStatement include = new IncludeStatement();
-										include.Path = includeFile;
-										include.LineNumber = (int)currentSignature.LineNumber;
-
-										reflection.m_Includes.Add(include);
+										FileToken.IncludeStatement include = new FileToken.IncludeStatement(includeFile, (int)currentSignature.LineNumber);
+										outputFile.AddInternalInclude(include);
 									}
 
 									else if (macroString.StartsWith("#ifdef"))
@@ -217,7 +183,7 @@ namespace Prism.Parsing
 									// Look for any structures which are supported
 									string errorMessage = null;
 
-									foreach (var supportedStructure in reflection.m_SupportedReflectableStructures)
+									foreach (var supportedStructure in m_SupportedReflectableStructures)
 									{
 										if (data.MacroName == supportedStructure.MacroToken && ValidateStructureReflection(currentSignature, previousSignature, supportedStructure.MacroToken, supportedStructure.StructureType))
 										{
@@ -238,7 +204,7 @@ namespace Prism.Parsing
 												if (currentStructure != null)
 												{
 													currentAccessScope = supportedStructure.DefaultAccess;
-													reflection.m_ParsedTokens.Add(currentStructure);
+													outputFile.AddInternalToken(currentStructure);
 												}
 
 												// Reset any previous error (Originated for shared macro token)
@@ -289,7 +255,7 @@ namespace Prism.Parsing
 									{
 										var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
 
-										if (data.MacroName == settings.VariableToken)
+										if (data.MacroName == m_Settings.VariableToken)
 										{
 											macroTokenClaimed = true;
 											
@@ -305,13 +271,13 @@ namespace Prism.Parsing
 											}
 											else
 											{
-												throw new ParseException(ParseErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.VariableToken + "' (Prism does not currently support reflecting outside of a type structure)");
+												throw new ParseException(ParseErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + m_Settings.VariableToken + "' (Prism does not currently support reflecting outside of a type structure)");
 											}
 											break;
 										}
 									}
 
-									if (settings.UseImplicitVariables)
+									if (m_Settings.UseImplicitVariables)
 									{
 										if (structure != null)
 										{
@@ -337,7 +303,7 @@ namespace Prism.Parsing
 									{
 										var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
 
-										if (data.MacroName == settings.FunctionToken)
+										if (data.MacroName == m_Settings.FunctionToken)
 										{
 											macroTokenClaimed = true;
 											
@@ -353,13 +319,13 @@ namespace Prism.Parsing
 											}
 											else
 											{
-												throw new ParseException(ParseErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + settings.FunctionToken + "' (Prism does not currently support reflecting outside of a type structure)");
+												throw new ParseException(ParseErrorCode.ParseUnexpectedSignature, currentSignature, "Found unexpected '" + m_Settings.FunctionToken + "' (Prism does not currently support reflecting outside of a type structure)");
 											}
 											break;
 										}
 									}
 
-									if (settings.UseImplicitFunctions)
+									if (m_Settings.UseImplicitFunctions)
 									{
 										if (structure != null)
 										{
@@ -412,11 +378,11 @@ namespace Prism.Parsing
 							{
 								var data = (MacroCallSignature.ParseData)previousSignature.AdditionalParam;
 
-								if (data.MacroName == settings.FunctionToken)
+								if (data.MacroName == m_Settings.FunctionToken)
 								{
 									throw new ParseException(ParseErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting function definition to follow. Got " + currentSignature.SignatureType + " )");
 								}
-								else if (data.MacroName == settings.VariableToken)
+								else if (data.MacroName == m_Settings.VariableToken)
 								{
 									throw new ParseException(ParseErrorCode.TokenMissuse, previousSignature, "Found unexpected '" + data.MacroName + "' (Expecting variable definition to follow. Got " + currentSignature.SignatureType + " )");
 								}
@@ -433,22 +399,22 @@ namespace Prism.Parsing
 						previousSignature = currentSignature;
 					}
 
-					return reflection;
+					return outputFile;
 				}
 			}
 #if !DEBUG
 			catch (Exception e)
 			{
-				if (settings.IgnoreBadForm)
+				if (m_Settings.IgnoreBadForm)
 				{
 					// Look for export include
 					bool foundReflInclude = false;
-					string includeExportPath = Path.GetFileNameWithoutExtension(filePath) + settings.ExportExtension + Path.GetExtension(filePath);
+					string includeExportPath = Path.GetFileNameWithoutExtension(filePath) + m_Settings.ExportExtension + Path.GetExtension(filePath);
 					string requiredPreInclude = includeExportPath.ToLower().Replace('/', '\\');
 
-					foreach (var fileInclude in reflection.Includes)
+					foreach (var fileInclude in outputFile.Includes)
 					{
-						string path = fileInclude.Path.Replace('/', '\\');
+						string path = fileInclude.IncludePath.Replace('/', '\\');
 						if (path.EndsWith(requiredPreInclude, StringComparison.CurrentCultureIgnoreCase))
 						{
 							foundReflInclude = true;
@@ -461,7 +427,7 @@ namespace Prism.Parsing
 						throw e;
 					else
 						// Return empty reflection
-						return new ParsedHeader(settings);
+						return new FileToken(filePath);
 				}
 				else
 					throw e;

@@ -18,19 +18,19 @@ namespace Prism.Export
 		/// <summary>
 		/// Where all the source files will be read from
 		/// </summary>
-		[CommandLineArgument(Arg = "src-dir", Usage = "The directory of the files to be read", MustExist = true)]
+		[CommandLineArgument(Name = "src-dir", Usage = "The directory of the files to be read", MustExist = true)]
 		private string m_SourceDirectory;
 
 		/// <summary>
 		/// Where all the output files will be placed
 		/// </summary>
-		[CommandLineArgument(Arg = "out-dir", Usage = "The directory where output files will be placed", MustExist = true)]
+		[CommandLineArgument(Name = "out-dir", Usage = "The directory where output files will be placed", MustExist = true)]
 		private string m_OutputDirectory;
 
 		/// <summary>
 		/// The extensions that are supported
 		/// </summary>
-		[CommandLineArgument(Arg = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
+		[CommandLineArgument(Name = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
 		private string[] m_WhitelistedExtensions;
 		
 		/// <summary>

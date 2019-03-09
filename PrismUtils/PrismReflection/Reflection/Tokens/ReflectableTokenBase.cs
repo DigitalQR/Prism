@@ -36,7 +36,7 @@ namespace Prism.Reflection.Tokens
 		/// Get a enumerator of all the internal tokens this token may have
 		/// (Will return null, if there are no tokens)
 		/// </summary>
-		public virtual IEnumerable<IReflectableToken> InternalTokens => null;
+		public virtual IReadOnlyList<IReflectableToken> InternalTokens => null;
 
 		/// <summary>
 		/// Append content which will be added to the refl.h inside of the REFLECT_TOKEN

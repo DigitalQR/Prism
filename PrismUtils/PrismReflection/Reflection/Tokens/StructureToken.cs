@@ -125,7 +125,7 @@ namespace Prism.Reflection.Tokens
 		/// Get a enumerator of all the internal tokens this token may have
 		/// (Will return null, if there are no tokens)
 		/// </summary>
-		public override IEnumerable<IReflectableToken> InternalTokens
+		public override IReadOnlyList<IReflectableToken> InternalTokens
 		{
 			get
 			{
