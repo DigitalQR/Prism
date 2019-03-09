@@ -63,8 +63,8 @@ namespace Prism.Reflection.Tokens
 			get { return m_DeclarationReflectionState; }
 		}
 
-		public VariableToken(TokenOrigin origin, AccessorMode accessor, string name, TypeToken typeToken, string preProcessorCondition, ReflectionState declarationState)
-			: base(origin, BehaviourTarget.Variable)
+		public VariableToken(TokenOrigin origin, AccessorMode accessor, string name, TypeToken typeToken, string preProcessorCondition, ReflectionState declarationState, string attribParams)
+			: base(origin, BehaviourTarget.Variable, attribParams)
 		{
 			m_Accessor = accessor;
 			m_TypeToken = new NamedTypeToken(name, typeToken);
@@ -105,7 +105,8 @@ namespace Prism.Reflection.Tokens
 			builder.Replace("$(" + prefix + "IsPublic" + suffix + ")", m_Accessor == AccessorMode.Public ? "1" : "0");
 			builder.Replace("$(" + prefix + "IsPrivate" + suffix + ")", m_Accessor == AccessorMode.Private ? "1" : "0");
 			builder.Replace("$(" + prefix + "IsProtected" + suffix + ")", m_Accessor == AccessorMode.Protected ? "1" : "0");
-			
+
+			ExpandAttributeMacros(builder, prefix, suffix);
 			return builder;
 		}
 

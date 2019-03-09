@@ -56,14 +56,24 @@ EnumInfo_$(ReflectedName)::EnumInfo_$(ReflectedName)()
 		Prism::TypeId::Get<$(Name)>(),
 		PRISM_STR(""$(NamespaceList[.])""), PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""($(Documentation))""),
 		sizeof($(Name)),
-		{ /* TODO - Attributes for StructureToken */},
+		{ $(AttributesInstances) },
 		{ $(EnumValueInstances) }
 	)
 {
 }
 #endif
 ");
+			string template_AttributesInstances = "";
 			string template_ValueInstances = "";
+
+			int a = 0;
+			foreach (AttributeData attrib in target.DataAttributes)
+			{
+				string current = "new $(Attribute[%i].Name)Attribute($(Attribute[%i].Params)),\n";
+				template_AttributesInstances += current.Replace("%i", a.ToString());
+				++a;
+			}
+
 			for (int i = 0; i < target.Values.Count; ++i)
 			{
 				string current_ValueInstance = @"
@@ -73,7 +83,8 @@ Prism::Enum::Value(PRISM_STR(""$(Value[%i].Name)""), (size_t)$(Name)::$(Value[%i
 ";
 				template_ValueInstances += current_ValueInstance.Replace("%i", i.ToString());
 			}
-			
+
+			builder.Replace("$(AttributesInstances)", template_AttributesInstances);
 			builder.Replace("$(EnumValueInstances)", template_ValueInstances);
 
 			return builder;

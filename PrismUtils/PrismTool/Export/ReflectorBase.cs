@@ -199,7 +199,16 @@ namespace Prism.Export
 					FileToken fileToken = parser.Parse(sourcePath, stream);
 
 					// Perform reflection
-					m_BehaviourController.ProcessToken(fileToken);
+					//try
+					//{
+						m_BehaviourController.ProcessToken(fileToken);
+					//}
+					//catch (TokenException e)
+					//{
+					//	// TODO - 
+					//	e.Token
+					//	throw new HeaderParseException(sourcePath, ParseErrorCode.TokenMissuse, new Parsing.Code.Signatures.SignatureInfo(0, ), e);
+					//}
 
 					// If there were no tokens, check if there are artefacts from previous runs (If so, the files need to be wiped)
 					if (fileToken.InternalTokens.Count == 0)

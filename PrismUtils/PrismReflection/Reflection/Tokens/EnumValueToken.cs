@@ -49,7 +49,7 @@ namespace Prism.Reflection.Tokens
 		}
 
 		public EnumValueToken(TokenOrigin origin, string name, string preProcessorCondition, ReflectionState declarationState)
-			: base(origin, BehaviourTarget.EnumuratorValue)
+			: base(origin, BehaviourTarget.EnumuratorValue, null)
 		{
 			m_Name = name;
 			m_PreProcessorCondition = preProcessorCondition;
@@ -72,7 +72,8 @@ namespace Prism.Reflection.Tokens
 			builder.Replace("$(" + prefix + "PreProcessorCondition" + suffix + ")", string.IsNullOrWhiteSpace(m_PreProcessorCondition) ? "1" : m_PreProcessorCondition);
 			builder.Replace("$(" + prefix + "Name" + suffix + ")", m_Name);
 			builder.Replace("$(" + prefix + "Documentation" + suffix + ")", m_Documentation);
-			
+
+			//ExpandAttributeMacros(builder, prefix, suffix);
 			return builder;
 		}
 

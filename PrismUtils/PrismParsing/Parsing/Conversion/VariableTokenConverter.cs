@@ -21,7 +21,7 @@ namespace Prism.Parsing.Conversion
 
 			var data = (VariableInfo)sigInfo.AdditionalParam;
 
-			VariableToken token = new VariableToken(origin, AccessorModeUtils.Parse(currentScope), data.VariableName, data.TypeInfo.ToTypeToken(), conditionState.CurrentCondition, ReflectionState.Discovered);
+			VariableToken token = new VariableToken(origin, AccessorModeUtils.Parse(currentScope), data.VariableName, data.TypeInfo.ToTypeToken(), conditionState.CurrentCondition, ReflectionState.Discovered, tokenParams);
 			return token;
 		}
 	}

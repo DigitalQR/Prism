@@ -105,8 +105,8 @@ namespace Prism.Reflection.Tokens
 			get { return m_DeclarationReflectionState; }
 		}
 
-		public StructureToken(TokenOrigin origin, string name, string structureType, string[] declaredNamespace, string preProcessorCondition, ReflectionState declarationState, ScopedStructure[] parents)
-			: base(origin, BehaviourTarget.Structure)
+		public StructureToken(TokenOrigin origin, string name, string structureType, string[] declaredNamespace, string preProcessorCondition, ReflectionState declarationState, ScopedStructure[] parents, string attribParams)
+			: base(origin, BehaviourTarget.Structure, attribParams)
 		{
 			m_Name = name;
 			m_StructureType = structureType;
@@ -207,6 +207,7 @@ namespace Prism.Reflection.Tokens
 				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".Name", m_Parents[i].Name);
 			}
 
+			ExpandAttributeMacros(builder, prefix, suffix);
 			return builder;
 		}
 

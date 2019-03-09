@@ -174,8 +174,8 @@ namespace Prism.Reflection.Tokens
 			get { return (m_Properties & FunctionProperties.Explicit) != 0; }
 		}
 
-		public FunctionToken(TokenOrigin origin, AccessorMode accessor, string name, string preProcessorCondition, NamedTypeToken[] paramTypes, TypeToken returnType, FunctionProperties properties, ReflectionState declarationState)
-			: base(origin, BehaviourTarget.Function)
+		public FunctionToken(TokenOrigin origin, AccessorMode accessor, string name, string preProcessorCondition, NamedTypeToken[] paramTypes, TypeToken returnType, FunctionProperties properties, ReflectionState declarationState, string attribParams)
+			: base(origin, BehaviourTarget.Function, attribParams)
 		{
 			m_Accessor = accessor;
 			m_Name = name;
@@ -321,7 +321,8 @@ namespace Prism.Reflection.Tokens
 			builder.Replace("$(" + prefix + "IsInline" + suffix + ")", IsInline ? "1" : "0");
 			builder.Replace("$(" + prefix + "IsAbstract" + suffix + ")", IsAbstract ? "1" : "0");
 			builder.Replace("$(" + prefix + "IsExplicit" + suffix + ")", IsExplicit ? "1" : "0");
-						
+
+			ExpandAttributeMacros(builder, prefix, suffix);
 			return builder;
 		}
 

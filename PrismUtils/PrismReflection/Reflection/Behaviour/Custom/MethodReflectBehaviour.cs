@@ -75,7 +75,7 @@ public: \
 $(Parent.Name)::MethodInfo_$(ReflectedName)::MethodInfo_$(ReflectedName)()
 	: Prism::Method(
 		PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""($(Documentation))""),
-		{ /* TODO - Attributes in MethodReflectBehaviour.cs */},
+		{ $(AttributesInstances) },
 		Prism::Accessor::$(AccessorPretty),
 		$(IsStatic), $(IsConst), $(IsVirtual)
 	)
@@ -153,8 +153,17 @@ Prism::Holder $(Parent.Name)::MethodInfo_$(ReflectedName)::Call(Prism::Holder ta
 
 #endif
 ");
+			string template_AttributesInstances = "";
 			StringBuilder paramSelect = new StringBuilder();
 			StringBuilder callParams = new StringBuilder();
+
+			int a = 0;
+			foreach (AttributeData attrib in target.DataAttributes)
+			{
+				string current = "new $(Attribute[%i].Name)Attribute($(Attribute[%i].Params)),\n";
+				template_AttributesInstances += current.Replace("%i", a.ToString());
+				++a;
+			}
 
 			for (int i = 0; i < target.ParamTypes.Length; ++i)
 			{
@@ -185,6 +194,7 @@ case %i:
 			}
 
 
+			builder.Replace("$(AttributesInstances)", template_AttributesInstances);
 			builder.Replace("$(SwitchBody_GetParamInfo)", paramSelect.ToString());
 			builder.Replace("$(CallParams_Call)", callParams.ToString());
 			return builder;

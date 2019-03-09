@@ -61,7 +61,7 @@ $(Name)::ClassInfo::ClassInfo()
 		Prism::TypeId::Get<$(Name)>(),
 		PRISM_STR(""$(NamespaceList[.])""), PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""($(Documentation))""),
 		sizeof($(Name)),
-		{ /* TODO - Attributes for StructureToken */ },
+		{ $(AttributesInstances) },
 		std::is_abstract<$(Name)>::value,
 		{ $(ConstructorInstances)},
 		{ $(MethodInstances) },
@@ -92,11 +92,20 @@ $(FuncBody_GetParentCount)
 ");
 
 			// Expand custom macros
+			string template_AttributesInstances = "";
 			string template_ConstructorInstances = "";
 			string template_MethodInstances = "";
 			string template_PropertyInstances = "";
 			string template_GetParentClass = "";
 			string template_GetParentCount = "";
+
+			int a = 0;
+			foreach (AttributeData attrib in target.DataAttributes)
+			{
+				string current = "new $(Attribute[%i].Name)Attribute($(Attribute[%i].Params)),\n";
+				template_AttributesInstances += current.Replace("%i", a.ToString());
+				++a;
+			}
 
 			for (int i = 0; i < target.Methods.Count; ++i)
 			{
@@ -141,6 +150,7 @@ __if_exists($(Parent[%i].Name)::ClassInfo)
 				template_GetParentCount += current_GetParentCount.Replace("%i", i.ToString());
 			}
 
+			builder.Replace("$(AttributesInstances)", template_AttributesInstances);
 			builder.Replace("$(ConstructorInstances)", template_ConstructorInstances);
 			builder.Replace("$(MethodInstances)", template_MethodInstances);
 			builder.Replace("$(PropertyInstances)", template_PropertyInstances);

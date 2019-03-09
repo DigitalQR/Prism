@@ -41,7 +41,7 @@ namespace Prism.Reflection.Tokens
 		
 
 		public FileToken(string fileSource)
-			: base(new TokenOrigin(fileSource, 0), BehaviourTarget.File)
+			: base(new TokenOrigin(fileSource, 0), BehaviourTarget.File, null)
 		{
 			m_InternalTokens = new List<IReflectableToken>();
 			m_Includes = new List<IncludeStatement>();

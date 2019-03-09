@@ -5,7 +5,7 @@ using Prism.Reflection.Behaviour;
 
 namespace Prism.Reflection.Tokens
 {
-	public abstract class ReflectableTokenBase : IReflectableToken
+	public abstract class ReflectableTokenBase : AttributeCollection, IReflectableToken
 	{
 		private TokenOrigin m_TokenOrigin;
 		private BehaviourTarget m_BehaviourTarget;
@@ -13,7 +13,8 @@ namespace Prism.Reflection.Tokens
 		private StringBuilder m_ImplementationContent;
 		private StringBuilder m_IncludeContent;
 
-		public ReflectableTokenBase(TokenOrigin origin, BehaviourTarget supportedTargets)
+		public ReflectableTokenBase(TokenOrigin origin, BehaviourTarget supportedTargets, string attribParams)
+			: base(attribParams)
 		{
 			m_TokenOrigin = origin;
 			m_BehaviourTarget = supportedTargets;
@@ -74,7 +75,23 @@ namespace Prism.Reflection.Tokens
 
 		public virtual StringBuilder GenerateIncludeContent(IReflectableToken context)
 		{
-			return new StringBuilder(m_IncludeContent.ToString());
+			StringBuilder builder = new StringBuilder(m_IncludeContent.ToString());
+
+			// Add some nicer complier errors for attributes that haven't been found
+			int i = 0;
+			foreach (AttributeData attrib in DataAttributes)
+			{
+				string check = @"
+__if_not_exists($(Attribute[%i].Name)Attribute)
+{
+#pragma message(R""($(SourceFilePath)($(TokenOriginLine)): error P202: Cannot find attribute '$(Attribute[%i].Name)Attribute')"");
+}
+";
+				builder.Append(check.Replace("%i", i.ToString()));
+				++i;
+			}
+			
+			return builder;
 		}
 	}
 }

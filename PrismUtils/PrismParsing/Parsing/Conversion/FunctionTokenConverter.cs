@@ -23,7 +23,7 @@ namespace Prism.Parsing.Conversion
 					origin, AccessorModeUtils.Parse(currentScope), data.FunctionName, conditionState.CurrentCondition,
 					ConvertToTypeTokens(data.ParamTypes),
 					data.ReturnType != null ? data.ReturnType.ToTypeToken() : TypeToken.VoidType, 
-					data.ToFunctionProperties(), ReflectionState.Discovered
+					data.ToFunctionProperties(), ReflectionState.Discovered, tokenParams
 				);
 			}
 			else if (sigInfo.SignatureType == SignatureInfo.SigType.StructureConstructor)
@@ -37,7 +37,7 @@ namespace Prism.Parsing.Conversion
 				token = new FunctionToken(
 					origin, AccessorModeUtils.Parse(currentScope), data.DeclareName + "Constructor", conditionState.CurrentCondition,
 					ConvertToTypeTokens(data.ParamTypes), TypeToken.VoidType,
-					properties, ReflectionState.Discovered
+					properties, ReflectionState.Discovered, tokenParams
 				);
 			}
 			else if (sigInfo.SignatureType == SignatureInfo.SigType.StructureDestructor)
@@ -51,7 +51,7 @@ namespace Prism.Parsing.Conversion
 				token = new FunctionToken(
 					origin, AccessorModeUtils.Parse(currentScope), data.DeclareName + "Destructor", conditionState.CurrentCondition,
 					ConvertToTypeTokens(null), TypeToken.VoidType,
-					properties, ReflectionState.Discovered
+					properties, ReflectionState.Discovered, tokenParams
 				);
 			}
 			else

@@ -27,7 +27,7 @@ namespace Prism.Parsing.Conversion
 
 			if (data.StructureType == "class" || data.StructureType == "struct")
 			{
-				StructureToken token = new StructureToken(origin, data.DeclareName, data.StructureType, tokenNamespace, conditionState.CurrentCondition, ReflectionState.Discovered, ParseParentInfo(data.ParentStructures));
+				StructureToken token = new StructureToken(origin, data.DeclareName, data.StructureType, tokenNamespace, conditionState.CurrentCondition, ReflectionState.Discovered, ParseParentInfo(data.ParentStructures), tokenParams);
 				token.Documentation = docString;
 
 				return token;
@@ -35,7 +35,7 @@ namespace Prism.Parsing.Conversion
 			else if (data.StructureType == "enum")
 			{
 				// TODO - Actually parse structure type rather than hardcode class
-				EnumToken token = new EnumToken(origin, data.DeclareName, "class", tokenNamespace, conditionState.CurrentCondition, ReflectionState.Discovered, data.ParentCount != 0 ? data.ParentStructures[0].DeclareName : "");
+				EnumToken token = new EnumToken(origin, data.DeclareName, "class", tokenNamespace, conditionState.CurrentCondition, ReflectionState.Discovered, data.ParentCount != 0 ? data.ParentStructures[0].DeclareName : "", tokenParams);
 				token.Documentation = docString;
 
 				return token;

@@ -69,7 +69,7 @@ public: \
 $(Parent.Name)::VariableInfo_$(ReflectedName)::VariableInfo_$(ReflectedName)()
 	: Prism::Property(
 		PRISM_STR(""$(Name)""), PRISM_DEVSTR(R""($(Documentation))""),
-		{ /* TODO - Attributes in PropertyReflectBehaviour.cs */ },
+		{ $(AttributesInstances) },
 		Prism::Accessor::$(AccessorPretty),
 		$(IsPointer), $(IsStatic), $(IsConst)
 	)
@@ -118,6 +118,17 @@ Prism::Holder $(Parent.Name)::VariableInfo_$(ReflectedName)::Get(Prism::Holder t
 }
 #endif
 ");
+			string template_AttributesInstances = "";
+
+			int a = 0;
+			foreach (AttributeData attrib in target.DataAttributes)
+			{
+				string current = "new $(Attribute[%i].Name)Attribute($(Attribute[%i].Params)),\n";
+				template_AttributesInstances += current.Replace("%i", a.ToString());
+				++a;
+			}
+
+			builder.Replace("$(AttributesInstances)", template_AttributesInstances);
 			return builder;
 		}
 	}

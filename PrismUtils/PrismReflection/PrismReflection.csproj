@@ -52,6 +52,8 @@
     <Compile Include="Reflection\Behaviour\Custom\PropertyReflectBehaviour.cs" />
     <Compile Include="Reflection\Behaviour\Custom\StructureReflectBehaviour.cs" />
     <Compile Include="Reflection\ReflectionState.cs" />
+    <Compile Include="Reflection\TokenException.cs" />
+    <Compile Include="Reflection\Tokens\AttributeCollection.cs" />
     <Compile Include="Reflection\Tokens\EnumToken.cs" />
     <Compile Include="Reflection\Tokens\EnumValueToken.cs" />
     <Compile Include="Reflection\Tokens\FunctionToken.cs" />

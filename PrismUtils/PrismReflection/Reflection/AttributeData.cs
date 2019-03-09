@@ -31,8 +31,7 @@ namespace Prism.Reflection
 	public class AttributeData
 	{
 		private string m_Name;
-		private string[] m_Params;
-		private BehaviourTarget m_Target;
+		private string m_Params;
 		private AttributeStatus m_Status;
 
 		/// <summary>
@@ -46,19 +45,11 @@ namespace Prism.Reflection
 		/// <summary>
 		/// The params that are being used with this attribute instance
 		/// </summary>
-		public string[] Params
+		public string Params
 		{
 			get { return m_Params; }
 		}
-
-		/// <summary>
-		/// The current target of this attribute instance
-		/// </summary>
-		public BehaviourTarget Target
-		{
-			get { return m_Target; }
-		}
-
+		
 		/// <summary>
 		/// The current parse status of this attribute
 		/// </summary>
@@ -68,22 +59,11 @@ namespace Prism.Reflection
 			internal set { m_Status = value; }
 		}
 
-		public AttributeData(string name, string[] initParams, BehaviourTarget target)
+		public AttributeData(string name, string initParams)
 		{
 			m_Name = name;
 			m_Params = initParams;
-			m_Target = target;
-		}
-
-		public bool HasParam(string param, StringComparison comparison = StringComparison.CurrentCulture)
-		{
-			foreach (string str in m_Params)
-			{
-				if (str.Equals(param, comparison))
-					return true;
-			}
-
-			return false;
+			m_Status = AttributeStatus.Unknown;
 		}
 	}
 }

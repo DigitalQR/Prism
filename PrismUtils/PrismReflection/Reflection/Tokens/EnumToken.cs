@@ -84,8 +84,8 @@ namespace Prism.Reflection.Tokens
 			get { return m_DeclarationReflectionState; }
 		}
 
-		public EnumToken(TokenOrigin origin, string name, string structureType, string[] declaredNamespace, string preProcessorCondition, ReflectionState declarationState, string internalType)
-			: base(origin, BehaviourTarget.Enumurator)
+		public EnumToken(TokenOrigin origin, string name, string structureType, string[] declaredNamespace, string preProcessorCondition, ReflectionState declarationState, string internalType, string attribParams)
+			: base(origin, BehaviourTarget.Enumurator, attribParams)
 		{
 			m_Name = name;
 			m_StructureType = structureType;
@@ -156,7 +156,8 @@ namespace Prism.Reflection.Tokens
 
 			for (int i = 0; i < m_Values.Count; ++i)
 				m_Values[i].ExpandMacros(builder, prefix + "Value[" + i + "]" + suffix + ".");
-			
+
+			ExpandAttributeMacros(builder, prefix, suffix);
 			return builder;
 		}
 

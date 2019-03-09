@@ -127,6 +127,9 @@ namespace Prism.Reflection.Behaviour
 		/// </summary>
 		public void ProcessToken(IReflectableToken baseToken)
 		{
+			// Set the state of any attribute
+			ResolveAttributes(baseToken);
+
 			List<BehaviourInstance> behaviourQueue = new List<BehaviourInstance>();
 			QueueBehaviours(baseToken, behaviourQueue);
 
@@ -138,9 +141,53 @@ namespace Prism.Reflection.Behaviour
 				task.Run();
 		}
 
+		/// <summary>
+		/// Discover which attributes are behaviours and which are data
+		/// </summary>
+		private void ResolveAttributes(IReflectableToken baseToken)
+		{
+			AttributeCollection collection = baseToken as AttributeCollection;
+
+			if (collection != null)
+			{
+				foreach (AttributeData attrib in collection.Attributes)
+				{
+					if (attrib.Status == AttributeStatus.Unknown)
+					{
+						if (m_BehaviourLookup.ContainsKey(attrib.Name))
+						{
+							IReflectionBehaviour behaviour = m_BehaviourLookup[attrib.Name];
+
+							if (behaviour.ApplicationMode == BehaviourApplication.Implicit)
+								throw new TokenException(baseToken, "'" + attrib.Name + "' is an attibute behaviour (It is a globally applied behaviour)");
+
+							if ((behaviour.SupportedTargets & baseToken.SupportedTargets) == 0)
+								throw new TokenException(baseToken, "Cannot apply attribute '" + attrib.Name + "' to this target (Unsported Attribute target)");
+
+							attrib.Status = AttributeStatus.Behaviour;
+						}
+						else
+						{
+							// Assume is data, if not behaviour
+							attrib.Status = AttributeStatus.Data;
+						}
+					}
+				}
+			}
+
+
+			// Resolve any sub tokens too
+			if (baseToken.InternalTokens != null)
+			{
+				foreach (IReflectableToken childToken in baseToken.InternalTokens)
+					ResolveAttributes(childToken);
+			}
+		}
+
 		private void QueueBehaviours(IReflectableToken token, List<BehaviourInstance> behaviourQueue)
 		{
 			// Queue any behaviour to apply
+
 			// Add global behaviour
 			foreach (var pair in m_BehaviourLookup)
 			{
@@ -150,8 +197,17 @@ namespace Prism.Reflection.Behaviour
 					behaviourQueue.Add(new BehaviourInstance { Behaviour = behaviour, Data = null, TargetToken = token });
 			}
 
-			// TODO - Add Attribute Behaviours
-			// ...
+			AttributeCollection collection = token as AttributeCollection;
+
+			if (collection != null)
+			{
+				foreach (var attrib in collection.Attributes)
+				{
+					// State was validated earlier, so no need for additional checks
+					if (attrib.Status == AttributeStatus.Behaviour)
+						behaviourQueue.Add(new BehaviourInstance { Behaviour = m_BehaviourLookup[attrib.Name], Data = attrib, TargetToken = token });
+				}
+			}
 
 			// Queue any sub-tokens aswell
 			var internalTokens = token.InternalTokens;
