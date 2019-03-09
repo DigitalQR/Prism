@@ -200,12 +200,8 @@ namespace Prism.Parsing
 													data.MacroParams, recentDocString
 												);
 
-												// TEMP WORK AROUND FOR LACK OF ENUM
-												if (currentStructure != null)
-												{
-													currentAccessScope = supportedStructure.DefaultAccess;
-													outputFile.AddInternalToken(currentStructure);
-												}
+												currentAccessScope = supportedStructure.DefaultAccess;
+												outputFile.AddInternalToken(currentStructure);
 
 												// Reset any previous error (Originated for shared macro token)
 												errorMessage = null;
@@ -345,9 +341,19 @@ namespace Prism.Parsing
 							// Add any enum value to structure
 							case SignatureInfo.SigType.EnumValueEntry:
 								{
-									// TODO - Fix enum reflection
-									//if (currentStructure != null)
-									//	currentStructure.AddInternalSignature(currentSignature, currentAccessScope, macroCondition, filePath, (int)currentSignature.LineNumber, "", recentDocString);
+									EnumToken enumToken = currentStructure as EnumToken;
+
+									if (enumToken != null)
+									{
+										var data = (EnumEntrySignature.EnumValueData)currentSignature.AdditionalParam;
+
+										EnumValueToken value = new EnumValueToken(
+											new TokenOrigin(filePath, (int)currentSignature.LineNumber), data.Name, 
+											macroCondition.CurrentCondition, Reflection.ReflectionState.Discovered
+										);
+
+										enumToken.AddValue(value);
+									}
 
 									break;
 								}

@@ -12,7 +12,7 @@ namespace Prism.Reflection.Tokens
 		private string m_PreProcessorCondition;
 		
 		private string m_Documentation;
-		private ReflectionState m_DeclarationReflecitonState;
+		private ReflectionState m_DeclarationReflectionState;
 		
 		/// <summary>
 		/// The accessor for this variable
@@ -60,7 +60,7 @@ namespace Prism.Reflection.Tokens
 		/// </summary>
 		public ReflectionState DeclarationState
 		{
-			get { return m_DeclarationReflecitonState; }
+			get { return m_DeclarationReflectionState; }
 		}
 
 		public VariableToken(TokenOrigin origin, AccessorMode accessor, string name, TypeToken typeToken, string preProcessorCondition, ReflectionState declarationState)
@@ -69,7 +69,7 @@ namespace Prism.Reflection.Tokens
 			m_Accessor = accessor;
 			m_TypeToken = new NamedTypeToken(name, typeToken);
 			m_PreProcessorCondition = preProcessorCondition;
-			m_DeclarationReflecitonState = declarationState;
+			m_DeclarationReflectionState = declarationState;
 			m_Documentation = "";
 			
 			NamedTypeToken.Sanitize(ref m_TypeToken);

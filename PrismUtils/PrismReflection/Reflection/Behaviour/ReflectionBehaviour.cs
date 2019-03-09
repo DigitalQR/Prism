@@ -16,7 +16,8 @@ namespace Prism.Reflection.Behaviour
 		Function = 2,
 		Variable = 4,
 		Enumurator = 8,
-		File = 16,
+		EnumuratorValue = 16,
+		File = 32,
 	}
 
 	public enum BehaviourApplication

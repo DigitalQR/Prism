@@ -34,8 +34,11 @@ namespace Prism.Parsing.Conversion
 			}
 			else if (data.StructureType == "enum")
 			{
-				return null;
-				//return new EnumStructureReflection(data, tokenNamespace, conditionState, tokenFile, tokenBodyLine, tokenParams, docString);
+				// TODO - Actually parse structure type rather than hardcode class
+				EnumToken token = new EnumToken(origin, data.DeclareName, "class", tokenNamespace, conditionState.CurrentCondition, ReflectionState.Discovered, data.ParentCount != 0 ? data.ParentStructures[0].DeclareName : "");
+				token.Documentation = docString;
+
+				return token;
 			}
 
 			throw new ParseException(ParseErrorCode.ParseUnexpectedSignature, sigInfo, "No structure infomation for this current signature");

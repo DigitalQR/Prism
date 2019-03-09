@@ -63,7 +63,7 @@
     <Compile Include="Parsing\Conversion\StructureTokenConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parsing\ConditionState.cs" />
-    <Compile Include="Parsing\ParsedHeader.cs" />
+    <Compile Include="Parsing\HeaderParser.cs" />
     <Compile Include="Parsing\ParseException.cs" />
     <Compile Include="Parsing\ReflectionSettings.cs" />
   </ItemGroup>

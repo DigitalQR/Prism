@@ -1,39 +1,27 @@
 ﻿using Prism.Reflection.Behaviour;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Prism.Reflection.Tokens
 {
-
-	public class ScopedStructure
-	{
-		public AccessorMode Accessor;
-		public string Name;
-
-		public ScopedStructure(AccessorMode accessor, string name)
-		{
-			this.Accessor = accessor;
-			this.Name = name;
-		}
-	}
-
-	public class StructureToken : ReflectableTokenBase
+	public class EnumToken : ReflectableTokenBase
 	{
 		private string m_Name;
 		private string m_StructureType;
 		private string m_PreProcessorCondition;
 		private string[] m_Namespace;
 
-		private List<ScopedStructure> m_Parents;
-		private List<FunctionToken> m_Methods;
-		private List<VariableToken> m_Properties;
-		
+		private string m_InternalType;
+		private List<EnumValueToken> m_Values;
+
 		private string m_Documentation;
 		private ReflectionState m_DeclarationReflectionState;
 
 		/// <summary>
-		/// Code name for this structure
+		/// Code name for this enum
 		/// </summary>
 		public string Name
 		{
@@ -41,13 +29,12 @@ namespace Prism.Reflection.Tokens
 		}
 
 		/// <summary>
-		/// Code keyword for this structure
+		/// Code keyword for this enum structure (class or struct)
 		/// </summary>
 		public string StructureType
 		{
 			get { return m_StructureType; }
 		}
-
 		/// <summary>
 		/// The preprocessor condition string for this structure
 		/// </summary>
@@ -65,29 +52,21 @@ namespace Prism.Reflection.Tokens
 		}
 
 		/// <summary>
-		/// Any parents for this structure
+		/// Any values stored in this structure
 		/// </summary>
-		public IReadOnlyList<ScopedStructure> ParentStructures
+		public IReadOnlyList<EnumValueToken> Values
 		{
-			get { return m_Parents; }
+			get { return m_Values; }
 		}
 
 		/// <summary>
-		/// Any methods for this structure
+		/// The internal type of this enum (If one is provided)
 		/// </summary>
-		public IReadOnlyList<FunctionToken> Methods
+		public string InternalType
 		{
-			get { return m_Methods; }
+			get { return m_InternalType; }
 		}
 
-		/// <summary>
-		/// Any properties for this structure
-		/// </summary>
-		public IReadOnlyList<VariableToken> Properties
-		{
-			get { return m_Properties; }
-		}
-		
 		/// <summary>
 		/// The code-side documentation found for this variable
 		/// </summary>
@@ -105,84 +84,67 @@ namespace Prism.Reflection.Tokens
 			get { return m_DeclarationReflectionState; }
 		}
 
-		public StructureToken(TokenOrigin origin, string name, string structureType, string[] declaredNamespace, string preProcessorCondition, ReflectionState declarationState, ScopedStructure[] parents)
-			: base(origin, BehaviourTarget.Structure)
+		public EnumToken(TokenOrigin origin, string name, string structureType, string[] declaredNamespace, string preProcessorCondition, ReflectionState declarationState, string internalType)
+			: base(origin, BehaviourTarget.Enumurator)
 		{
 			m_Name = name;
 			m_StructureType = structureType;
 			m_Namespace = declaredNamespace;
 			m_PreProcessorCondition = preProcessorCondition;
-			m_Parents = new List<ScopedStructure>(parents);
-			m_Methods = new List<FunctionToken>();
-			m_Properties = new List<VariableToken>();
+			m_InternalType = internalType;
 			m_DeclarationReflectionState = declarationState;
+
+			m_Values = new List<EnumValueToken>();
 
 			if (m_Namespace == null)
 				m_Namespace = new string[0];
 		}
 
 		/// <summary>
-		/// Get a enumerator of all the internal tokens this token may have
-		/// (Will return null, if there are no tokens)
+		/// Get a enumerator of all the internal value tokens for this enum
 		/// </summary>
 		public override IReadOnlyList<IReflectableToken> InternalTokens
 		{
-			get
-			{
-				List<IReflectableToken> tokens = new List<IReflectableToken>();
-				tokens.AddRange(m_Properties);
-				tokens.AddRange(m_Methods);
-				return tokens;
-			}
+			get	{ return m_Values; }
 		}
 
 		/// <summary>
-		/// Add a method to this structure, to be reflected
+		/// Add a value to this enum, to be reflected
 		/// </summary>
-		public void AddMethod(FunctionToken function)
+		public void AddValue(EnumValueToken value)
 		{
-			m_Methods.Add(function);
-		}
-
-		/// <summary>
-		/// Add a method to this structure, to be reflected
-		/// </summary>
-		public void AddProperty(VariableToken variable)
-		{
-			m_Properties.Add(variable);
+			m_Values.Add(value);
 		}
 
 		/// <summary>
 		/// Expand any macros relating to this function (Missing macros will be left)
 		/// $(PreProcessorCondition)
 		/// $(ReflectHash)
+		/// $(ReflectedName)
 		/// $(TokenOriginFile)
 		/// $(TokenOriginLine)
 		/// $(Documentation)
 		/// $(Name)
 		/// $(StructureType)
+		/// $(InternalType)
 		/// $(NamespaceList[,])			e.g. Namespace { A, B, C } = "A,B,C"
 		/// $(NamespaceList[.])			e.g. Namespace { A, B, C } = "A.B.C"
 		/// $(NamespaceList[::])		e.g. Namespace { A, B, C } = "A::B::C"
-		/// $(Method[i].*TypeTokenMacro*)
-		/// $(MethodCount)
-		/// $(Property[i].*TypeTokenMacro*)
-		/// $(PropertyCount)
-		/// $(Parent[i].Accessor)
-		/// $(Parent[i].AccessorPretty)
-		/// $(Parent[i].Name)
-		/// $(ParentCount)
+		/// $(ValueCount)
+		/// $(Value[i].Name)
 		/// </summary>
 		public StringBuilder ExpandMacros(StringBuilder builder, string prefix = "", string suffix = "")
 		{
 			builder.Replace("$(" + prefix + "PreProcessorCondition" + suffix + ")", string.IsNullOrWhiteSpace(m_PreProcessorCondition) ? "1" : m_PreProcessorCondition);
 			builder.Replace("$(" + prefix + "ReflectHash" + suffix + ")", GetReflectionHash());
+			builder.Replace("$(" + prefix + "ReflectedName" + suffix + ")", m_Name + "_" + GetReflectionHash());
 			builder.Replace("$(" + prefix + "TokenOriginFile" + suffix + ")", Origin.FilePath.ToString());
 			builder.Replace("$(" + prefix + "TokenOriginLine" + suffix + ")", Origin.LineNumber.ToString());
 			builder.Replace("$(" + prefix + "Documentation" + suffix + ")", m_Documentation);
 			builder.Replace("$(" + prefix + "Name" + suffix + ")", m_Name);
 			builder.Replace("$(" + prefix + "StructureType" + suffix + ")", m_StructureType);
-			
+			builder.Replace("$(" + prefix + "InternalType" + suffix + ")", m_InternalType);
+
 			builder.Replace("$(" + prefix + "NamespaceList[,]" + suffix + ")", string.Join(",", m_Namespace));
 			builder.Replace("$(" + prefix + "NamespaceList[.]" + suffix + ")", string.Join(".", m_Namespace));
 			builder.Replace("$(" + prefix + "NamespaceList[::]" + suffix + ")", string.Join("::", m_Namespace));
@@ -190,23 +152,11 @@ namespace Prism.Reflection.Tokens
 			builder.Replace("$(" + prefix + "NamespaceList[::]" + suffix + ")", string.Join("::", m_Namespace));
 			builder.Replace("$(" + prefix + "NamespaceList[::]" + suffix + ")", string.Join("::", m_Namespace));
 
-			builder.Replace("$(" + prefix + "MethodCount" + suffix + ")", m_Methods.Count.ToString());
-			builder.Replace("$(" + prefix + "PropertyCount" + suffix + ")", m_Properties.Count.ToString());
-			builder.Replace("$(" + prefix + "ParentCount" + suffix + ")", m_Parents.Count.ToString());
+			builder.Replace("$(" + prefix + "ValueCount" + suffix + ")", m_Values.Count.ToString());
 
-			for (int i = 0; i < m_Methods.Count; ++i)
-				m_Methods[i].ExpandMacros(builder, prefix + "Method[" + i + "]" + suffix + ".");
-
-			for (int i = 0; i < m_Properties.Count; ++i)
-				m_Properties[i].ExpandMacros(builder, prefix + "Property[" + i + "]" + suffix + ".");
-
-			for (int i = 0; i < m_Parents.Count; ++i)
-			{
-				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".Accessor", m_Parents[i].Accessor.ToString().ToLower());
-				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".AccessorPretty", m_Parents[i].Accessor.ToString());
-				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".Name", m_Parents[i].Name);
-			}
-
+			for (int i = 0; i < m_Values.Count; ++i)
+				m_Values[i].ExpandMacros(builder, prefix + "Value[" + i + "]" + suffix + ".");
+			
 			return builder;
 		}
 
@@ -215,6 +165,7 @@ namespace Prism.Reflection.Tokens
 			int hash = 2;
 			hash = hash * 31 + m_Name.GetHashCode();
 			hash = hash * 31 + m_StructureType.GetHashCode();
+			hash = hash * 31 + m_InternalType.GetHashCode();
 
 			return hash.ToString("x");
 		}
@@ -226,9 +177,8 @@ namespace Prism.Reflection.Tokens
 			// Add debug comment header
 			builder.Append(@"///
 /// $(TokenOriginFile)($(TokenOriginLine))
-/// Structure: $(StructureType) $(Name) 
-/// Properties: $(PropertyCount)
-/// Methods: $(MethodCount)
+/// Enum: $(StructureType) $(Name) 
+/// Values: $(ValueCount)
 /// 
 
 ");
@@ -237,13 +187,10 @@ namespace Prism.Reflection.Tokens
 			foreach (string ns in m_Namespace)
 				builder.Append("namespace " + ns + " {\n");
 
-			// Add variable/function include before structure include, as they're reflected as part of the structure
-			foreach (VariableToken variable in m_Properties)
-				builder.Append(variable.GenerateIncludeContent(this));
-
-			foreach (FunctionToken function in m_Methods)
-				builder.Append(function.GenerateIncludeContent(this));
-
+			// Add value include before structure include, as they're reflected as part of the structure
+			foreach (EnumValueToken value in m_Values)
+				builder.Append(value.GenerateIncludeContent(this));
+			
 			// Generate any base include content for this structure
 			builder.Append(base.GenerateIncludeContent(context));
 
@@ -257,23 +204,20 @@ namespace Prism.Reflection.Tokens
 				StringBuilder declaration = new StringBuilder();
 				declaration.Append(base.GenerateDeclarationContent(context) + "\n");
 
-				foreach (VariableToken variable in m_Properties)
-					declaration.Append(variable.GenerateDeclarationContent(this) + "\n");
-
-				foreach (FunctionToken function in m_Methods)
-					declaration.Append(function.GenerateDeclarationContent(this) + "\n");
-
+				foreach (EnumValueToken value in m_Values)
+					declaration.Append(value.GenerateDeclarationContent(this) + "\n");
+				
 				// Add declaration inside of define which will be placed inside the orignal structure
 				builder.Append("\n#define PRISM_REFLECTION_BODY_$(TokenOriginLine) ");
-				builder.Append(declaration.Replace("\r\n", "\n").Replace("\n", "\\\n\t") + "\\\n\tprivate:\n\n");
+				builder.Append(declaration.Replace("\r\n", "\n").Replace("\n", "\\\n\t") + "\\\n");
 			}
-			
+
 			return ExpandMacros(builder);
 		}
 
 		public override StringBuilder GenerateDeclarationContent(IReflectableToken context)
 		{
-			throw new InvalidOperationException("Cannot call GenerateDeclarationContent for StructureToken (It IS the declaration)");
+			throw new InvalidOperationException("Cannot call GenerateDeclarationContent for EnumToken (It IS the declaration)");
 		}
 
 		public override StringBuilder GenerateImplementationContent(IReflectableToken context)
@@ -283,9 +227,8 @@ namespace Prism.Reflection.Tokens
 			// Add debug comment header
 			builder.Append(@"///
 /// $(TokenOriginFile)($(TokenOriginLine))
-/// Structure: $(StructureType) $(Name) 
-/// Properties: $(PropertyCount)
-/// Methods: $(MethodCount)
+/// Enum: $(StructureType) $(Name) 
+/// Values: $(ValueCount)
 /// 
 
 ");
@@ -295,19 +238,15 @@ namespace Prism.Reflection.Tokens
 				builder.Append("namespace " + ns + " {\n");
 
 			builder.Append(base.GenerateImplementationContent(context));
-			
+
 			// Append any extra variable/function content
-			foreach (VariableToken variable in m_Properties)
-				builder.Append(variable.GenerateImplementationContent(this));
-
-			foreach (FunctionToken function in m_Methods)
-				builder.Append(function.GenerateImplementationContent(this));
-
-
+			foreach (EnumValueToken value in m_Values)
+				builder.Append(value.GenerateImplementationContent(this));
+			
 			// Namespace close
 			foreach (string ns in m_Namespace)
 				builder.Append("}\n");
-			
+
 			return ExpandMacros(builder);
 		}
 	}

@@ -105,7 +105,7 @@ namespace Prism.Reflection.Tokens
 #ifdef $(EnumReflectionToken)
 #undef $(EnumReflectionToken)
 #endif
-#define $(EnumReflectionToken)(...) //PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
+#define $(EnumReflectionToken)(...) PRISM_DEFER(PRISM_REFLECTION_BODY_) ## __LINE__
 
 #ifdef $(FunctionReflectionToken)
 #undef $(FunctionReflectionToken)
