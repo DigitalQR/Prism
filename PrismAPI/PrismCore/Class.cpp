@@ -185,6 +185,91 @@ namespace Prism
 		return size;
 	}
 
+	size_t Class::GetAttributeCount(bool recurse) const
+	{
+		size_t count = AttributeStore::GetAttributeCount(false);
+
+		if (recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				count += GetParentClass(i)->GetInheritableAttributeCount(true);
+			}
+		}
+
+		return count;
+	}
+
+	const Attribute* Class::GetAttributeByIndex(int index, bool recurse) const
+	{
+		int localCount = (int)GetAttributeCount(false);
+
+		if (index < localCount)
+		{
+			return AttributeStore::GetAttributeByIndex(index, false);
+		}
+		else if(recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				const Attribute* attrib = GetParentClass(i)->TraverseFindInheritableAttribute(index, true);
+				if (attrib != nullptr)
+					return attrib;
+			}
+		}
+
+		return nullptr;
+	}
+
+	size_t Class::GetInheritableAttributeCount(bool recurse) const 
+	{
+		size_t count = 0;
+
+		for (int i = 0; i < (int)GetAttributeCount(false); ++i)
+		{
+			const Attribute* attrib = GetAttributeByIndex(i, false);
+			if (attrib->CanInherit())
+				++count;
+		}
+
+		if (recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				count += GetParentClass(i)->GetInheritableAttributeCount(true);
+			}
+		}
+
+		return count;
+	}
+
+	const Attribute* Class::TraverseFindInheritableAttribute(int& index, bool recurse) const
+	{
+		for (int i = 0; i < (int)GetAttributeCount(false); ++i)
+		{
+			const Attribute* attrib = GetAttributeByIndex(i, false);
+			if (attrib->CanInherit())
+			{
+				if (index == 0)
+					return attrib;
+				else
+					--index;
+			}
+		}
+
+		if (recurse)
+		{
+			for (int i = 0; i < (int)GetParentCount(); ++i)
+			{
+				const Attribute* attrib = GetParentClass(i)->TraverseFindInheritableAttribute(index, true);
+				if (attrib != nullptr)
+					return attrib;
+			}
+		}
+
+		return nullptr;
+	}
+
 	Prism::String Class::ToString(Prism::Holder inStorage) const 
 	{
 		const Method* toStringMethod = GetMethodByName(PRISM_STR("ToString"));

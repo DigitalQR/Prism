@@ -169,4 +169,43 @@ namespace Prism
 
 		friend class Assembly;
 	};
+
+	///
+	/// Specializations for Prism::Holder
+	///
+	
+	template<>
+	inline Prism::String Type::ConvertToString<Prism::Holder>(const Prism::Holder& holder) const
+	{
+		if (m_AssociatedInfo == holder.GetTypeInfo())
+			return ToString(holder);
+		else
+			return PRISM_STR("");
+	}
+
+	template<>
+	inline Prism::String Type::ConvertToString<Prism::Holder*>(Prism::Holder* holder) const
+	{
+		ConvertToString(*holder);
+	}
+	template<>
+	inline Prism::String Type::ConvertToString<const Prism::Holder*>(const Prism::Holder* holder) const
+	{
+		ConvertToString(*holder);
+	}
+
+	template<>
+	inline bool Type::ConvertFromString<Prism::Holder>(const String& str, Prism::Holder& holder) const
+	{
+		if (m_AssociatedInfo == holder.GetTypeInfo())
+			return ParseFromString(str, holder);
+		else
+			return false;
+	}
+
+	template<>
+	inline bool Type::ConvertFromString<Prism::Holder*>(const String& str, Prism::Holder* holder) const
+	{
+		return ConvertFromString(str, *holder);
+	}
 }

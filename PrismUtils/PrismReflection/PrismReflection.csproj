@@ -44,6 +44,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\AttributeData.cs" />
     <Compile Include="Reflection\Behaviour\AttributeReflectionBehaviour.cs" />
+    <Compile Include="Reflection\Behaviour\Custom\Attributes\FlagsAttributeBehaviour.cs" />
     <Compile Include="Reflection\Behaviour\Custom\EnumReflectBehaviour.cs" />
     <Compile Include="Reflection\Behaviour\GlobalReflectionBehaviour.cs" />
     <Compile Include="Reflection\Behaviour\ReflectionBehaviour.cs" />

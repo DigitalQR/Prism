@@ -202,9 +202,9 @@ namespace Prism.Reflection.Tokens
 
 			for (int i = 0; i < m_Parents.Count; ++i)
 			{
-				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".Accessor", m_Parents[i].Accessor.ToString().ToLower());
-				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".AccessorPretty", m_Parents[i].Accessor.ToString());
-				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".Name", m_Parents[i].Name);
+				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".Accessor)", m_Parents[i].Accessor.ToString().ToLower());
+				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".AccessorPretty)", m_Parents[i].Accessor.ToString());
+				builder.Replace("$(" + prefix + "Parent[" + i + "]" + suffix + ".Name)", m_Parents[i].Name);
 			}
 
 			ExpandAttributeMacros(builder, prefix, suffix);

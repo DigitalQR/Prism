@@ -46,6 +46,10 @@ namespace Prism.Reflection.Tokens
 		{
 			m_DeclarationContent.Append(builder);
 		}
+		public void AppendDeclarationContent(string str)
+		{
+			m_DeclarationContent.Append(str);
+		}
 
 		/// <summary>
 		/// Append content which will be added to the refl.cpp
@@ -53,6 +57,10 @@ namespace Prism.Reflection.Tokens
 		public void AppendImplementationContent(StringBuilder builder)
 		{
 			m_ImplementationContent.Append(builder);
+		}
+		public void AppendImplementationContent(string str)
+		{
+			m_ImplementationContent.Append(str);
 		}
 
 		/// <summary>
@@ -62,7 +70,11 @@ namespace Prism.Reflection.Tokens
 		{
 			m_IncludeContent.Append(builder);
 		}
-		
+		public void AppendIncludeContent(string str)
+		{
+			m_IncludeContent.Append(str);
+		}
+
 		public virtual StringBuilder GenerateDeclarationContent(IReflectableToken context)
 		{
 			return new StringBuilder(m_DeclarationContent.ToString());

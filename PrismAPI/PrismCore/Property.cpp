@@ -3,7 +3,7 @@
 namespace Prism 
 {
 	Property::Property(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, Accessor accessor, bool isPointer, bool isStatic, bool isConst)
-		: AttributeStore(attributes)
+		: AttributeStore(Attribute::Usage::Properties, attributes)
 		, m_Name(name)
 		, m_Documentation(documentation)
 		, m_Accessor(accessor)

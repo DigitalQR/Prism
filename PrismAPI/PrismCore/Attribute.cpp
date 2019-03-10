@@ -2,10 +2,9 @@
 
 namespace Prism 
 {
-	Attribute::Attribute(Usage usage, bool inherit, bool allowMultiple)
+	Attribute::Attribute(Usage usage, Behaviour behaviour)
 		: m_Usage(usage)
-		, m_Inherit(inherit)
-		, m_AllowMultiple(allowMultiple)
+		, m_Behaviour(behaviour)
 	{
 	}
 }

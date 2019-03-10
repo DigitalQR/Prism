@@ -98,8 +98,33 @@ namespace Prism
 		///
 		size_t GetPropertyCount(bool recurse = true) const;
 
+
+		///
+		/// How many attributes does this store contain
+		/// @param recurse		Should this method be looked for in parent classes
+		///
+		virtual size_t GetAttributeCount(bool recurse = true) const;
+
+		///
+		/// Fetch the attribute at this index
+		/// @param recurse		Should this method be looked for in parent classes
+		///
+		virtual const Attribute* GetAttributeByIndex(int index, bool recurse = true) const;
 	protected:
 		Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties);
+
+		///
+		/// How many attributes does this store contain which are inheritable
+		/// @param recurse		Should this method be looked for in parent classes
+		///
+		size_t GetInheritableAttributeCount(bool recurse) const;
+
+		///
+		/// Fetch the inheritable attribute at this index
+		/// @param recurse		Should this method be looked for in parent classes
+		///
+		const Attribute* TraverseFindInheritableAttribute(int& index, bool recurse) const;
+
 
 		///
 		/// Convert this given value into a string

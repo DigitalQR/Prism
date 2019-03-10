@@ -4,7 +4,7 @@
 namespace Prism
 {
 	Method::Method(const String& name, const String& documentation, const std::vector<const Attribute*>& attributes, Accessor accessor, bool isStatic, bool isConst, bool isVirtual)
-		: AttributeStore(attributes)
+		: AttributeStore(Attribute::Usage::Methods, attributes)
 		, m_Name(name)
 		, m_Documentation(documentation)
 		, m_Accessor(accessor)

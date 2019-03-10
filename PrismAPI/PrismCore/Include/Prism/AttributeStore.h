@@ -6,23 +6,28 @@
 ///
 #pragma once
 #include "Definitions.h"
+#include "Attribute.h"
 
 #include <vector>
 
 namespace Prism
 {
-	class Attribute;
-
 	///
 	/// Any reflected type which can have attributes applied to it
 	///
 	class PRISMCORE_API AttributeStore 
 	{
 	protected:
+		const Attribute::Usage m_SupportedUsage;
 		const std::vector<const Attribute*> m_Attributes;
 
 	public:
-		AttributeStore(const std::vector<const Attribute*>& attributes);
+		AttributeStore(Attribute::Usage usage, const std::vector<const Attribute*>& attributes);
+
+		///
+		/// The supported attribute usage for this store
+		///
+		inline Attribute::Usage GetSupportedAttributeUsage() const { return m_SupportedUsage; }
 
 		///
 		/// How many attributes does this store contain

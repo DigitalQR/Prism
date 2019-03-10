@@ -127,6 +127,7 @@ namespace Prism.Reflection.Tokens
 		/// $(Name)
 		/// $(StructureType)
 		/// $(InternalType)
+		/// $(HasInternalType)
 		/// $(NamespaceList[,])			e.g. Namespace { A, B, C } = "A,B,C"
 		/// $(NamespaceList[.])			e.g. Namespace { A, B, C } = "A.B.C"
 		/// $(NamespaceList[::])		e.g. Namespace { A, B, C } = "A::B::C"
@@ -144,6 +145,7 @@ namespace Prism.Reflection.Tokens
 			builder.Replace("$(" + prefix + "Name" + suffix + ")", m_Name);
 			builder.Replace("$(" + prefix + "StructureType" + suffix + ")", m_StructureType);
 			builder.Replace("$(" + prefix + "InternalType" + suffix + ")", m_InternalType);
+			builder.Replace("$(" + prefix + "HasInternalType" + suffix + ")", string.IsNullOrWhiteSpace(m_InternalType) ? "0" : "1");
 
 			builder.Replace("$(" + prefix + "NamespaceList[,]" + suffix + ")", string.Join(",", m_Namespace));
 			builder.Replace("$(" + prefix + "NamespaceList[.]" + suffix + ")", string.Join(".", m_Namespace));
