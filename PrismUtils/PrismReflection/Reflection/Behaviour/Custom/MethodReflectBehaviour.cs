@@ -126,11 +126,46 @@ size_t $(Parent.Name)::MethodInfo_$(ReflectedName)::GetParamCount() const
 	return $(ParamCount);
 }
 
+template<typename T>
+struct SafeConstruct$(ReflectedName)
+{
+private:
+	template<typename A, typename = std::enable_if_t<std::is_abstract<A>::value>>
+	static std::true_type AbstractCheck(...)
+	{
+		return std::true_type;
+	}
+
+	template<typename A, typename = std::enable_if_t<!std::is_abstract<A>::value>>
+	static std::false_type AbstractCheck(...)
+	{
+		return std::false_type;
+	}
+
+	typedef decltype(AbstractCheck<T>(0)) IsAbstract;
+
+	static T* ConstructInternal(Prism::Holder& target, std::vector<Prism::Holder>& params, std::true_type)
+	{
+		return nullptr;
+	}
+
+	static T* ConstructInternal(Prism::Holder& target, std::vector<Prism::Holder>& params, std::false_type)
+	{
+		return new $(Parent.Name)($(CallParams_Call));
+	}
+
+public:
+	static T* Construct(Prism::Holder& target, std::vector<Prism::Holder>& params)
+	{
+		return ConstructInternal(target, params, IsAbstract());
+	}
+};
+
 Prism::Holder $(Parent.Name)::MethodInfo_$(ReflectedName)::Call(Prism::Holder target, const std::vector<Prism::Holder>& params) const
 {
 	std::vector<Prism::Holder>& safeParams = *const_cast<std::vector<Prism::Holder>*>(&params);
 #if $(IsConstructor)
-	return new $(Parent.Name)($(CallParams_Call));
+	return SafeConstruct$(ReflectedName)<$(Parent.Name)>::Construct(target, safeParams);
 #else
 #if $(IsStatic)
 #if $(ReturnType.IsVoid)
