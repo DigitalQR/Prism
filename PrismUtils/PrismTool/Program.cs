@@ -20,11 +20,11 @@ namespace Prism
 		/// </summary>
 		internal class ReflectionSelector
 		{
+			[CommandLineArgument(Name = "src-file")]
+			public string[] FileSources = null;
+
 			[CommandLineArgument(Name = "src-dir")]
 			public string DirectorySource = null;
-
-			[CommandLineArgument(Name = "src-vsproj")]
-			public string VisualStudioSource = null;
 		}
 
 
@@ -49,9 +49,16 @@ namespace Prism
 #endif
 			{
 				// Multiple reflection
-				if (selector.DirectorySource != null && selector.VisualStudioSource != null)
+				if (selector.FileSources != null && selector.DirectorySource != null)
 				{
-					throw new Exception("Found --src-dir and --src-vsproj. Only supports a single one at a time.");
+					throw new Exception("Found --src-file and --src-dir. Only supports a single one at a time.");
+				}
+
+				// Reflect files
+				else if (selector.FileSources != null)
+				{
+					FilesReflector reflector = new FilesReflector(selector.FileSources);
+					reflector.Run();
 				}
 
 				// Reflect directory
@@ -60,18 +67,11 @@ namespace Prism
 					DirectoryReflector reflector = new DirectoryReflector();
 					reflector.Run();
 				}
-
-				// Reflect project
-				else if (selector.VisualStudioSource != null)
-				{
-					VisualStudioReflector reflector = new VisualStudioReflector();
-					reflector.Run();
-				}
-
+				
 				// No reflection
 				else
 				{
-					throw new Exception("Not found code source. Exprect --src-dir or --src-vsproj.");
+					throw new Exception("Not found code source. Expect --src-dir or --src-file.");
 				}
 			}
 #if !DEBUG

@@ -59,9 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Export\DirectoryReflector.cs" />
+    <Compile Include="Export\FilesReflector.cs" />
     <Compile Include="Export\ReflectionExporter.cs" />
     <Compile Include="Export\ReflectorBase.cs" />
-    <Compile Include="Export\VisualStudioReflector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
