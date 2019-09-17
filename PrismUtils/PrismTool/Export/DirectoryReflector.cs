@@ -33,29 +33,17 @@ namespace Prism.Export
 		[CommandLineArgument(Name = "parse-ext", Usage = "File extensions which will be read", MustExist = false)]
 		private string[] m_WhitelistedExtensions;
 		
-		/// <summary>
-		/// Reflection settings used by this reflector
-		/// </summary>
-		private ReflectionSettings m_ReflectionSettings;
-
 		public DirectoryReflector()
 		{
-			m_ReflectionSettings = new ReflectionSettings();
 			m_WhitelistedExtensions = new string[] { ".h", ".hpp" };
 
 			CommandLineArguments.FillValues(this);
-			CommandLineArguments.FillValues(m_ReflectionSettings);
 		}
-
-		public override string IntermediateFolder
-		{
-			get { return Path.Combine(m_OutputDirectory, ".prism"); }
-		}
-
-		public override List<ExportFile> Run()
+		
+		public override bool Run()
 		{
 			var sourceFiles = Directory.EnumerateFiles(m_SourceDirectory, "*.*", SearchOption.AllDirectories).Where(f => m_WhitelistedExtensions.Contains(Path.GetExtension(f)));
-			return RunInternal(m_ReflectionSettings, sourceFiles, m_OutputDirectory);
+			return RunInternal(sourceFiles, m_OutputDirectory);
 		}
 	}
 }

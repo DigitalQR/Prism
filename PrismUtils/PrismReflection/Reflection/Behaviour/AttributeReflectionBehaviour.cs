@@ -1,4 +1,4 @@
-﻿using Prism.Reflection.Tokens;
+﻿using Prism.Reflection.Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,32 +11,27 @@ namespace Prism.Reflection.Behaviour
 	/// Behaviour which will be applied to anything which has an attribute of matching name applied 
 	/// (Will result in data attribute not being used, if one of matching name exists)
 	/// </summary>
-	public abstract class AttributeReflectionBehaviour : IReflectionBehaviour
+	public abstract class AttributeReflectionBehaviour<ElementType> : ReflectionBehaviourBase where ElementType : class, IReflectionElement
 	{
-		private string m_Name;
-		private BehaviourTarget m_Target;
-		private int m_QueuePriority;
-
 		public AttributeReflectionBehaviour(BehaviourTarget supportedTarget, int queuePriority)
-			: this(null, supportedTarget, queuePriority)
+			: base(null, supportedTarget, queuePriority, BehaviourApplication.Explicit)
 		{
 		}
 
 		public AttributeReflectionBehaviour(string name, BehaviourTarget supportedTarget, int queuePriority)
+			: base(name, supportedTarget, queuePriority, BehaviourApplication.Explicit)
 		{
-			m_Name = string.IsNullOrWhiteSpace(name) ? GetType().Name : name;
-			m_Target = supportedTarget;
-			m_QueuePriority = queuePriority;
+		}
+		
+		public override void RunBehaviour(IReflectionElement target, AttributeData data)
+		{
+			ElementType castTarget = target as ElementType;
+			if (castTarget == null)
+				throw new BehaviourException("Attribute behaviour '" + Name + "' has encounted unsupported element type");
+			else
+				RunBehaviour(castTarget, data);
 		}
 
-		public string Name => m_Name;
-
-		public BehaviourTarget SupportedTargets => m_Target;
-
-		public int QueuePriority => m_QueuePriority;
-
-		public BehaviourApplication ApplicationMode => BehaviourApplication.Explicit;
-		
-		public abstract void RunBehaviour(IReflectableToken target, AttributeData data);
+		public abstract void RunBehaviour(ElementType target, AttributeData data);
 	}
 }

@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Prism.Export;
+using Prism.Parser;
+using Prism.Parser.Cpp;
+using Prism.Parser.Cpp.Token;
 using Prism.Parsing;
 using Prism.Reflection;
 using Prism.Reflection.Behaviour;
+using Prism.Reflection.Elements.Cpp;
 using Prism.Utils;
 
 namespace Prism
@@ -25,24 +30,28 @@ namespace Prism
 
 			[CommandLineArgument(Name = "src-dir")]
 			public string DirectorySource = null;
+
+			[CommandLineArgument(Name = "run-default-behaviour", Usage = "Should the default behaviour be executed", MustExist = false)]
+			public bool RunDefaultBehaviour = true;
 		}
-
-
+		
 		/// <summary>
 		/// Format a message in the Visual Studio message format 
 		/// {file}({line}): error {code}: {message}
 		/// </summary>
-		private static string FormatErrorMessage(string message, string source, int line = -1, ParseErrorCode errorCode = ParseErrorCode.GenericError)
+		private static string FormatErrorMessage(string message, string source, int line = -1)
 		{
-			return source + "(" + line + "): error PRI" + (int)errorCode + ": " + message;
+			return source + "(" + line + "): error PRISM: " + message;
 		}
 
 		static void Main(string[] args)
-		{
-			CommandLineArguments.ProvideArguments(args);
-
+		{			
 			ReflectionSelector selector = new ReflectionSelector();
+			CommandLineArguments.ProvideArguments(args);
 			CommandLineArguments.FillValues(selector);
+
+			if(selector.RunDefaultBehaviour)
+				Assembly.Load("PrismDefaultBehaviour");
 
 #if !DEBUG
 			try
@@ -84,16 +93,16 @@ namespace Prism
 				Console.Error.WriteLine(e.StackTrace);
 				Environment.Exit(-1);
 			}
-			catch (HeaderParseException e)
+			catch (FileReflectException e)
 			{
-				Console.Error.WriteLine("HeaderReflectionException Caught");
-				Console.Error.WriteLine(FormatErrorMessage(e.Message, e.FilePath, (int)e.Signature.LineNumber, e.ErrorCode));
+				Console.Error.WriteLine("FileReflectException Caught");
+				Console.Error.WriteLine(FormatErrorMessage(e.Message, e.m_SourceFile, e.m_SourceLine));
 				Console.Error.WriteLine(e.InnerException.StackTrace);
 				Environment.Exit(-1);
 			}
 			catch (Exception e)
 			{
-				Console.Error.WriteLine("Exception Caught");
+				Console.Error.WriteLine("Exception Caught (" + e.GetType().Name + ")");
 				Console.Error.WriteLine(FormatErrorMessage(e.Message, "PrismTool.exe"));
 				Console.Error.WriteLine(e.StackTrace);
 				Environment.Exit(-1);

@@ -7,11 +7,12 @@
     <ProjectGuid>{64F55F42-2711-4EA4-A59B-42F84111C116}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PrismReflection</RootNamespace>
+    <RootNamespace>Prism</RootNamespace>
     <AssemblyName>PrismReflection</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,29 +45,33 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\AttributeData.cs" />
     <Compile Include="Reflection\Behaviour\AttributeReflectionBehaviour.cs" />
-    <Compile Include="Reflection\Behaviour\Custom\Attributes\FlagsAttributeBehaviour.cs" />
-    <Compile Include="Reflection\Behaviour\Custom\EnumReflectBehaviour.cs" />
+    <Compile Include="Reflection\Behaviour\BehaviourException.cs" />
+    <Compile Include="Reflection\Behaviour\ReflectionBehaviourBase.cs" />
+    <Compile Include="Reflection\Elements\ElementException.cs" />
     <Compile Include="Reflection\Behaviour\GlobalReflectionBehaviour.cs" />
-    <Compile Include="Reflection\Behaviour\ReflectionBehaviour.cs" />
+    <Compile Include="Reflection\Behaviour\IReflectionBehaviour.cs" />
     <Compile Include="Reflection\Behaviour\BehaviourController.cs" />
-    <Compile Include="Reflection\Behaviour\Custom\MethodReflectBehaviour.cs" />
-    <Compile Include="Reflection\Behaviour\Custom\PropertyReflectBehaviour.cs" />
-    <Compile Include="Reflection\Behaviour\Custom\StructureReflectBehaviour.cs" />
+    <Compile Include="Reflection\Elements\AttributeCollection.cs" />
+    <Compile Include="Reflection\Elements\Cpp\ContentElement.cs" />
+    <Compile Include="Reflection\Elements\Cpp\Data\EnumInfo.cs" />
+    <Compile Include="Reflection\Elements\Cpp\Data\FunctionInfo.cs" />
+    <Compile Include="Reflection\Elements\Cpp\Data\StructureInfo.cs" />
+    <Compile Include="Reflection\Elements\Cpp\Data\TypeInfo.cs" />
+    <Compile Include="Reflection\Elements\Cpp\Data\VariableInfo.cs" />
+    <Compile Include="Reflection\Elements\Cpp\EnumTypeElement.cs" />
+    <Compile Include="Reflection\Elements\Cpp\EnumValueElement.cs" />
+    <Compile Include="Reflection\Elements\Cpp\FunctionElement.cs" />
+    <Compile Include="Reflection\Elements\Cpp\StructureElement.cs" />
+    <Compile Include="Reflection\Elements\Cpp\VariableElement.cs" />
+    <Compile Include="Reflection\Elements\IReflectionElement.cs" />
+    <Compile Include="Reflection\Elements\ReflectionElementBase.cs" />
+    <Compile Include="Reflection\ReflectionException.cs" />
     <Compile Include="Reflection\ReflectionState.cs" />
-    <Compile Include="Reflection\TokenException.cs" />
-    <Compile Include="Reflection\Tokens\AttributeCollection.cs" />
-    <Compile Include="Reflection\Tokens\EnumToken.cs" />
-    <Compile Include="Reflection\Tokens\EnumValueToken.cs" />
-    <Compile Include="Reflection\Tokens\FunctionToken.cs" />
-    <Compile Include="Reflection\Tokens\IReflectableToken.cs" />
-    <Compile Include="Reflection\Tokens\FileToken.cs" />
-    <Compile Include="Reflection\Tokens\ReflectableTokenBase.cs" />
-    <Compile Include="Reflection\Tokens\ScopedTokens.cs" />
-    <Compile Include="Reflection\Tokens\StructureToken.cs" />
-    <Compile Include="Reflection\Tokens\TokenOrigin.cs" />
-    <Compile Include="Reflection\Tokens\TypeToken.cs" />
-    <Compile Include="Reflection\Tokens\VariableToken.cs" />
+    <Compile Include="Reflection\TokenSettings.cs" />
+    <Compile Include="Utils\GenerationUtils.cs" />
+    <Compile Include="Utils\TokenUtils.cs" />
     <Compile Include="Utils\CommandLine.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

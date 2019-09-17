@@ -1,5 +1,5 @@
 ﻿using Prism.Parsing;
-using Prism.Reflection.Tokens;
+using Prism.Reflection.Elements.Cpp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Prism.Export
 {
-	public class ReflectionExporter
+	public class ReflectionExporter : IReflectionExporter
 	{
 		/// <summary>
 		/// Header text which should be attached to every exported file
@@ -21,55 +21,33 @@ namespace Prism.Export
 ///  Edit the original file and then re-run PrismTool to update this file               ///
 ///////////////////////////////////////////////////////////////////////////////////////////
 ";
+		private ContentElement m_ReflectedContent;
 
-		private FileToken m_FileToken;
-		private ReflectionSettings m_Settings;
-
-		public ReflectionExporter(FileToken file, ReflectionSettings settings)
+		public ReflectionExporter(ContentElement content)
 		{
-			m_FileToken = file;
-			m_Settings = settings;
+			m_ReflectedContent = content;
 		}
 
 		/// <summary>
 		/// Gernerate all the content for the include
 		/// </summary>
-		public StringBuilder GenerateIncludeContent()
+		public string GenerateIncludeContent()
 		{
 			StringBuilder builder = new StringBuilder(s_ExportHeader);
-			builder.Append(m_FileToken.GenerateIncludeContent(null));
-			return ExpandMacros(builder);
+			builder.Append("#pragma once\n");
+			builder.Append(m_ReflectedContent.GenerateIncludeContent());
+			return ConditionState.PreExpandDirectives(builder.ToString());
 		}
 
 		/// <summary>
 		/// Gernerate all the content for the source
 		/// </summary>
-		public StringBuilder GenerateSourceContent()
+		public string GenerateSourceContent()
 		{
 			StringBuilder builder = new StringBuilder(s_ExportHeader);
-			builder.Append(m_FileToken.GenerateImplementationContent(null));
-			return ExpandMacros(builder);
-		}
-		
-		/// <summary>
-		/// Expand any macros relating to this type (Missing macros will be left)
-		/// $(ClassReflectionToken)
-		/// $(StructReflectionToken)
-		/// $(EnumReflectionToken)
-		/// $(VariableReflectionToken)
-		/// </summary>
-		/// <param name="input">The raw input string which should have it's macros replaced</param>
-		/// <param name="prefix">The prefix to apply to every macro</param>
-		/// <param name="suffix">The suffix to apply to each macro</param>
-		/// <returns>The string with all relevent macros expanded</returns>
-		public StringBuilder ExpandMacros(StringBuilder builder, string prefix = "", string suffix = "")
-		{
-			builder.Replace("$(" + prefix + "ClassReflectionToken" + suffix + ")", m_Settings.ClassToken);
-			builder.Replace("$(" + prefix + "StructReflectionToken" + suffix + ")", m_Settings.StructToken);
-			builder.Replace("$(" + prefix + "EnumReflectionToken" + suffix + ")", m_Settings.EnumToken);
-			builder.Replace("$(" + prefix + "FunctionReflectionToken" + suffix + ")", m_Settings.FunctionToken);
-			builder.Replace("$(" + prefix + "VariableReflectionToken" + suffix + ")", m_Settings.VariableToken);
-			return builder;
+			builder.Append("#include \"" + m_ReflectedContent.FileName + "\"\n");
+			builder.Append(m_ReflectedContent.GenerateSourceContent());
+			return ConditionState.PreExpandDirectives(builder.ToString());
 		}
 	}
 }

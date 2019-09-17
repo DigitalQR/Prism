@@ -31,7 +31,7 @@ namespace Prism.Reflection
 	public class AttributeData
 	{
 		private string m_Name;
-		private string m_Params;
+		private string[] m_Params;
 		private AttributeStatus m_Status;
 
 		/// <summary>
@@ -45,7 +45,7 @@ namespace Prism.Reflection
 		/// <summary>
 		/// The params that are being used with this attribute instance
 		/// </summary>
-		public string Params
+		public string[] Params
 		{
 			get { return m_Params; }
 		}
@@ -59,7 +59,7 @@ namespace Prism.Reflection
 			internal set { m_Status = value; }
 		}
 
-		public AttributeData(string name, string initParams)
+		public AttributeData(string name, string[] initParams)
 		{
 			m_Name = name;
 			m_Params = initParams;

@@ -1,46 +1,36 @@
-﻿using System;
+﻿using Prism.Reflection.Elements;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Prism.Reflection.Tokens;
 
 namespace Prism.Reflection.Behaviour
 {
 	/// <summary>
 	/// Behaviour which will be applied to everything
 	/// </summary>
-	public abstract class GlobalReflectionBehaviour : IReflectionBehaviour
-	{
-		private string m_Name;
-		private BehaviourTarget m_Target;
-		private int m_QueuePriority;
-
+	public abstract class GlobalReflectionBehaviour<ElementType> : ReflectionBehaviourBase where ElementType : class, IReflectionElement
+	{		
 		public GlobalReflectionBehaviour(BehaviourTarget supportedTarget, int queuePriority)
-			: this(null, supportedTarget, queuePriority)
+			: base(null, supportedTarget, queuePriority, BehaviourApplication.Implicit)
 		{
 		}
 
 		public GlobalReflectionBehaviour(string name, BehaviourTarget supportedTarget, int queuePriority)
+			: base(name, supportedTarget, queuePriority, BehaviourApplication.Implicit)
 		{
-			m_Name = string.IsNullOrWhiteSpace(name) ? GetType().Name : name;
-			m_Target = supportedTarget;
-			m_QueuePriority = queuePriority;
+		}
+				
+		public override void RunBehaviour(IReflectionElement target, AttributeData data)
+		{
+			ElementType castTarget = target as ElementType;
+			if (castTarget == null)
+				throw new BehaviourException("Global behaviour '" + Name + "' has encounted unsupported element type");
+			else
+				RunBehaviour(castTarget);
 		}
 
-		public string Name => m_Name;
-
-		public BehaviourTarget SupportedTargets => m_Target;
-
-		public int QueuePriority => m_QueuePriority;
-
-		public BehaviourApplication ApplicationMode => BehaviourApplication.Implicit;
-
-		public abstract void RunBehaviour(IReflectableToken target);
-
-		public void RunBehaviour(IReflectableToken target, AttributeData data)
-		{
-			RunBehaviour(target);
-		}
+		public abstract void RunBehaviour(ElementType target);
 	}
 }

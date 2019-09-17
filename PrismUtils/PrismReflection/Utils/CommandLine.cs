@@ -57,7 +57,7 @@ namespace Prism.Utils
 	public static class CommandLineArguments
 	{
 		private static string[] s_RawArgs;
-		private static Dictionary<string, List<string>> s_ArgTable;
+		private static Dictionary<string, List<string>> s_ArgTable = new Dictionary<string, List<string>>();
 
 		/// <summary>
 		/// To be called once on the programs start up with any arguments passed in
@@ -68,8 +68,6 @@ namespace Prism.Utils
 			s_RawArgs = args;
 
 			// Create dicitonary of -v/--value-key and values
-			s_ArgTable = new Dictionary<string, List<string>>();
-
 			foreach (string arg in args)
 			{
 				if (arg.StartsWith("-") && arg.Contains('='))

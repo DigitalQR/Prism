@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">	
+	<PropertyGroup Label="Prism Properties">
+		<PrismBaseDir>$(SolutionDir)\Prism\</PrismBaseDir>
+		<PrismExe>$(PrismBaseDir)PrismTool.exe</PrismExe>
+		<PrismOutDir>$(ProjectDir).prism\Reflected</PrismOutDir>
+	</PropertyGroup>
+</Project>

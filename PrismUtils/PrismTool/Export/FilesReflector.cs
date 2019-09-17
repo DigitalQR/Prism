@@ -24,29 +24,17 @@ namespace Prism.Export
 		/// All the files reflection should be ran on
 		/// </summary>
 		private IEnumerable<string> m_SourceFiles;
-
-		/// <summary>
-		/// Reflection settings used by this reflector
-		/// </summary>
-		private ReflectionSettings m_ReflectionSettings;
-
+		
 		public FilesReflector(IEnumerable<string> sourceFiles)
 		{
 			m_SourceFiles = sourceFiles;
-			m_ReflectionSettings = new ReflectionSettings();
 
 			CommandLineArguments.FillValues(this);
-			CommandLineArguments.FillValues(m_ReflectionSettings);
 		}
-
-		public override string IntermediateFolder
+		
+		public override bool Run()
 		{
-			get { return Path.Combine(m_OutputDirectory, ".prism"); }
-		}
-
-		public override List<ExportFile> Run()
-		{
-			return RunInternal(m_ReflectionSettings, m_SourceFiles, m_OutputDirectory);
+			return RunInternal(m_SourceFiles, m_OutputDirectory);
 		}
 	}
 }

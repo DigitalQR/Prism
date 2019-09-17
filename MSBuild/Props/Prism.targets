@@ -1,0 +1,35 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<BuildDependsOn>
+			PrismTarget;
+			$(BuildDependsOn)
+		</BuildDependsOn>
+	</PropertyGroup>
+			
+	<Target Name="PrismGatherSources">
+		<ItemGroup>
+			<PrismSource Include="@(ClInclude)" Condition="'%(ClInclude.Extension)'=='.h' or '%(ClInclude.Extension)'=='.hpp'">
+				<OutHeader>$(PrismOutDir)\%(ClInclude.Filename).refl.h</OutHeader>
+				<OutSource>$(PrismOutDir)\%(ClInclude.Filename).refl.cpp</OutSource>
+			</PrismSource>
+		</ItemGroup>
+	</Target>
+			
+	<Target Name="PrismGenerateReflection" DependsOnTargets="PrismGatherSources" Inputs="@(PrismSource)" Outputs="@(PrismSource->'%(OutHeader)')">	
+		<PropertyGroup>
+			<_PrismExe>"$(PrismExe)"</_PrismExe>
+			<_PrismOutDir>"$(PrismOutDir)"</_PrismOutDir>
+		</PropertyGroup>
+				
+		<Exec Command="$(_PrismExe) --src-file=&quot;@(PrismSource->'%(FullPath)', '&quot; --src-file=&quot;')&quot; --out-dir=$(_PrismOutDir)" />
+	</Target>
+	
+	<Target Name="PrismAppendClSources" DependsOnTargets="PrismGatherSources">	
+		<CreateItem Include="@(PrismSource->'%(OutSource)')">
+			<Output TaskParameter="Include" ItemName="ClCompile" />
+		</CreateItem>
+	</Target>
+	
+	<Target Name="PrismTarget" DependsOnTargets="PrismGenerateReflection;PrismAppendClSources">
+	</Target>	
+</Project>

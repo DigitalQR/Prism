@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Prism.Parser.Cpp.Token;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,9 +29,40 @@ namespace Prism.Parsing
 			{
 				string condition = string.Join(" && ", m_StateTree);
 				if (condition == "")
-					return "1";
+					return null;
 				else
 					return condition;
+			}
+		}
+
+		public void HandleDirective(PreProToken.ParsedData data)
+		{
+			string first = data.m_Directive.First();
+			var args = data.m_Directive.Skip(1);
+
+			if (first.Equals("#if"))
+			{
+				AddIF(string.Join(" ", args));
+			}
+			else if (first.Equals("#ifdef"))
+			{
+				AddIF("defined(" + string.Join(" ", args) + ")");
+			}
+			else if (first.Equals("#ifndef"))
+			{
+				AddIF("!defined(" + string.Join(" ", args) + ")");
+			}
+			else if (first.Equals("#else"))
+			{
+				AddELSE();
+			}
+			else if (first.Equals("#elif"))
+			{
+				AddELSEIF(string.Join(" ", args));
+			}
+			else if (first.Equals("#endif"))
+			{
+				EndIF();
 			}
 		}
 

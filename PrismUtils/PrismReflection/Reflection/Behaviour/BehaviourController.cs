@@ -1,4 +1,4 @@
-﻿using Prism.Reflection.Tokens;
+﻿using Prism.Reflection.Elements;
 using Prism.Utils;
 using System;
 using System.Collections.Generic;
@@ -10,29 +10,44 @@ namespace Prism.Reflection.Behaviour
 {
 	public class BehaviourController
 	{
-		[CommandLineArgument(Name = "custom-behaviour", Usage = "File path to any additional assemblies")]
-		private string[] m_AdditionalAssemblies;
-
+		/// <summary>
+		/// Store of all behaviour types
+		/// </summary>
 		private Dictionary<string, IReflectionBehaviour> m_BehaviourLookup;
+
+		/// <summary>
+		/// The priority at which the code content generation will occur for structures
+		/// </summary>
+		public static int StructureGenerationPriority { get { return 10000; } }
+
+		/// <summary>
+		/// The priority at which the code content generation will occur for internal fields of structures
+		/// </summary>
+		public static int FieldGenerationPriority { get { return StructureGenerationPriority - 1; } }
 
 		public BehaviourController()
 		{
 			CommandLineArguments.FillValues(this);
 
 			m_BehaviourLookup = new Dictionary<string, IReflectionBehaviour>();
-			PopulateBehaviours();
 		}
 
-		private void PopulateBehaviours()
+		public void PopulateBehaviours(IEnumerable<Assembly> assemblies = null)
 		{
-			// Add any assemblies currently loaded
-			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-				FindBehavioursInAssembly(assembly);
+			if(assemblies == null)
+				assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			
+			// Add any assemblies currently loaded
+			foreach (Assembly assembly in assemblies)
+				FindBehavioursInAssembly(assembly);
+		}
+
+		public void PopulateBehaviours(IEnumerable<string> assembliesPaths)
+		{
 			// Add additional assemblies requested
-			if (m_AdditionalAssemblies != null)
+			if (assembliesPaths != null)
 			{
-				foreach (string path in m_AdditionalAssemblies)
+				foreach (string path in assembliesPaths)
 					FindBehavioursInExternal(path);
 			}
 		}
@@ -85,13 +100,12 @@ namespace Prism.Reflection.Behaviour
 					}
 				}
 		}
-
-
+		
 		private class BehaviourInstance : IComparable
 		{
-			public IReflectionBehaviour Behaviour;
-			public AttributeData Data;
-			public IReflectableToken TargetToken;
+			public IReflectionBehaviour m_Behaviour;
+			public AttributeData m_Data;
+			public IReflectionElement m_TargetElement;
 
 			public int CompareTo(object obj)
 			{
@@ -99,13 +113,13 @@ namespace Prism.Reflection.Behaviour
 				if (other != null)
 				{
 					// Queue based on queue priority
-					int compare = Behaviour.QueuePriority.CompareTo(other.Behaviour.QueuePriority);
+					int compare = m_Behaviour.QueuePriority.CompareTo(other.m_Behaviour.QueuePriority);
 
 					// In same queue priority, just compare based on whether it's a struct or not
 					if (compare == 0)
 					{
-						BehaviourTarget thisStruct = (TargetToken.SupportedTargets & BehaviourTarget.Structure);
-						BehaviourTarget otherStruct = (other.TargetToken.SupportedTargets & BehaviourTarget.Structure);
+						BehaviourTarget thisStruct = (m_TargetElement.SupportedTargets & BehaviourTarget.Structure);
+						BehaviourTarget otherStruct = (other.m_TargetElement.SupportedTargets & BehaviourTarget.Structure);
 
 						compare = thisStruct.CompareTo(otherStruct);
 					}
@@ -118,20 +132,20 @@ namespace Prism.Reflection.Behaviour
 
 			public void Run()
 			{
-				Behaviour.RunBehaviour(TargetToken, Data);
+				m_Behaviour.RunBehaviour(m_TargetElement, m_Data);
 			}
 		}
 
 		/// <summary>
-		/// Fetch all attributes for a given token
+		/// Fetch all attributes for a given element
 		/// </summary>
-		public void ProcessToken(IReflectableToken baseToken)
+		public void ProcessElement(IReflectionElement element)
 		{
 			// Set the state of any attribute
-			ResolveAttributes(baseToken);
+			ResolveAttributes(element);
 
 			List<BehaviourInstance> behaviourQueue = new List<BehaviourInstance>();
-			QueueBehaviours(baseToken, behaviourQueue);
+			QueueBehaviours(element, behaviourQueue);
 
 			// Sort behaviours based on priority
 			behaviourQueue.Sort();
@@ -144,9 +158,9 @@ namespace Prism.Reflection.Behaviour
 		/// <summary>
 		/// Discover which attributes are behaviours and which are data
 		/// </summary>
-		private void ResolveAttributes(IReflectableToken baseToken)
+		private void ResolveAttributes(IReflectionElement element)
 		{
-			AttributeCollection collection = baseToken as AttributeCollection;
+			AttributeCollection collection = element as AttributeCollection;
 
 			if (collection != null)
 			{
@@ -159,10 +173,10 @@ namespace Prism.Reflection.Behaviour
 							IReflectionBehaviour behaviour = m_BehaviourLookup[attrib.Name];
 
 							if (behaviour.ApplicationMode == BehaviourApplication.Implicit)
-								throw new TokenException(baseToken, "'" + attrib.Name + "' is an attibute behaviour (It is a globally applied behaviour)");
+								throw new BehaviourException("'" + attrib.Name + "' is an attibute behaviour (It is a globally applied behaviour)", behaviour, element);
 
-							if ((behaviour.SupportedTargets & baseToken.SupportedTargets) == 0)
-								throw new TokenException(baseToken, "Cannot apply attribute '" + attrib.Name + "' to this target (Unsported Attribute target)");
+							if ((behaviour.SupportedTargets & element.SupportedTargets) == 0)
+								throw new BehaviourException("Cannot apply attribute '" + attrib.Name + "' to this target (Unsupported Attribute target)", behaviour, element);
 
 							attrib.Status = AttributeStatus.Behaviour;
 						}
@@ -177,27 +191,28 @@ namespace Prism.Reflection.Behaviour
 
 
 			// Resolve any sub tokens too
-			if (baseToken.InternalTokens != null)
-			{
-				foreach (IReflectableToken childToken in baseToken.InternalTokens)
-					ResolveAttributes(childToken);
-			}
+			foreach (IReflectionElement child in element.ChildElements)
+				ResolveAttributes(child);
 		}
 
-		private void QueueBehaviours(IReflectableToken token, List<BehaviourInstance> behaviourQueue)
+		private void QueueBehaviours(IReflectionElement element, List<BehaviourInstance> behaviourQueue)
 		{
 			// Queue any behaviour to apply
+
+			// Queue any sub-elements first
+			foreach (IReflectionElement child in element.ChildElements)
+				QueueBehaviours(child, behaviourQueue);
 
 			// Add global behaviour
 			foreach (var pair in m_BehaviourLookup)
 			{
 				IReflectionBehaviour behaviour = pair.Value;
 
-				if (behaviour.ApplicationMode == BehaviourApplication.Implicit && (behaviour.SupportedTargets & token.SupportedTargets) != 0)
-					behaviourQueue.Add(new BehaviourInstance { Behaviour = behaviour, Data = null, TargetToken = token });
+				if (behaviour.ApplicationMode == BehaviourApplication.Implicit && (behaviour.SupportedTargets & element.SupportedTargets) != 0)
+					behaviourQueue.Add(new BehaviourInstance { m_Behaviour = behaviour, m_Data = null, m_TargetElement = element });
 			}
 
-			AttributeCollection collection = token as AttributeCollection;
+			AttributeCollection collection = element as AttributeCollection;
 
 			if (collection != null)
 			{
@@ -205,16 +220,8 @@ namespace Prism.Reflection.Behaviour
 				{
 					// State was validated earlier, so no need for additional checks
 					if (attrib.Status == AttributeStatus.Behaviour)
-						behaviourQueue.Add(new BehaviourInstance { Behaviour = m_BehaviourLookup[attrib.Name], Data = attrib, TargetToken = token });
+						behaviourQueue.Add(new BehaviourInstance { m_Behaviour = m_BehaviourLookup[attrib.Name], m_Data = attrib, m_TargetElement = element });
 				}
-			}
-
-			// Queue any sub-tokens aswell
-			var internalTokens = token.InternalTokens;
-			if (internalTokens != null)
-			{
-				foreach (IReflectableToken subToken in internalTokens)
-					QueueBehaviours(subToken, behaviourQueue);
 			}
 		}
 	}
