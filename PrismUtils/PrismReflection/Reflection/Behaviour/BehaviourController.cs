@@ -59,7 +59,7 @@ namespace Prism.Reflection.Behaviour
 		{
 			if (!File.Exists(assemblyPath))
 			{
-				Console.Error.WriteLine("Error: Failed to find assembly at '" + assemblyPath + "' (Ignoring)");
+				throw new Exception("Error: Failed to find assembly at '" + assemblyPath + "'");
 			}
 
 			Assembly assembly = null;
@@ -69,13 +69,13 @@ namespace Prism.Reflection.Behaviour
 			}
 			catch (Exception e)
 			{
-				Console.Error.WriteLine("Error: Found assembly but failed to load at '" + assemblyPath + "' (Ignoring)");
+				throw new Exception("Error: Found assembly but failed to load at '" + assemblyPath + "'", e);
 			}
 
 			if(assembly != null)
 				FindBehavioursInAssembly(assembly);
 			else
-				Console.Error.WriteLine("Error: Found assembly but failed to load at '" + assemblyPath + "' (Ignoring)");
+				throw new Exception("Error: Found assembly but failed to load at '" + assemblyPath + "'");
 		}
 
 		/// <summary>

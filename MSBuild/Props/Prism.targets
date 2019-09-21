@@ -13,15 +13,27 @@
 				<OutSource>$(PrismOutDir)\%(ClInclude.Filename).refl.cpp</OutSource>
 			</PrismSource>
 		</ItemGroup>
+		
+		<ItemGroup>
+			<PrismCustomAssembly Include="$(PrismAssemblies)" />
+		</ItemGroup>
 	</Target>
 			
 	<Target Name="PrismGenerateReflection" DependsOnTargets="PrismGatherSources" Inputs="@(PrismSource)" Outputs="@(PrismSource->'%(OutHeader)')">	
 		<PropertyGroup>
 			<_PrismExe>"$(PrismExe)"</_PrismExe>
 			<_PrismOutDir>"$(PrismOutDir)"</_PrismOutDir>
+			
+			<_PrismInputs>--src-file=&quot;@(PrismSource->'%(FullPath)', '&quot; --src-file=&quot;')&quot;</_PrismInputs>
+			<_PrismAssembliesInput>--custom-behaviour=&quot;@(PrismCustomAssembly->'%(FullPath)', '&quot; --custom-behaviour=&quot;')&quot;</_PrismAssembliesInput>
 		</PropertyGroup>
 				
-		<Exec Command="$(_PrismExe) --src-file=&quot;@(PrismSource->'%(FullPath)', '&quot; --src-file=&quot;')&quot; --out-dir=$(_PrismOutDir)" />
+		<Message Text="PrismAssemblies: $(PrismAssemblies)"></Message>
+		<Message Text="_PrismAssembliesInput: $(_PrismAssembliesInput)"></Message>
+		<Message Text="$(_PrismExe) --out-dir=$(_PrismOutDir) $(_PrismAssembliesInput) $(_PrismInputs)"></Message>
+		
+		
+		<Exec Command="$(_PrismExe) --out-dir=$(_PrismOutDir) $(_PrismAssembliesInput) $(_PrismInputs)" />
 	</Target>
 	
 	<Target Name="PrismAppendClSources" DependsOnTargets="PrismGatherSources">	

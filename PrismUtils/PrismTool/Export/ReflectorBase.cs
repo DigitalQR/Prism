@@ -28,7 +28,7 @@ namespace Prism.Export
 		/// Other assemblies to be loaded
 		/// </summary>
 		[CommandLineArgument(Name = "custom-behaviour", Usage = "File path to any additional assemblies")]
-		private string[] m_AdditionalAssemblies;
+		protected string[] m_AdditionalAssemblies;
 
 
 		/// <summary>
