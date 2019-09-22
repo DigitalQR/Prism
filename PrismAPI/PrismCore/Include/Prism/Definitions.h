@@ -14,7 +14,7 @@
 ///
 namespace Prism
 {
-#ifdef _PRISM_SSTRING
+#ifndef _PRISM_WSTRING
 	typedef char Char;
 	typedef std::string String;
 	#define PRISM_STR_WIDE 0

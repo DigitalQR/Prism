@@ -47,6 +47,10 @@
     <Compile Include="Reflection\Behaviour\AttributeReflectionBehaviour.cs" />
     <Compile Include="Reflection\Behaviour\BehaviourException.cs" />
     <Compile Include="Reflection\Behaviour\ReflectionBehaviourBase.cs" />
+    <Compile Include="Reflection\Elements\Cpp\Data\TemplateInfo.cs" />
+    <Compile Include="Reflection\Behaviour\Utils\FunctionContent.cs" />
+    <Compile Include="Reflection\Behaviour\Utils\StructureContent.cs" />
+    <Compile Include="Reflection\Behaviour\Utils\VariableContent.cs" />
     <Compile Include="Reflection\Elements\ElementException.cs" />
     <Compile Include="Reflection\Behaviour\GlobalReflectionBehaviour.cs" />
     <Compile Include="Reflection\Behaviour\IReflectionBehaviour.cs" />

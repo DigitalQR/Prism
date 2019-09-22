@@ -66,6 +66,9 @@
     <ClInclude Include="Include\Prism\Object.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Prism\TemplateInfo.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembly.cpp">
@@ -99,6 +102,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TemplateInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

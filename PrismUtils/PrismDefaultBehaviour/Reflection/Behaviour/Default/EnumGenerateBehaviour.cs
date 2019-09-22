@@ -32,6 +32,7 @@ class EnumInfo_{target.UniqueName} : public Prism::Enum
 private:
 	static EnumInfo_{target.UniqueName} s_AssemblyInstance;
 	EnumInfo_{target.UniqueName}();
+	virtual Prism::TypeInfo GetTemplateParam(int index) const override {{ return nullptr; }}
 }};
 {GenerationUtils.GetNamespaceClose(target)}
 #endif
@@ -70,6 +71,7 @@ EnumInfo_{target.UniqueName}::EnumInfo_{target.UniqueName}()
 		PRISM_STR(""{target.Name}""), 
 		PRISM_DEVSTR(R""({target.Documentation})""),
 		sizeof({target.Name}),
+		nullptr, // Template Info
 		{{{GenerationUtils.GetDataAttributeInstancesString(target)}}},
 		{{{valueInstances.ToString()}
 		}}

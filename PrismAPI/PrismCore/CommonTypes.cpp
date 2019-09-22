@@ -2,7 +2,7 @@
 
 #define IMPLEMENT_PRISM_SOURCE(Namespace,StructName,TypeName) \
 TypeInfo_ ## StructName::TypeInfo_ ## StructName() \
-	: Prism::Type(Prism::TypeId::Get<TypeName>(), PRISM_STR(#Namespace), PRISM_STR(#StructName), PRISM_DEVSTR("Internally reflected type for '" #TypeName "'"), sizeof(TypeName), {}, false, false) \
+	: Prism::Type(Prism::TypeId::Get<TypeName>(), PRISM_STR(#Namespace), PRISM_STR(#StructName), PRISM_DEVSTR("Internally reflected type for '" #TypeName "'"), sizeof(TypeName), nullptr, {}, false, false) \
 {} \
 Prism::Object TypeInfo_ ## StructName::CreateNew(const std::vector<Prism::Object>& params) const \
 { \
@@ -20,7 +20,8 @@ namespace Prism
 			: Prism::Type(
 				0, 
 				PRISM_STR(""), PRISM_STR("null"), PRISM_DEVSTR("null type info"), 
-				0, 
+				0,
+				nullptr,
 				{},
 				false, false
 			) 
@@ -30,7 +31,7 @@ namespace Prism
 		{ 
 			return nullptr; 
 		}
-
+		
 		TypeInfo_nullptr TypeInfo_nullptr::s_AssemblyInstance;
 
 

@@ -3,6 +3,7 @@ using Prism.Parsing;
 using Prism.Reflection;
 using Prism.Reflection.Elements;
 using Prism.Reflection.Elements.Cpp;
+using Prism.Reflection.Elements.Cpp.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -140,6 +141,7 @@ namespace Prism.Parser.Cpp
 		// States
 		private StructureElement m_CurrentStructure;
 		private EnumTypeElement m_CurrentEnumType;
+		private List<TemplateToken.ParsedData> m_ActiveTemplates = new List<TemplateToken.ParsedData>();
 		private string[] m_CurrentNamespace = new string[0];
 		private ConditionState m_CurrentCondition;
 		private string m_CurrentComment;
@@ -262,6 +264,16 @@ namespace Prism.Parser.Cpp
 						m_CurrentNamespace = data.m_Namespace ?? new string[0];
 					}
 
+					// Handle templates
+					if (curr.m_TokenType is TemplateToken)
+						m_ActiveTemplates.Add(curr.m_ParsedData as TemplateToken.ParsedData);
+					else if (!(
+						curr.m_TokenType is MacroCallToken ||
+						curr.m_TokenType is StructureToken ||
+						curr.m_TokenType is EnumTypeToken
+					))
+						m_ActiveTemplates.Clear();
+
 					// Handle pre-processor states
 					if (curr.m_TokenType is PreProToken)
 					{
@@ -275,7 +287,7 @@ namespace Prism.Parser.Cpp
 						var data = curr.m_ParsedData as AccessorToken.ParsedData;
 						m_CurrentAccessor = data.m_Name;
 					}
-					
+
 					// Track comments, they might be dev strings
 					if (curr.m_TokenType is CommentToken)
 					{
@@ -320,6 +332,10 @@ namespace Prism.Parser.Cpp
 						}
 					}
 				}
+				else
+				{
+					m_ActiveTemplates.Clear();
+				}
 
 				// Next
 				prev = curr;
@@ -332,6 +348,24 @@ namespace Prism.Parser.Cpp
 			return true;
 		}
 
+		private TemplateInfo GetActiveTemplate(CppTokenInfo info)
+		{
+			if (m_ActiveTemplates.Any())
+			{
+				if (m_ActiveTemplates.Count > 1)
+					throw new ParseException("Multiple templates are currently not supported for Structures", info);
+
+				var data = m_ActiveTemplates.First();
+
+				if (!data.m_IsValid)
+					throw new ParseException("Template contains syntax currently not supported", info);
+
+				return data.m_TemplateInfo;
+			}
+
+			return null;
+		}
+
 		private void OnStructureToken(ElementOrigin origin, string[] macroParams, CppTokenInfo info)
 		{
 			CppBlockInfo blockInfo = info.m_ParsedData as CppBlockInfo;
@@ -342,7 +376,7 @@ namespace Prism.Parser.Cpp
 
 			if (blockInfo.m_IsBlockBegin)
 			{
-				m_CurrentStructure = new StructureElement(GetMetaData(info, origin), macroParams, data.m_StructureInfo);
+				m_CurrentStructure = new StructureElement(GetMetaData(info, origin), macroParams, data.m_StructureInfo, GetActiveTemplate(info));
 				m_ReflectedContent.AppendElement(m_CurrentStructure);
 
 				if (data.m_StructureInfo.m_Structure == "class")
@@ -359,6 +393,9 @@ namespace Prism.Parser.Cpp
 
 		private void OnEnumToken(ElementOrigin origin, string[] macroParams, CppTokenInfo info)
 		{
+			if (m_ActiveTemplates.Count != 0)
+				throw new ParseException("Templates are currently not supported for Enums", info);
+
 			CppBlockInfo blockInfo = info.m_ParsedData as CppBlockInfo;
 			var data = blockInfo.m_ParsedData as EnumTypeToken.ParsedData;
 
@@ -378,6 +415,9 @@ namespace Prism.Parser.Cpp
 
 		private void OnFunctionToken(ElementOrigin origin, string[] macroParams, CppTokenInfo info)
 		{
+			if (m_ActiveTemplates.Count != 0)
+				throw new ParseException("Templates are currently not supported for Functions", info);
+
 			if (m_CurrentStructure == null)
 				throw new ParseException("Currently there is not support for reflecting functions outside of structures", info);
 
@@ -393,6 +433,9 @@ namespace Prism.Parser.Cpp
 
 		private void OnVariableToken(ElementOrigin origin, string[] macroParams, CppTokenInfo info)
 		{
+			if (m_ActiveTemplates.Count != 0)
+				throw new ParseException("Templates are currently not supported for Variables", info);
+
 			if (!InsideStructure)
 				throw new ParseException("Currently there is not support for reflecting variables outside of structures", info);
 

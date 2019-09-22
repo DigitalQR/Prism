@@ -21,7 +21,35 @@ namespace Prism.Reflection.Elements.Cpp.Data
 		public bool m_IsAbstract;
 		public bool m_IsExplicit;
 		public bool m_IsInlined;
-		
+
+		public static FunctionInfo Generate(
+			string name, 
+			TypeInfo returnInfo = null, 
+			VariableInfo[] paramInfos = null,
+			bool isConst = false,
+			bool isStatic = false,
+			bool isExplicit = false,
+			bool isVirtual = false
+			)
+		{
+			FunctionInfo info = new FunctionInfo();
+			info.m_Name = name;
+			info.m_ReturnInfo = returnInfo;
+			info.m_Params = paramInfos;
+			info.m_IsConst = isConst;
+			info.m_IsStatic = isStatic;
+			info.m_IsExplicit = isExplicit;
+			info.m_IsVirtual = isVirtual;
+
+			if (info.m_ReturnInfo == null)
+				info.m_ReturnInfo = new TypeInfo { m_Name = "void" };
+
+			if (info.m_Params == null)
+				info.m_Params = new VariableInfo[0];
+			
+			return info;
+		}
+
 		public override string ToString()
 		{
 			List<string> parts = new List<string>();

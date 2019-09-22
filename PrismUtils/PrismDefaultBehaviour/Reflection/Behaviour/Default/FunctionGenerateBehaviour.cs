@@ -1,4 +1,6 @@
-﻿using Prism.Reflection.Elements.Cpp;
+﻿using Prism.Reflection.Behaviour.Utils;
+using Prism.Reflection.Elements.Cpp;
+using Prism.Reflection.Elements.Cpp.Data;
 using Prism.Utils;
 using System;
 using System.Collections.Generic;
@@ -15,40 +17,34 @@ namespace Prism.Reflection.Behaviour.Default
 		
 		public override void RunBehaviour(FunctionElement target)
 		{
-			GenerateIncludeContent(target);
-			GenerateInlineContent(target);
 			GenerateSourceContent(target);
-		}
 
-		private void GenerateIncludeContent(FunctionElement target)
-		{
-		}
+			StructureElement parent = FunctionContent.GetParent(target);
 
-		private void GenerateInlineContent(FunctionElement target)
-		{
-			target.AppendInlineContent($@"
-private:
-class MethodInfo_{target.UniqueName} : public Prism::Method
-{{
-public:
-	MethodInfo_{target.UniqueName}();
+			// Create MethodInfo_ Prism class
+			{
+				StructureInfo structInfo = StructureInfo.Generate(
+					"FunctionInfo_" + target.UniqueName,
+					parents: new InheritanceInfo[]
+					{
+						new InheritanceInfo{ m_Accessor = "public", m_Name = "Prism::Method" }
+					}
+				);
+				var reflectStruct = parent.GenerateStructure(structInfo, target);
 
-	virtual Prism::TypeInfo GetParentInfo() const override;
-	virtual Prism::ParamInfo* GetReturnInfo() const override;
-	virtual Prism::ParamInfo* GetParamInfo(size_t index) const override;
-	virtual size_t GetParamCount() const override;
-	virtual Prism::Object Call(Prism::Object target, const std::vector<Prism::Object>& params) const override;
-}};
-");
-		}
-
-		private void GenerateSourceContent(FunctionElement target)
-		{
-			target.AppendSourceContent($@"
-#if {target.PreProcessorCondition}
-{GenerationUtils.GetNamespaceOpen(target)}
-{target.ParentElement.Name}::MethodInfo_{target.UniqueName}::MethodInfo_{target.UniqueName}()
-	: Prism::Method(
+				// Add functions
+				{
+					// Constructor
+					{
+						FunctionInfo info = new FunctionInfo
+						{
+							m_Name = "FunctionInfo_" + target.UniqueName,
+							m_IsConstructor = true,
+							m_Params = new VariableInfo[0]
+						};
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $@"
+: Prism::Method(
 		PRISM_STR(""{target.Name}""),
 		PRISM_DEVSTR(R""({target.Documentation})""),
 		{{ {GenerationUtils.GetDataAttributeInstancesString(target)} }},
@@ -58,8 +54,31 @@ public:
 		{(target.Details.m_IsVirtual ? 1 : 0)}
 	)
 	{{}}
+");
+					}
 
-const Prism::ParamInfo* {target.ParentElement.Name}::MethodInfo_{target.UniqueName}::GetReturnInfo() const
+					// GetParentInfo
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "GetParentInfo",
+							returnInfo: new TypeInfo { m_Name = "Prism::TypeInfo" },
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $"{{ return Prism::Assembly::Get().FindTypeOf<{target.ParentElement.Name}>(); }}");
+					}
+
+					// GetReturnInfo
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "GetReturnInfo",
+							returnInfo: new TypeInfo { m_Name = "Prism::ParamInfo", m_IsPointer = true },
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $@"
 {{
 #if {(target.Details.m_IsConstructor ? 1 : 0)}
 	static Prism::ParamInfo info = {{
@@ -81,13 +100,23 @@ const Prism::ParamInfo* {target.ParentElement.Name}::MethodInfo_{target.UniqueNa
 #endif
 #endif
 }}
+");
+					}
 
-Prism::TypeInfo {target.ParentElement.Name}::MethodInfo_{target.UniqueName}::GetParentInfo() const
-{{
-	return Prism::Assembly::Get().FindTypeOf<{target.ParentElement.Name}>();
-}}
-
-const Prism::ParamInfo* {target.ParentElement.Name}::MethodInfo_{target.UniqueName}::GetParamInfo(size_t index) const
+					// GetParentInfo
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "GetParamInfo",
+							returnInfo: new TypeInfo { m_Name = "Prism::ParamInfo", m_IsPointer = true },
+							paramInfos: new VariableInfo[] 
+							{
+								new VariableInfo { m_Name="index", m_TypeInfo=new TypeInfo{ m_Name="size_t" } }
+							},
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $@"
 {{
 #if {target.Details.m_Params.Length}
 	switch(index)
@@ -97,11 +126,54 @@ const Prism::ParamInfo* {target.ParentElement.Name}::MethodInfo_{target.UniqueNa
 #endif
 	return nullptr;
 }}
+");
+					}
 
-size_t {target.ParentElement.Name}::MethodInfo_{target.UniqueName}::GetParamCount() const
+					// GetParamCount
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "GetParamCount",
+							returnInfo: new TypeInfo { m_Name = "size_t" },
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $"{{ return {target.Details.m_Params.Length}; }}");
+					}
+
+					// Call
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "Call",
+							returnInfo: new TypeInfo { m_Name = "Prism::Object" },
+							paramInfos: new VariableInfo[]
+							{
+								new VariableInfo { m_Name="target", m_TypeInfo=new TypeInfo{ m_Name="Prism::Object" } },
+								new VariableInfo { m_Name="params", m_TypeInfo=new TypeInfo{ m_Name="std::vector<Prism::Object>", m_IsReference=true, m_IsConst=true } }
+							},
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $@"
 {{
-	return {target.Details.m_Params.Length}
+	std::vector<Prism::Object>& safeParams = *const_cast<std::vector<Prism::Object>*>(&params);
+	{GetCallString(target)}
 }}
+");
+					}
+				}
+
+				target.AppendInlineContent("private:");
+				StructureContent.GenerateInlineFull(target, reflectStruct);
+			}
+		}
+		
+		private void GenerateSourceContent(FunctionElement target)
+		{
+			target.AppendSourceContent($@"
+#if {target.PreProcessorCondition}
+{GenerationUtils.GetNamespaceOpen(target)}
 
 #if {(target.Details.m_IsConstructor ? 1 : 0)}
 namespace PrismInternal
@@ -142,11 +214,6 @@ namespace PrismInternal
 }}
 #endif
 
-Prism::Object {target.ParentElement.Name}::MethodInfo_{target.UniqueName}::Call(Prism::Object target, const std::vector<Prism::Object>& params) const
-{{
-	std::vector<Prism::Object>& safeParams = *const_cast<std::vector<Prism::Object>*>(&params);
-	{GetCallString(target)}
-}}
 {GenerationUtils.GetNamespaceClose(target)}
 #endif
 ");

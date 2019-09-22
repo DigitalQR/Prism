@@ -47,6 +47,7 @@
     <ClInclude Include="Include\Prism\Enum.h" />
     <ClInclude Include="Include\Prism\Object.h" />
     <ClInclude Include="Include\Prism\Method.h" />
+    <ClInclude Include="Include\Prism\TemplateInfo.h" />
     <ClInclude Include="Include\Prism\Type.h" />
     <ClInclude Include="Include\Prism\Property.h" />
     <ClInclude Include="Include\Prism\TypeId.h" />
@@ -61,6 +62,7 @@
     <ClCompile Include="Enum.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Method.cpp" />
+    <ClCompile Include="TemplateInfo.cpp" />
     <ClCompile Include="Type.cpp" />
     <ClCompile Include="Property.cpp" />
     <ClCompile Include="TypeInfo.cpp" />

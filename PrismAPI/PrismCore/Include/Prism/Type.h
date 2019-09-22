@@ -15,6 +15,7 @@
 namespace Prism 
 {
 	class Class;
+	class TemplateInfo;
 
 	///
 	/// Prism reflected type info
@@ -29,11 +30,12 @@ namespace Prism
 		const size_t m_Size; 
 		
 		TypeInfo m_AssociatedInfo;
+		const TemplateInfo* m_TemplateInfo;
 
 		const bool m_IsClass : 1;
 		const bool m_IsEnum : 1;
 
-		Type(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, bool isClass, bool isEnum);
+		Type(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const TemplateInfo* templateInfo, const std::vector<const Attribute*>& attributes, bool isClass, bool isEnum);
 
 	public:
 		inline long GetUniqueId() const { return m_UniqueId; }
@@ -84,6 +86,24 @@ namespace Prism
 		inline bool IsEnum() const { return m_IsEnum; }
 
 		///
+		/// Was this type created from a template
+		///
+		inline bool IsTemplated() const { return m_TemplateInfo != nullptr; }
+
+		///
+		/// Get the template param type info at this index
+		/// @param index		The index of the param
+		/// @returns The type info for the tempalte param at this index
+		///
+		virtual Prism::TypeInfo GetTemplateParam(int index) const = 0;
+
+		///
+		/// Get the template info which was used to create this type
+		/// @returns The valid info or nullptr if wasn't created from a template
+		///
+		const Prism::TemplateInfo* GetTemplateInfo() const { return m_TemplateInfo; }
+		
+		///
 		/// Is this type info a valid instance of (Child or original) this type
 		/// @param testType		The desired parent type we would like to check for
 		///
@@ -101,7 +121,7 @@ namespace Prism
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ToString(storageHolder);
 			else
-				return PRISM_STR("");
+				return PRISM_STR("[Missmatched Type Information]");
 		}
 
 		///
@@ -116,7 +136,7 @@ namespace Prism
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ToString(storageHolder);
 			else
-				return PRISM_STR("");
+				return PRISM_STR("[Missmatched Type Information]");
 		}
 
 
@@ -155,7 +175,7 @@ namespace Prism
 		/// Convert this given value into a string
 		/// (Object will already be pre-checked to make sure it is valid, when this is called)
 		///
-		virtual Prism::String ToString(Prism::Object inStorage) const { return PRISM_STR(""); }
+		virtual Prism::String ToString(Prism::Object inStorage) const { return PRISM_STR("[Object ") + m_Name + PRISM_STR("]"); }
 
 		///
 		/// Attempt to parse a string into an instance of this type 

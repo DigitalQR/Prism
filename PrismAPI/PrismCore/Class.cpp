@@ -4,8 +4,8 @@
 
 namespace Prism 
 {
-	Class::Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties)
-		: Type(uniqueId, space, name, documentation, size, attributes, true, false)
+	Class::Class(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const TemplateInfo* templateInfo, const std::vector<const Attribute*>& attributes, bool isAbstract, const std::vector<const Method*>& constructors, const std::vector<const Method*>& methods, const std::vector<const Property*>& properties)
+		: Type(uniqueId, space, name, documentation, size, templateInfo, attributes, true, false)
 		, m_IsAbstract(isAbstract)
 		, m_Constructors(constructors)
 		, m_Methods(methods)
@@ -282,7 +282,7 @@ namespace Prism
 			}
 		}
 
-		return PRISM_STR("");
+		return Prism::Type::ToString(inStorage);
 	}
 
 	bool Class::ParseFromString(const String& str, Prism::Object outStorage) const 

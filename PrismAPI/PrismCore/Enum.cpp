@@ -14,8 +14,8 @@ namespace Prism
 	{
 	}
 
-	Enum::Enum(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const std::vector<const Attribute*>& attributes,  const std::vector<Value>& values)
-		: Type(uniqueId, space, name, documentation, size, attributes, false, true)
+	Enum::Enum(long uniqueId, const String& space, const String& name, const String& documentation, size_t size, const TemplateInfo* templateInfo, const std::vector<const Attribute*>& attributes,  const std::vector<Value>& values)
+		: Type(uniqueId, space, name, documentation, size, templateInfo, attributes, false, true)
 		, m_Values(values)
 	{
 	}
@@ -87,8 +87,7 @@ namespace Prism
 					return value.Name;
 				}
 			}
-
-			return PRISM_STR("");
+			break;
 		}
 
 		case 2:
@@ -102,8 +101,7 @@ namespace Prism
 					return value.Name;
 				}
 			}
-
-			return PRISM_STR("");
+			break;
 		}
 
 		case 4:
@@ -117,8 +115,7 @@ namespace Prism
 					return value.Name;
 				}
 			}
-
-			return PRISM_STR("");
+			break;
 		}
 
 		case 8:
@@ -132,13 +129,11 @@ namespace Prism
 					return value.Name;
 				}
 			}
-
-			return PRISM_STR("");
+			break;
+		}
 		}
 
-		default:
-			return PRISM_STR("");
-		}
+		return Prism::Type::ToString(inStorage);
 	}
 
 	bool Enum::ParseFromString(const String& str, Prism::Object outStorage) const 

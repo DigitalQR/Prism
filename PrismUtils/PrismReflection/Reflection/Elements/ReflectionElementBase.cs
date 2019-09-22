@@ -84,6 +84,9 @@ namespace Prism.Reflection.Elements
 
 		public ReflectionElementBase AppendInlineContent(string format)
 		{
+			if (format.Contains("\n#"))
+				throw new ReflectionException("Found # in inlined block");
+
 			m_InlineContent.Append(format);
 			return this;
 		}

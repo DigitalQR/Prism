@@ -4,49 +4,50 @@ namespace Prism
 	// Work around for Prism templates
 	// Attempt to call RetrievePrismInfo()
 	template<typename T>
-	struct try_call_RetrievePrismInfo 
+	struct RetrievePrismInfoHelper
 	{		
 		// Function Exists
 		template<typename A>
-		static std::true_type test(decltype(&A::RetrievePrismInfo), void*)
+		static std::true_type MethodCheck(decltype(&A::RetrievePrismInfo), void*)
 		{
 			return std::true_type;
 		}
 
 		// Doesn't exist
 		template<typename A>
-		static std::false_type test(...)
+		static std::false_type MethodCheck(...)
 		{
 			return std::false_type();
 		}
 
-		typedef decltype(test<T>(0, 0)) type;
+		typedef decltype(MethodCheck<T>(0, 0)) CheckResult;
 
-		static const Type* run(std::true_type)
+		static const Type* Run(std::true_type)
 		{
 			return T::RetrievePrismInfo();
 		}
 
-		static const Type* run(std::false_type)
+		static const Type* Run(std::false_type)
 		{
 			return nullptr;
 		}
 
-		static const Type* run()
+		static const Type* Run()
 		{
-			return run(type());
+			return Run(CheckResult());
 		}
 	};
 
 	template<typename T>
 	TypeInfo Assembly::FindTypeOf() const
 	{
-		TypeInfo info = FindTypeById(TypeId::Get<std::remove_pointer_t<T>>());
+		using CheckType = std::remove_pointer_t<std::remove_const_t<T>>;
+		TypeInfo info = FindTypeById(TypeId::Get<CheckType>());
 
 		// Attempt to retieve info by calling RetrievePrismInfo (Required for template types)
 		if (!info.IsValid())
 		{
-			const Type* type = try_call_RetrievePrismInfo<std::remove_pointer_t<T>>::run();
+			const Type* type = RetrievePrismInfoHelper<CheckType>::Run();
 			if (type != nullptr)
 				return type->m_AssociatedInfo;
 			else

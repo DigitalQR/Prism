@@ -26,6 +26,7 @@ protected: \
 	virtual Prism::Object CreateNew(const std::vector<Prism::Object>& params) const override; \
 	virtual Prism::String ToString(Prism::Object inStorage) const override; \
 	virtual bool ParseFromString(const String& str, Prism::Object outStorage) const override; \
+	virtual Prism::TypeInfo GetTemplateParam(int index) const override { return nullptr; } \
 }; 
 
 namespace Prism
@@ -37,6 +38,7 @@ namespace Prism
 		public:
 			TypeInfo_nullptr();
 			virtual Prism::Object CreateNew(const std::vector<Prism::Object>& params) const override;
+			virtual Prism::TypeInfo GetTemplateParam(int index) const override { return nullptr; }
 
 			static TypeInfo_nullptr s_AssemblyInstance;
 		};

@@ -1,9 +1,11 @@
 ﻿using Prism.Reflection;
 using Prism.Reflection.Elements;
+using Prism.Reflection.Elements.Cpp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Prism.Utils
@@ -46,7 +48,13 @@ namespace Prism.Utils
 
 		public static string GetInlineBlockName(IReflectionElement elem)
 		{
-			return "PRISM_INLINE_DEF_" + (elem.ParentElement != null ? elem.ParentElement.Name + "_" : "") + elem.UniqueName;
+			return MakeStringSyntaxSafe("PRISM_INLINE_DEF_" + (elem.ParentElement != null ? elem.ParentElement.UniqueName + "_" : "") + elem.UniqueName);
+		}
+
+		public static string MakeStringSyntaxSafe(string source)
+		{
+			Regex pattern = new Regex("s/[<>,]");
+			return pattern.Replace(source, "_");
 		}
 
 		public static string GetInlineBlock(IReflectionElement elem, string content)
@@ -98,6 +106,17 @@ namespace Prism.Utils
 					target.AppendSourceContent(content);
 				}
 			}
+		}
+
+		public static string GetTemplateInfo(StructureElement target)
+		{
+			if (target.IsTemplate)
+			{
+				// TODO
+				return "nullptr";
+			}
+
+			return "nullptr";
 		}
 	}
 }

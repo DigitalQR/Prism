@@ -1,5 +1,7 @@
 ﻿using Prism.Reflection.Behaviour;
+using Prism.Reflection.Behaviour.Utils;
 using Prism.Reflection.Elements.Cpp;
+using Prism.Reflection.Elements.Cpp.Data;
 using Prism.Utils;
 using System;
 using System.Collections.Generic;
@@ -16,41 +18,32 @@ namespace Prism.Reflection.Behaviour.Default
 		
 		public override void RunBehaviour(VariableElement target)
 		{
-			GenerateIncludeContent(target);
-			GenerateInlineContent(target);
-			GenerateSourceContent(target);
-		}
+			StructureElement parent = VariableContent.GetParent(target);
+			
+			// Create VarInfo Prism class
+			{
+				StructureInfo structInfo = StructureInfo.Generate(
+					"VariableInfo_" + target.UniqueName,
+					parents: new InheritanceInfo[] 
+					{
+						new InheritanceInfo{ m_Accessor = "public", m_Name = "Prism::Property" }
+					}
+				);
+				var reflectStruct = parent.GenerateStructure(structInfo, target);
 
-		private void GenerateIncludeContent(VariableElement target)
-		{
-
-		}
-
-		private void GenerateInlineContent(VariableElement target)
-		{
-			target.AppendInlineContent($@"
-private:
-	class VariableInfo_{target.UniqueName} : public Prism::Property
-	{{
-	public:
-		VariableInfo_{target.UniqueName}();
-
-		virtual Prism::TypeInfo GetParentInfo() const override;
-		virtual Prism::TypeInfo GetTypeInfo() const override;
-
-		virtual void Set(Prism::Object, Prism::Object) const override;
-		virtual Prism::Object Get(Prism::Object) const override;
-	}};
-");
-		}
-
-		private void GenerateSourceContent(VariableElement target)
-		{
-			target.AppendSourceContent($@"
-#if {target.PreProcessorCondition}
-{GenerationUtils.GetNamespaceOpen(target)}
-{target.ParentElement.Name}::VariableInfo_{target.UniqueName}::VariableInfo_{target.UniqueName}()
-	: Prism::Property(
+				// Add functions
+				{
+					// Constructor
+					{
+						FunctionInfo info = new FunctionInfo
+						{
+							m_Name = "VariableInfo_" + target.UniqueName,
+							m_IsConstructor = true,
+							m_Params = new VariableInfo[0]
+						};
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $@"
+: Prism::Property(
 		PRISM_STR(""{target.Name}""),
 		PRISM_DEVSTR(R""({target.Documentation})""),
 		{{ {GenerationUtils.GetDataAttributeInstancesString(target)} }},
@@ -60,29 +53,69 @@ private:
 		{(target.Details.m_TypeInfo.m_IsConst ? 1 : 0)}
 	)
 	{{}}
-
-Prism::TypeInfo {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::GetParentInfo() const
-{{
-	return Prism::Assembly::Get().FindTypeOf<{target.ParentElement.Name}>();
-}}
-
-Prism::TypeInfo {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::GetTypeInfo() const
-{{
-	return Prism::Assembly::Get().FindTypeOf<{target.Details.m_TypeInfo.m_Name}>();
-}}
-
-void {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::Set(Prism::Object target, Prism::Object value) const
-{{
-	{GetSetterBody(target)}
-}}
-
-Prism::Object {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::Get(Prism::Object target) const
-{{
-	{GetGetterBody(target)}
-}}
-{GenerationUtils.GetNamespaceClose(target)}
-#endif
 ");
+					}
+
+					// GetParentInfo
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "GetParentInfo",
+							returnInfo: new TypeInfo { m_Name = "Prism::TypeInfo" },
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $"{{ return Prism::Assembly::Get().FindTypeOf<{target.ParentElement.Name}>(); }}");
+					}
+
+					// GetTypeInfo
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "GetTypeInfo",
+							returnInfo: new TypeInfo { m_Name = "Prism::TypeInfo" },
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $"{{ return Prism::Assembly::Get().FindTypeOf<{target.Details.m_TypeInfo.m_Name}>(); }}");
+					}
+
+					// Set
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "Set",
+							paramInfos: new VariableInfo[]
+							{
+								new VariableInfo { m_Name="target", m_TypeInfo=new TypeInfo { m_Name="Prism::Object"} },
+								new VariableInfo { m_Name="value", m_TypeInfo=new TypeInfo { m_Name="Prism::Object"} },
+							},
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $"{{{GetSetterBody(target)}}}");
+					}
+
+					// Get
+					{
+						FunctionInfo info = FunctionInfo.Generate(
+							name: "Get",
+							returnInfo: new TypeInfo { m_Name="Prism::Object" },
+							paramInfos: new VariableInfo[]
+							{
+								new VariableInfo { m_Name="target", m_TypeInfo=new TypeInfo { m_Name="Prism::Object"} },
+							},
+							isVirtual: true,
+							isConst: true
+						);
+						var elem = reflectStruct.GenerateFunction(info, target, "public");
+						FunctionContent.GenerateFull(elem, $"{{{GetGetterBody(target)}}}");
+					}
+				}
+				
+				target.AppendInlineContent("private:");
+				StructureContent.GenerateInlineFull(target, reflectStruct);
+			}
 		}
 
 		private string GetSetterBody(VariableElement target)

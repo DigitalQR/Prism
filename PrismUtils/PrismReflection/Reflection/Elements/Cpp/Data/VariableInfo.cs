@@ -16,7 +16,25 @@ namespace Prism.Reflection.Elements.Cpp.Data
 		public bool m_IsVolatile;
 		public bool m_IsMutable;
 		public bool m_IsInlined;
-		
+
+		public static VariableInfo Generate(
+			string name,
+			TypeInfo typeInfo,
+			string defaultValue = null,
+			bool isStatic = false,
+			bool isInlined = false
+			)
+		{
+			VariableInfo info = new VariableInfo();
+			info.m_Name = name;
+			info.m_TypeInfo = typeInfo;
+			info.m_DefaultValue = defaultValue;
+			info.m_IsStatic = isStatic;
+			info.m_IsInlined = isInlined;
+			
+			return info;
+		}
+
 		public override string ToString()
 		{
 			List<string> parts = new List<string>();
