@@ -30,9 +30,6 @@
     <ClInclude Include="Include\Prism\Assembly.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Prism\Holder.h">
-      <Filter>Header Files\Prism</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Prism\Method.h">
       <Filter>Header Files\Prism</Filter>
     </ClInclude>
@@ -66,12 +63,12 @@
     <ClInclude Include="Include\Prism\Accessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Prism\Object.h">
+      <Filter>Header Files\Prism</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembly.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Holder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Method.cpp">
@@ -101,12 +98,15 @@
     <ClCompile Include="AttributeStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Include\Prism\Holder.inl">
+    <None Include="Include\Prism\Assembly.inl">
       <Filter>Header Files\Prism</Filter>
     </None>
-    <None Include="Include\Prism\Assembly.inl">
+    <None Include="Include\Prism\Object.inl">
       <Filter>Header Files\Prism</Filter>
     </None>
   </ItemGroup>

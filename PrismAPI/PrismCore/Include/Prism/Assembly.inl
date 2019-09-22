@@ -3,7 +3,6 @@ namespace Prism
 {
 	// Work around for Prism templates
 	// Attempt to call RetrievePrismInfo()
-	// (Based on https://stackoverflow.com/questions/12015195/how-to-call-member-function-only-if-object-happens-to-have-it)
 	template<typename T>
 	struct try_call_RetrievePrismInfo 
 	{		

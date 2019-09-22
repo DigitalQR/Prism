@@ -14,7 +14,7 @@ namespace Prism
 	{
 	}
 	
-	bool Method::AreValidParams(Prism::Holder target, const std::vector<Prism::Holder>& params) const 
+	bool Method::AreValidParams(Prism::Object target, const std::vector<Prism::Object>& params) const 
 	{
 		if (!m_IsStatic && !(target.GetTypeInfo().IsValid() && target.GetTypeInfo()->IsInstanceOf(GetParentInfo())))
 			return false;

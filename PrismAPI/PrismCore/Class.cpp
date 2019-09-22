@@ -13,7 +13,7 @@ namespace Prism
 	{
 	}
 
-	Prism::Holder Class::CreateNew(const std::vector<Prism::Holder>& params) const 
+	Prism::Object Class::CreateNew(const std::vector<Prism::Object>& params) const 
 	{
 		if (m_IsAbstract)
 			return nullptr;
@@ -27,7 +27,7 @@ namespace Prism
 		return nullptr;
 	}
 
-	bool Class::HasValidConstructor(const std::vector<Prism::Holder>& params) 
+	bool Class::HasValidConstructor(const std::vector<Prism::Object>& params) 
 	{
 		if (m_IsAbstract)
 			return false;
@@ -270,7 +270,7 @@ namespace Prism
 		return nullptr;
 	}
 
-	Prism::String Class::ToString(Prism::Holder inStorage) const 
+	Prism::String Class::ToString(Prism::Object inStorage) const 
 	{
 		const Method* toStringMethod = GetMethodByName(PRISM_STR("ToString"));
 		if (toStringMethod && !toStringMethod->IsStatic() && toStringMethod->GetParamCount() == 0)
@@ -285,7 +285,7 @@ namespace Prism
 		return PRISM_STR("");
 	}
 
-	bool Class::ParseFromString(const String& str, Prism::Holder outStorage) const 
+	bool Class::ParseFromString(const String& str, Prism::Object outStorage) const 
 	{
 		const Method* fromStringMethod = GetMethodByName(PRISM_STR("FromString"));
 		if (fromStringMethod && fromStringMethod->IsStatic() && fromStringMethod->GetParamCount() == 2)

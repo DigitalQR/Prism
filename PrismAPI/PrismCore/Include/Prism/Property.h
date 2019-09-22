@@ -8,7 +8,7 @@
 #include "Definitions.h"
 #include "Accessor.h"
 #include "AttributeStore.h"
-#include "Holder.h"
+#include "Object.h"
 
 namespace Prism 
 {
@@ -55,7 +55,7 @@ namespace Prism
 		/// @param value		The value it should be set to
 		/// @returns The result for this call
 		///
-		virtual void Set(Prism::Holder target, Prism::Holder value) const = 0;
+		virtual void Set(Prism::Object target, Prism::Object value) const = 0;
 
 		///
 		/// Attempt to get this property's value for the target
@@ -63,6 +63,6 @@ namespace Prism
 		/// @param target		The class instance which this property will be retrieved (Will be ignored for static/global functions)
 		/// @returns The value of the property
 		///
-		virtual Prism::Holder Get(Prism::Holder target) const = 0;
+		virtual Prism::Object Get(Prism::Object target) const = 0;
 	};
 }

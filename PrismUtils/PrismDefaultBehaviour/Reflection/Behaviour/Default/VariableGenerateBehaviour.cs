@@ -38,8 +38,8 @@ private:
 		virtual Prism::TypeInfo GetParentInfo() const override;
 		virtual Prism::TypeInfo GetTypeInfo() const override;
 
-		virtual void Set(Prism::Holder, Prism::Holder) const override;
-		virtual Prism::Holder Get(Prism::Holder) const override;
+		virtual void Set(Prism::Object, Prism::Object) const override;
+		virtual Prism::Object Get(Prism::Object) const override;
 	}};
 ");
 		}
@@ -71,12 +71,12 @@ Prism::TypeInfo {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::G
 	return Prism::Assembly::Get().FindTypeOf<{target.Details.m_TypeInfo.m_Name}>();
 }}
 
-void {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::Set(Prism::Holder target, Prism::Holder value) const
+void {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::Set(Prism::Object target, Prism::Object value) const
 {{
 	{GetSetterBody(target)}
 }}
 
-Prism::Holder {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::Get(Prism::Holder target) const
+Prism::Object {target.ParentElement.Name}::VariableInfo_{target.UniqueName}::Get(Prism::Object target) const
 {{
 	{GetGetterBody(target)}
 }}

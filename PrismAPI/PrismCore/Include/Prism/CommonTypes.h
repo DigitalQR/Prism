@@ -23,9 +23,9 @@ public: \
 	TypeInfo_ ## StructName(); \
 	static TypeInfo_ ## StructName s_AssemblyInstance; \
 protected: \
-	virtual Prism::Holder CreateNew(const std::vector<Prism::Holder>& params) const override; \
-	virtual Prism::String ToString(Prism::Holder inStorage) const override; \
-	virtual bool ParseFromString(const String& str, Prism::Holder outStorage) const override; \
+	virtual Prism::Object CreateNew(const std::vector<Prism::Object>& params) const override; \
+	virtual Prism::String ToString(Prism::Object inStorage) const override; \
+	virtual bool ParseFromString(const String& str, Prism::Object outStorage) const override; \
 }; 
 
 namespace Prism
@@ -36,7 +36,7 @@ namespace Prism
 		{
 		public:
 			TypeInfo_nullptr();
-			virtual Prism::Holder CreateNew(const std::vector<Prism::Holder>& params) const override;
+			virtual Prism::Object CreateNew(const std::vector<Prism::Object>& params) const override;
 
 			static TypeInfo_nullptr s_AssemblyInstance;
 		};

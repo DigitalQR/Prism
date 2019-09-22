@@ -85,35 +85,35 @@ namespace Prism
 	/// Object holder which will hold any type
 	/// It will create memory if required or use
 	///
-	class PRISMCORE_API Holder
+	class PRISMCORE_API Object
 	{
 	private:
 		std::shared_ptr<ObjectInstance> m_Data;
 		bool m_IsPointer;
 
 	public:
-		Holder(const Holder& other);
+		Object(const Object& other);
 
 		template<typename T, typename = std::enable_if_t<!std::is_pointer<T>::value>>
-		Holder(const T& obj);
+		Object(const T& obj);
 
 		template<typename T, typename = std::enable_if_t<std::is_pointer<T>::value>>
-		Holder(T obj);
+		Object(T obj);
 
 		///
 		/// Copy internal data from other holder
 		///
-		Holder& operator=(const Holder& other);
+		Object& operator=(const Object& other);
 
 		///
 		/// Is internal data the same
 		///
-		bool operator==(const Holder& other) const;
+		bool operator==(const Object& other) const;
 
 		///
 		/// Is internal data the same
 		///
-		bool operator!=(const Holder& other) const;
+		bool operator!=(const Object& other) const;
 
 
 		///
@@ -179,4 +179,4 @@ namespace Prism
 	};
 }
 
-#include "Holder.inl"
+#include "Object.inl"

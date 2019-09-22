@@ -8,7 +8,7 @@
 #include "Definitions.h"
 #include "AttributeStore.h"
 #include "TypeInfo.h"
-#include "Holder.h"
+#include "Object.h"
 
 #include <vector>
 
@@ -43,7 +43,7 @@ namespace Prism
 		/// @param params		The params that should be used in the constructor for this type
 		/// @returns The newly constructed object or an empty holder if a valid constructor couldn't be found
 		///
-		virtual Prism::Holder CreateNew(const std::vector<Prism::Holder>& params = {}) const = 0;
+		virtual Prism::Object CreateNew(const std::vector<Prism::Object>& params = {}) const = 0;
 
 		///
 		/// The namespace this type was delcared in.
@@ -97,7 +97,7 @@ namespace Prism
 		template<typename T, typename = std::enable_if_t<!std::is_pointer<T>::value>>
 		inline Prism::String ConvertToString(const T& inValue) const
 		{
-			Prism::Holder storageHolder = &inValue;
+			Prism::Object storageHolder = &inValue;
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ToString(storageHolder);
 			else
@@ -112,7 +112,7 @@ namespace Prism
 		template<typename T, typename = std::enable_if_t<std::is_pointer<T>::value>>
 		inline Prism::String ConvertToString(T inValue) const
 		{
-			Prism::Holder storageHolder = inValue;
+			Prism::Object storageHolder = inValue;
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ToString(storageHolder);
 			else
@@ -128,7 +128,7 @@ namespace Prism
 		template<typename T, typename = std::enable_if_t<!std::is_pointer<T>::value>>
 		inline bool ConvertFromString(const String& str, T& outStorage) const
 		{
-			Prism::Holder storageHolder = &outStorage;
+			Prism::Object storageHolder = &outStorage;
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ParseFromString(str, storageHolder);
 			else
@@ -143,7 +143,7 @@ namespace Prism
 		template<typename T, typename = std::enable_if_t<std::is_pointer<T>::value>>
 		inline bool ConvertFromString(const String& str, T outStorage) const
 		{
-			Prism::Holder storageHolder = outStorage;
+			Prism::Object storageHolder = outStorage;
 			if (m_AssociatedInfo == storageHolder.GetTypeInfo())
 				return ParseFromString(str, storageHolder);
 			else
@@ -153,15 +153,15 @@ namespace Prism
 	protected:
 		///
 		/// Convert this given value into a string
-		/// (Holder will already be pre-checked to make sure it is valid, when this is called)
+		/// (Object will already be pre-checked to make sure it is valid, when this is called)
 		///
-		virtual Prism::String ToString(Prism::Holder inStorage) const { return PRISM_STR(""); }
+		virtual Prism::String ToString(Prism::Object inStorage) const { return PRISM_STR(""); }
 
 		///
 		/// Attempt to parse a string into an instance of this type 
-		/// (Holder will already be pre-checked to make sure it is valid, when this is called)
+		/// (Object will already be pre-checked to make sure it is valid, when this is called)
 		///
-		virtual bool ParseFromString(const String& str, Prism::Holder outStorage) const { return false; }
+		virtual bool ParseFromString(const String& str, Prism::Object outStorage) const { return false; }
 
 	private:
 		Type(const Type&) = delete;
@@ -171,11 +171,11 @@ namespace Prism
 	};
 
 	///
-	/// Specializations for Prism::Holder
+	/// Specializations for Prism::Object
 	///
 	
 	template<>
-	inline Prism::String Type::ConvertToString<Prism::Holder>(const Prism::Holder& holder) const
+	inline Prism::String Type::ConvertToString<Prism::Object>(const Prism::Object& holder) const
 	{
 		if (m_AssociatedInfo == holder.GetTypeInfo())
 			return ToString(holder);
@@ -184,18 +184,18 @@ namespace Prism
 	}
 
 	template<>
-	inline Prism::String Type::ConvertToString<Prism::Holder*>(Prism::Holder* holder) const
+	inline Prism::String Type::ConvertToString<Prism::Object*>(Prism::Object* holder) const
 	{
 		ConvertToString(*holder);
 	}
 	template<>
-	inline Prism::String Type::ConvertToString<const Prism::Holder*>(const Prism::Holder* holder) const
+	inline Prism::String Type::ConvertToString<const Prism::Object*>(const Prism::Object* holder) const
 	{
 		ConvertToString(*holder);
 	}
 
 	template<>
-	inline bool Type::ConvertFromString<Prism::Holder>(const String& str, Prism::Holder& holder) const
+	inline bool Type::ConvertFromString<Prism::Object>(const String& str, Prism::Object& holder) const
 	{
 		if (m_AssociatedInfo == holder.GetTypeInfo())
 			return ParseFromString(str, holder);
@@ -204,7 +204,7 @@ namespace Prism
 	}
 
 	template<>
-	inline bool Type::ConvertFromString<Prism::Holder*>(const String& str, Prism::Holder* holder) const
+	inline bool Type::ConvertFromString<Prism::Object*>(const String& str, Prism::Object* holder) const
 	{
 		return ConvertFromString(str, *holder);
 	}

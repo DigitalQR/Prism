@@ -4,7 +4,7 @@
 TypeInfo_ ## StructName::TypeInfo_ ## StructName() \
 	: Prism::Type(Prism::TypeId::Get<TypeName>(), PRISM_STR(#Namespace), PRISM_STR(#StructName), PRISM_DEVSTR("Internally reflected type for '" #TypeName "'"), sizeof(TypeName), {}, false, false) \
 {} \
-Prism::Holder TypeInfo_ ## StructName::CreateNew(const std::vector<Prism::Holder>& params) const \
+Prism::Object TypeInfo_ ## StructName::CreateNew(const std::vector<Prism::Object>& params) const \
 { \
 	if(params.size() == 0) return new TypeName; \
 	else if(params.size() == 1 && params[0].GetTypeInfo() == m_AssociatedInfo) return new TypeName(params[0].GetAs<TypeName>()); \
@@ -26,7 +26,7 @@ namespace Prism
 			) 
 		{}
 		
-		Prism::Holder TypeInfo_nullptr::CreateNew(const std::vector<Prism::Holder>& params) const
+		Prism::Object TypeInfo_nullptr::CreateNew(const std::vector<Prism::Object>& params) const
 		{ 
 			return nullptr; 
 		}
@@ -37,7 +37,7 @@ namespace Prism
 		FOREACH_PRISM_COMMONTYPE(IMPLEMENT_PRISM_SOURCE)
 #undef IMPLEMENT_PRISM_SOURCE
 
-		Prism::String TypeInfo_char::ToString(Prism::Holder inStorage) const 
+		Prism::String TypeInfo_char::ToString(Prism::Object inStorage) const 
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<char>());
@@ -45,14 +45,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<char>());
 #endif
 		}
-		bool TypeInfo_char::ParseFromString(const String& str, Prism::Holder outStorage) const 
+		bool TypeInfo_char::ParseFromString(const String& str, Prism::Object outStorage) const 
 		{
 			char& outValue = *outStorage.GetPtrAs<char>();
 			outValue = (char)str[0];
 			return true;
 		}
 
-		Prism::String TypeInfo_uchar::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_uchar::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<unsigned char>());
@@ -60,14 +60,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<unsigned char>());
 #endif
 		}
-		bool TypeInfo_uchar::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_uchar::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			unsigned char& outValue = *outStorage.GetPtrAs<unsigned char>();
 			outValue = (unsigned char)str[0];
 			return true;
 		}
 
-		Prism::String TypeInfo_short::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_short::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<short>());
@@ -75,14 +75,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<short>());
 #endif
 		}
-		bool TypeInfo_short::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_short::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			short& outValue = *outStorage.GetPtrAs<short>();
 			outValue = (short)std::stoi(str);
 			return true;
 		}
 
-		Prism::String TypeInfo_ushort::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_ushort::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<unsigned short>());
@@ -90,14 +90,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<unsigned short>());
 #endif
 		}
-		bool TypeInfo_ushort::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_ushort::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			unsigned short& outValue = *outStorage.GetPtrAs<unsigned short>();
 			outValue = (unsigned short)std::stoi(str);
 			return true;
 		}
 
-		Prism::String TypeInfo_int::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_int::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<int>());
@@ -105,14 +105,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<int>());
 #endif
 		}
-		bool TypeInfo_int::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_int::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			int& outValue = *outStorage.GetPtrAs<int>();
 			outValue = std::stoi(str);
 			return true;
 		}
 
-		Prism::String TypeInfo_uint::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_uint::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<unsigned int>());
@@ -120,7 +120,7 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<unsigned int>());
 #endif
 		}
-		bool TypeInfo_uint::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_uint::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			unsigned int& outValue = *outStorage.GetPtrAs<unsigned int>();
 			outValue = (unsigned int)std::stol(str);
@@ -128,7 +128,7 @@ namespace Prism
 		}
 
 
-		Prism::String TypeInfo_long::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_long::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<long>());
@@ -136,14 +136,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<long>());
 #endif
 		}
-		bool TypeInfo_long::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_long::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			long& outValue = *outStorage.GetPtrAs<long>();
 			outValue = std::stol(str);
 			return true;
 		}
 
-		Prism::String TypeInfo_ulong::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_ulong::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<unsigned long>());
@@ -151,14 +151,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<unsigned long>());
 #endif
 		}
-		bool TypeInfo_ulong::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_ulong::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			unsigned long& outValue = *outStorage.GetPtrAs<unsigned long>();
 			outValue = std::stoul(str);
 			return true;
 		}
 
-		Prism::String TypeInfo_float::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_float::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<float>());
@@ -166,14 +166,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<float>());
 #endif
 		}
-		bool TypeInfo_float::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_float::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			float& outValue = *outStorage.GetPtrAs<float>();
 			outValue = std::stof(str);
 			return true;
 		}
 
-		Prism::String TypeInfo_double::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_double::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return std::to_wstring(inStorage.GetAs<double>());
@@ -181,14 +181,14 @@ namespace Prism
 			return std::to_string(inStorage.GetAs<double>());
 #endif
 		}
-		bool TypeInfo_double::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_double::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			double& outValue = *outStorage.GetPtrAs<double>();
 			outValue = std::stod(str);
 			return true;
 		}
 
-		Prism::String TypeInfo_string::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_string::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			const std::string& str = *inStorage.GetPtrAs<std::string>();
@@ -197,14 +197,14 @@ namespace Prism
 			return inStorage.GetAs<std::string>();
 #endif
 		}
-		bool TypeInfo_string::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_string::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			std::string& outValue = *outStorage.GetPtrAs<std::string>();
 			outValue = std::string(str.begin(), str.end());
 			return true;
 		}
 
-		Prism::String TypeInfo_wstring::ToString(Prism::Holder inStorage) const
+		Prism::String TypeInfo_wstring::ToString(Prism::Object inStorage) const
 		{
 #if PRISM_STR_WIDE
 			return inStorage.GetAs<std::wstring>();
@@ -213,7 +213,7 @@ namespace Prism
 			return std::string(str.begin(), str.end());
 #endif
 		}
-		bool TypeInfo_wstring::ParseFromString(const String& str, Prism::Holder outStorage) const
+		bool TypeInfo_wstring::ParseFromString(const String& str, Prism::Object outStorage) const
 		{
 			std::wstring& outValue = *outStorage.GetPtrAs<std::wstring>();
 			outValue = std::wstring(str.begin(), str.end());

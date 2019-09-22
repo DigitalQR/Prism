@@ -1,4 +1,4 @@
-#include "Include\Prism\Holder.h"
+#include "Include\Prism\Object.h"
 
 namespace Prism 
 {
@@ -23,40 +23,40 @@ namespace Prism
 		free(m_Data);
 	}
 
-	Holder::Holder(const Holder& other)
+	Object::Object(const Object& other)
 		: m_Data(other.m_Data)
 		, m_IsPointer(other.m_IsPointer)
 	{
 	}
 
-	Holder& Holder::operator=(const Holder& other) 
+	Object& Object::operator=(const Object& other) 
 	{
 		m_Data = other.m_Data;
 		m_IsPointer = other.m_IsPointer;
 		return *this;
 	}
 
-	bool Holder::operator==(const Holder& other) const 
+	bool Object::operator==(const Object& other) const 
 	{
 		return m_Data->GetData() == other.m_Data->GetData();
 	}
 
-	bool Holder::operator!=(const Holder& other) const
+	bool Object::operator!=(const Object& other) const
 	{
 		return m_Data->GetData() == other.m_Data->GetData();
 	}
 
-	void* Holder::GetData()
+	void* Object::GetData()
 	{
 		return m_Data->GetData();
 	}
 
-	const void* Holder::GetData() const
+	const void* Object::GetData() const
 	{
 		return m_Data->GetData();
 	}
 
-	TypeInfo Holder::GetTypeInfo() const 
+	TypeInfo Object::GetTypeInfo() const 
 	{
 		return m_Data->GetTypeInfo();
 	}

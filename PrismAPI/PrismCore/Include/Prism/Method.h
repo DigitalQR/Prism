@@ -9,7 +9,7 @@
 #include "Accessor.h"
 #include "AttributeStore.h"
 #include "TypeInfo.h"
-#include "Holder.h"
+#include "Object.h"
 
 #include <vector>
 
@@ -76,7 +76,7 @@ namespace Prism
 		/// @param params		The parms to pass into the method call
 		/// @returns The result for this call
 		///
-		virtual Prism::Holder Call(Prism::Holder target = nullptr, const std::vector<Prism::Holder>& params = {}) const = 0;
+		virtual Prism::Object Call(Prism::Object target = nullptr, const std::vector<Prism::Object>& params = {}) const = 0;
 
 		///
 		/// Check that these params will result in a valid call
@@ -84,6 +84,6 @@ namespace Prism
 		/// @param params		The parms to pass into the method call
 		/// @returns If these params will result in a valid call
 		///
-		bool AreValidParams(Prism::Holder target = nullptr, const std::vector<Prism::Holder>& params = {}) const;
+		bool AreValidParams(Prism::Object target = nullptr, const std::vector<Prism::Object>& params = {}) const;
 	};
 }

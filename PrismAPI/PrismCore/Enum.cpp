@@ -20,7 +20,7 @@ namespace Prism
 	{
 	}
 
-	Prism::Holder Enum::CreateNew(const std::vector<Prism::Holder>& params) const 
+	Prism::Object Enum::CreateNew(const std::vector<Prism::Object>& params) const 
 	{
 		if (params.size() != 0)
 			return nullptr;
@@ -72,7 +72,7 @@ namespace Prism
 		}
 	}
 
-	Prism::String Enum::ToString(Prism::Holder inStorage) const 
+	Prism::String Enum::ToString(Prism::Object inStorage) const 
 	{
 		switch (m_Size)
 		{
@@ -141,7 +141,7 @@ namespace Prism
 		}
 	}
 
-	bool Enum::ParseFromString(const String& str, Prism::Holder outStorage) const 
+	bool Enum::ParseFromString(const String& str, Prism::Object outStorage) const 
 	{
 		switch (m_Size)
 		{

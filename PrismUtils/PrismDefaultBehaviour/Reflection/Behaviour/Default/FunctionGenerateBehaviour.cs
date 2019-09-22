@@ -37,7 +37,7 @@ public:
 	virtual Prism::ParamInfo* GetReturnInfo() const override;
 	virtual Prism::ParamInfo* GetParamInfo(size_t index) const override;
 	virtual size_t GetParamCount() const override;
-	virtual Prism::Holder Call(Prism::Holder target, const std::vector<Prism::Holder>& params) const override;
+	virtual Prism::Object Call(Prism::Object target, const std::vector<Prism::Object>& params) const override;
 }};
 ");
 		}
@@ -124,17 +124,17 @@ namespace PrismInternal
 
 		typedef decltype(AbstractCheck<T>(0)) IsAbstract;
 
-		static T* ConstructInternal(Prism::Holder& target, std::vector<Prism::Holder>& params, std::true_type)
+		static T* ConstructInternal(Prism::Object& target, std::vector<Prism::Object>& params, std::true_type)
 		{{
 			return nullptr;
 		}}
 
-		static T* ConstructInternal(Prism::Holder& target, std::vector<Prism::Holder>& safeParams, std::true_type)
+		static T* ConstructInternal(Prism::Object& target, std::vector<Prism::Object>& safeParams, std::true_type)
 		{{
 			return new{target.ParentElement.Name}({GetCallParams(target)});
 		}}
 	public:
-		static T* Construct(Prism::Holder& target, std::vector<Prism::Holder>& params)
+		static T* Construct(Prism::Object& target, std::vector<Prism::Object>& params)
 		{{
 			return ConstructInternal(target, params, IsAbstract());
 		}}
@@ -142,9 +142,9 @@ namespace PrismInternal
 }}
 #endif
 
-Prism::Holder {target.ParentElement.Name}::MethodInfo_{target.UniqueName}::Call(Prism::Holder target, const std::vector<Prism::Holder>& params) const
+Prism::Object {target.ParentElement.Name}::MethodInfo_{target.UniqueName}::Call(Prism::Object target, const std::vector<Prism::Object>& params) const
 {{
-	std::vector<Prism::Holder>& safeParams = *const_cast<std::vector<Prism::Holder>*>(&params);
+	std::vector<Prism::Object>& safeParams = *const_cast<std::vector<Prism::Object>*>(&params);
 	{GetCallString(target)}
 }}
 {GenerationUtils.GetNamespaceClose(target)}

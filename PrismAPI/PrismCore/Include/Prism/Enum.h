@@ -33,7 +33,7 @@ namespace Prism
 		/// @param params		The params that should be used in the constructor for this type
 		/// @returns The newly constructed object or an empty holder if a valid constructor couldn't be found
 		///
-		virtual Prism::Holder CreateNew(const std::vector<Prism::Holder>& params = {}) const override;
+		virtual Prism::Object CreateNew(const std::vector<Prism::Object>& params = {}) const override;
 
 		///
 		/// Get value at a specific index i.e. the order they appear in code, not the actual value itself
@@ -50,14 +50,14 @@ namespace Prism
 
 		///
 		/// Convert this given value into a string
-		/// (Holder will already be pre-checked to make sure it is valid, when this is called)
+		/// (Object will already be pre-checked to make sure it is valid, when this is called)
 		///
-		virtual Prism::String ToString(Prism::Holder inStorage) const override;
+		virtual Prism::String ToString(Prism::Object inStorage) const override;
 
 		///
 		/// Attempt to parse a string into an instance of this type 
-		/// (Holder will already be pre-checked to make sure it is valid, when this is called)
+		/// (Object will already be pre-checked to make sure it is valid, when this is called)
 		///
-		virtual bool ParseFromString(const String& str, Prism::Holder outStorage) const override;
+		virtual bool ParseFromString(const String& str, Prism::Object outStorage) const override;
 	};
 }

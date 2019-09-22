@@ -25,14 +25,8 @@
 			<_PrismOutDir>"$(PrismOutDir)"</_PrismOutDir>
 			
 			<_PrismInputs>--src-file=&quot;@(PrismSource->'%(FullPath)', '&quot; --src-file=&quot;')&quot;</_PrismInputs>
-			<_PrismAssembliesInput>--custom-behaviour=&quot;@(PrismCustomAssembly->'%(FullPath)', '&quot; --custom-behaviour=&quot;')&quot;</_PrismAssembliesInput>
+			<_PrismAssembliesInput Condition="'$(PrismCustomAssembly)'!=''">--custom-behaviour=&quot;@(PrismCustomAssembly->'%(FullPath)', '&quot; --custom-behaviour=&quot;')&quot;</_PrismAssembliesInput>
 		</PropertyGroup>
-				
-		<Message Text="PrismAssemblies: $(PrismAssemblies)"></Message>
-		<Message Text="_PrismAssembliesInput: $(_PrismAssembliesInput)"></Message>
-		<Message Text="$(_PrismExe) --out-dir=$(_PrismOutDir) $(_PrismAssembliesInput) $(_PrismInputs)"></Message>
-		
-		
 		<Exec Command="$(_PrismExe) --out-dir=$(_PrismOutDir) $(_PrismAssembliesInput) $(_PrismInputs)" />
 	</Target>
 	

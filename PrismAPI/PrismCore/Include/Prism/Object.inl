@@ -77,21 +77,21 @@ namespace Prism
 	}
 		
 	template<typename T, typename>
-	Holder::Holder(const T& obj)
+	Object::Object(const T& obj)
 		: m_Data(Utils::CreateInstance<T>(&obj))
 		, m_IsPointer(false)
 	{
 	}
 
 	template<typename T, typename>
-	Holder::Holder(T obj)
+	Object::Object(T obj)
 		: m_Data(Utils::CreateInstance<T>(obj))
 		, m_IsPointer(true)
 	{
 	}
 
 	template<typename T>
-	T* Holder::GetPtrAs()
+	T* Object::GetPtrAs()
 	{
 		if(m_IsPointer)
 			return *static_cast<T**>(m_Data->GetData());
@@ -100,7 +100,7 @@ namespace Prism
 	}
 
 	template<typename T>
-	const T* Holder::GetPtrAs() const
+	const T* Object::GetPtrAs() const
 	{
 		if (m_IsPointer)
 			return *static_cast<T**>(m_Data->GetData());
@@ -109,13 +109,13 @@ namespace Prism
 	}
 
 	template<typename T>
-	T& Holder::GetAs() 
+	T& Object::GetAs() 
 	{
 		return *GetPtrAs<T>();
 	}
 
 	template<typename T>
-	const T& Holder::GetAs() const
+	const T& Object::GetAs() const
 	{
 		return *GetPtrAs<T>();
 	}
