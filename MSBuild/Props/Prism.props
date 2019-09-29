@@ -3,6 +3,6 @@
 		<PrismBaseDir Condition="'$(PrismBaseDir)'==''" >$(SolutionDir)\Prism\</PrismBaseDir>
 		<PrismExe Condition="'$(PrismExe)'==''">$(PrismBaseDir)PrismTool.exe</PrismExe>
 		<PrismOutDir Condition="'$(PrismOutDir)'==''">$(ProjectDir).prism\Reflected</PrismOutDir>
-		<PrismAssemblies Condition="'$(PrismAssemblies)'==''" ></PrismBaseDir>
+		<PrismAssemblies Condition="'$(PrismAssemblies)'==''" ></PrismAssemblies>
 	</PropertyGroup>
 </Project>
