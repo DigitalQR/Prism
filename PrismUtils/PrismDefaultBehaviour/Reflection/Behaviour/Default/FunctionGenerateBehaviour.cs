@@ -97,6 +97,7 @@ namespace Prism.Reflection.Behaviour.Default
 		{(target.Details.m_ReturnInfo.m_IsPointer ? 1 : 0)},
 		{(target.Details.m_ReturnInfo.m_IsConst ? 1 : 0)},
 	}};
+	return &info;
 #endif
 #endif
 }}
